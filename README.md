@@ -24,3 +24,7 @@ The programs included here create synthetic observations for an Observing System
 6. **tests**: Contains various scripts to test whether the synthetic observations are being created correctly. Most of these tests consist of comparisons between real and synthetic observations during the first few hours of the NR.
 
 7. **utils**: Miscellaneous scripts that might be helpful (or that I haven't bothered deleting yet!)
+
+## Dependencies
+
+In addition to several Python modules that are commonly used in meteorological research (e.g., NumPy, Matplotlib, Pandas, MetPy, etc.), the scripts found here also rely on modules found within [pyDA_utils](https://github.com/ShawnMurdzek-NOAA/pyDA_utils). To install pyDA_utils, I recommend cloning the repo and adding the location of pyDA_utils to the `PYTHONPATH` environment variable. 
