@@ -18,12 +18,12 @@ import pyDA_utils.bufr as bufr
 # Input Parameters
 #---------------------------------------------------------------------------------------------------
 
-fname = '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202204300000.rap.prepbufr.csv'
-save_fname = './202204300000.sample.prepbufr.csv'
+fname = '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202011200.rap.prepbufr.csv'
+save_fname = './202202011200.sample.prepbufr.csv'
 
 lat_lim = [39, 47]
-lon_lim = [283, 287]
-dhr_lim = [-1, -0.25]
+lon_lim = [280, 290]
+dhr_lim = [-1, 0]
 
 
 #---------------------------------------------------------------------------------------------------
