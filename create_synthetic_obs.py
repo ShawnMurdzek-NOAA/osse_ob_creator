@@ -57,11 +57,10 @@ import pyDA_utils.map_proj as mp
 #---------------------------------------------------------------------------------------------------
 
 # Directory containing wrfnat output from UPP
-wrf_dir = '/work2/noaa/wrfruc/murdzek/nature_run_spring/UPP/'
+wrf_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/'
 
 # Directory containing real prepbufr CSV output
-#bufr_dir = '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/'
-bufr_dir = './'
+bufr_dir = './tests/'
 
 # Observation platforms to use (aka subsets, same ones used by BUFR)
 obs_2d = ['ADPSFC', 'SFCSHP', 'MSONET', 'GPSIPW']
@@ -76,11 +75,10 @@ vinterp = [{'subset':['ADPUPA', 'AIRCAR', 'AIRCFT'], 'var':'POB', 'type':'log',
             'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True}]
 
 # Output directory for synthetic prepbufr CSV output
-#fake_bufr_dir = '/work2/noaa/wrfruc/murdzek/nature_run_spring/sfc_stat_obs_csv/conv/'
 fake_bufr_dir = './'
 
 # PrepBUFR time
-bufr_time = dt.datetime(2022, 4, 30, 0)
+bufr_time = dt.datetime(2022, 2, 1, 12)
 
 # Prepbufr tag ('rap', 'rap_e', or 'rap_p')
 bufr_tag = 'sample'
@@ -89,8 +87,8 @@ bufr_tag = 'sample'
 bufr_suffix = ''
 
 # Start and end times for wrfnat UPP output. Step is in min
-wrf_start = dt.datetime(2022, 4, 29, 21, 0)
-wrf_end = dt.datetime(2022, 4, 30, 1, 0)
+wrf_start = dt.datetime(2022, 2, 1, 10, 45)
+wrf_end = dt.datetime(2022, 2, 1, 12, 15)
 wrf_step = 15
 
 # Option to set all entries for a certain BUFR field to NaN
@@ -119,7 +117,7 @@ ceil_field = 'HGT_P0_L215_GLC0'
 #ceil_field = 'CEIL_P0_L215_GLC0'  # Experimental ceiling diagnostic #1
 
 # Option for debugging output (0 = none, 1 = some, 2 = a lot)
-debug = 2
+debug = 1
 
 # Option to interpolate (lat, lon) coordinates for surface obs (ADPSFC, SFCSHP, MSONET)
 # Helpful for debugging, but should usually be set to False b/c it increases runtime
