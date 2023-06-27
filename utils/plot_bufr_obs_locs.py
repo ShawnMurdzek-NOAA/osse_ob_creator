@@ -9,9 +9,10 @@ Date Created: 13 October 2022
 # Import Modules
 #---------------------------------------------------------------------------------------------------
 
-import bufr
 import matplotlib.pyplot as plt
 import numpy as np
+
+import pyDA_utils.bufr as bufr
 
 
 #---------------------------------------------------------------------------------------------------

@@ -15,8 +15,8 @@ import metpy.interpolate as mi
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import bufr
-import create_ob_utils as cou
+import pyDA_utils.bufr as bufr
+import pyDA_utils.create_ob_utils as cou
 
 
 #---------------------------------------------------------------------------------------------------

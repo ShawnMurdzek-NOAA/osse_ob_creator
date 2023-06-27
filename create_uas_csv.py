@@ -15,7 +15,8 @@ Date Created: 8 May 2023
 import datetime as dt
 import numpy as np
 import pandas as pd
-import bufr
+
+import pyDA_utils.bufr as bufr
 
 
 #---------------------------------------------------------------------------------------------------

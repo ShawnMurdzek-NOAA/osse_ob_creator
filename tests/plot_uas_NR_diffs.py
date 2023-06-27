@@ -10,13 +10,14 @@ Date Created: 9 May 2023
 #---------------------------------------------------------------------------------------------------
 
 import xarray as xr
-import bufr
-import plot_model_data as pmd
 import matplotlib.pyplot as plt
-import map_proj as mp
 import metpy.calc as mc
 from metpy.units import units
 import numpy as np
+
+import pyDA_utils.bufr as bufr
+import pyDA_utils.plot_model_data as pmd
+import pyDA_utils.map_proj as mp
 
 
 #---------------------------------------------------------------------------------------------------

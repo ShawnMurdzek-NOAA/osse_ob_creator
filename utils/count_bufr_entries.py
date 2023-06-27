@@ -9,10 +9,11 @@ Date Created: 6 April 2023
 # Import Modules
 #---------------------------------------------------------------------------------------------------
 
-import bufr
 import numpy as np
 import glob
 import pandas as pd
+
+import pyDA_utils.bufr as bufr
 
 
 #---------------------------------------------------------------------------------------------------

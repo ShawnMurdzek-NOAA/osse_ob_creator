@@ -23,8 +23,8 @@ import math
 import os
 import sys
 
-import create_ob_utils as cou 
-import map_proj as mp
+import pyDA_utils.create_ob_utils as cou 
+import pyDA_utils.map_proj as mp
 
 
 #---------------------------------------------------------------------------------------------------

@@ -11,7 +11,8 @@ Date Created: 24 March 2023
 
 import os
 import pandas as pd
-import bufr
+
+import pyDA_utils.bufr as bufr
 
 
 #---------------------------------------------------------------------------------------------------

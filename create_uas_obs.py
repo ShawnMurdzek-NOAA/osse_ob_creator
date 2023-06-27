@@ -21,9 +21,9 @@ import metpy.constants as const
 import metpy.calc as mc
 from metpy.units import units
 
-import create_ob_utils as cou
-import bufr
-import map_proj as mp
+import pyDA_utils.create_ob_utils as cou
+import pyDA_utils.bufr as bufr
+import pyDA_utils.map_proj as mp
 
 
 #---------------------------------------------------------------------------------------------------

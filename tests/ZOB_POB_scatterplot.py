@@ -15,7 +15,7 @@ Date Created: 1 March 2023
 import numpy as np
 import matplotlib.pyplot as plt
 
-import bufr
+import pyDA_utils.bufr as bufr
 
 
 #---------------------------------------------------------------------------------------------------

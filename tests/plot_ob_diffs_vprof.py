@@ -11,7 +11,6 @@ Date Created: 14 February 2023
 # Import Modules
 #---------------------------------------------------------------------------------------------------
 
-import bufr
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime as dt
@@ -19,6 +18,8 @@ import pandas as pd
 import metpy.calc as mc
 from metpy.units import units
 import sys
+
+import pyDA_utils.bufr as bufr
 
 
 #---------------------------------------------------------------------------------------------------

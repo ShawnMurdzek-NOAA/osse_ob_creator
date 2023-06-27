@@ -22,9 +22,9 @@ import glob
 import metpy.calc as mc
 from metpy.units import units
 
-import meteo_util as mu
-import gsi_fcts as gf
-import bufr
+import pyDA_utils.meteo_util as mu
+import pyDA_utils.gsi_fcts as gf
+import pyDA_utils.bufr as bufr
 
 
 #---------------------------------------------------------------------------------------------------

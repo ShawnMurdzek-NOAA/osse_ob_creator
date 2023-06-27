@@ -9,10 +9,11 @@ Date Created: 14 June 2023
 # Import Modules
 #---------------------------------------------------------------------------------------------------
 
-import bufr
 import numpy as np
 import metpy.calc as mc
 from metpy.units import units
+
+import pyDA_utils.bufr as bufr
 
 
 #---------------------------------------------------------------------------------------------------
