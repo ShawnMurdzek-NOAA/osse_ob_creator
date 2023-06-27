@@ -1,0 +1,25 @@
+
+# Synthetic Observation Creator Code
+
+Shawn Murdzek
+shawn.s.murdzek@noaa.gov
+
+## Description
+
+The programs included here create synthetic observations for an Observing System Simulation Experiment (OSSE) by interpolating Nature Run (NR) output to predefined observation locations and adding appropriate random errors (either purely Gaussian or autocorrelated in time or space). The program relies heavily on CSV files that contain the output from prepBUFR files. These CSV files define the observation locations and all synthetic obs are saved to these CSV files so that they can be easily converted into prepBUFR files that can be read by data assimilation packages.
+
+### Specific Programs
+
+1. create\_synthetic\_obs.py: The main program that reads a prepBUFR CSV file, interpolates NR output to the desired locations, and saves the output in a new prepBUFR CSV file. 
+
+2. run\_synthetic\_ob\_creator.py: A helper program that creates slurm job submission scripts to run create\_synthetic\_obs.py for several prepBUFR CSV files. For creating several synthetic observation CSV files, it is recommended that this script be run regularly using a crontab.
+
+3. add\_obs\_errors.py: Reads a series of prepBUFR CSV files and adds random observation errors.
+
+4. create\_ims\_snow\_obs.py: Creates snow cover and ice cover fields using NR output.
+
+5. uas\_sites.py: Determines UAS observation locations across CONUS given a specified observation spacing.
+
+6. tests: Contains various scripts to test whether the synthetic observations are being created correctly. Most of these tests consist of comparisons between real and synthetic observations during the first few hours of the NR.
+
+7. utils: Miscellaneous scripts that might be helpful (or that I haven't bothered deleting yet!)

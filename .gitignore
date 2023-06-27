@@ -1,0 +1,10 @@
+
+# Temporary swap files
+*.swp
+
+# Slurm output files
+slurm*out
+
+# Figure files
+*.png
+*.pdf
