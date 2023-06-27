@@ -11,15 +11,15 @@ The programs included here create synthetic observations for an Observing System
 
 ### Specific Programs
 
-1. `create\_synthetic\_obs.py`: The main program that reads a prepBUFR CSV file, interpolates NR output to the desired locations, and saves the output in a new prepBUFR CSV file. 
+1. `create_synthetic_obs.py`: The main program that reads a prepBUFR CSV file, interpolates NR output to the desired locations, and saves the output in a new prepBUFR CSV file. 
 
-2. `run\_synthetic\_ob\_creator.py`: A helper program that creates slurm job submission scripts to run create\_synthetic\_obs.py for several prepBUFR CSV files. For creating several synthetic observation CSV files, it is recommended that this script be run regularly using a crontab.
+2. `run_synthetic_ob_creator.py`: A helper program that creates slurm job submission scripts to run create\_synthetic\_obs.py for several prepBUFR CSV files. For creating several synthetic observation CSV files, it is recommended that this script be run regularly using a crontab.
 
-3. `add\_obs\_errors.py`: Reads a series of prepBUFR CSV files and adds random observation errors.
+3. `add_obs_errors.py`: Reads a series of prepBUFR CSV files and adds random observation errors.
 
-4. `create\_ims\_snow\_obs.py`: Creates snow cover and ice cover fields using NR output.
+4. `create_ims_snow_obs.py`: Creates snow cover and ice cover fields using NR output.
 
-5. `uas\_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
+5. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
 
 6. `tests`: Contains various scripts to test whether the synthetic observations are being created correctly. Most of these tests consist of comparisons between real and synthetic observations during the first few hours of the NR.
 
