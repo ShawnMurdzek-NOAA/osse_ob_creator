@@ -22,14 +22,14 @@ import pandas as pd
 #---------------------------------------------------------------------------------------------------
 
 # BUFR time stamps
-bufr_time = [dt.datetime(2022, 4, 29, 12) + dt.timedelta(hours=i) for i in range(0, 13, 6)]
+bufr_time = [dt.datetime(2022, 2, 1, 0) + dt.timedelta(hours=i) for i in range(0, 13)]
 
 # Parameters passed to create_conv_obs.py for each prepBUFR time
 nfiles = len(bufr_time)
-wrf_dir = ['/work2/noaa/wrfruc/murdzek/nature_run_spring/UPP'] * nfiles
+wrf_dir = ['/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'] * nfiles
 bufr_dir = ['/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv'] * nfiles
-fake_bufr_dir = ['/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/conv/data'] * nfiles
-log_dir = ['/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/conv/log'] * nfiles
+fake_bufr_dir = ['/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/data'] * nfiles
+log_dir = ['/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/log'] * nfiles
 
 # BUFR tags
 bufr_tag = ['rap', 'rap_e', 'rap_p']
@@ -39,7 +39,7 @@ bufr_tag = ['rap']
 max_jobs = 25
 user = 'smurdzek'
 allocation = 'wrfruc'
-job_csv_name = '/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/conv/log/synthetic_ob_creator_jobs.csv'
+job_csv_name = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/log/synthetic_ob_creator_jobs.csv'
 maxtries = 3
 
 # Location of Python script
@@ -163,13 +163,13 @@ while njobs < max_jobs:
                                               sub_jobs.loc[idx, 'tag']))
     fptr.write('#SBATCH --partition=orion\n\n')
     fptr.write('date\n. ~/.bashrc\nmy_py\n\n')
-    fptr.write('python %s/create_conv_obs.py %s \\\n' % (py_dir, wrf_dir[idate]))
-    fptr.write('                             %s \\\n' % bufr_dir[idate])
-    fptr.write('                             %s \\\n' % fake_bufr_dir[idate])
-    fptr.write('                             %s \\\n' % bufr_time[idate].strftime('%Y%m%d%H'))
-    fptr.write('                             %s \\\n' % wrf_start.strftime('%Y%m%d%H'))
-    fptr.write('                             %s \\\n' % wrf_end.strftime('%Y%m%d%H'))
-    fptr.write('                             %s \n\n' % sub_jobs.loc[idx, 'tag'])
+    fptr.write('python %s/create_synthetic_obs.py %s \\\n' % (py_dir, wrf_dir[idate]))
+    fptr.write('                                  %s \\\n' % bufr_dir[idate])
+    fptr.write('                                  %s \\\n' % fake_bufr_dir[idate])
+    fptr.write('                                  %s \\\n' % bufr_time[idate].strftime('%Y%m%d%H'))
+    fptr.write('                                  %s \\\n' % wrf_start.strftime('%Y%m%d%H'))
+    fptr.write('                                  %s \\\n' % wrf_end.strftime('%Y%m%d%H'))
+    fptr.write('                                  %s \n\n' % sub_jobs.loc[idx, 'tag'])
     fptr.write('date')
     fptr.close()
    

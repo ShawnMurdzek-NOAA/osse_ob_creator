@@ -167,6 +167,7 @@ ob_platforms = obs_2d + obs_3d
 
 # Open BUFR file
 bufr_fname = '%s/%s.%s.prepbufr.csv' % (bufr_dir, bufr_time.strftime('%Y%m%d%H%M'), bufr_tag)
+print('Opening BUFR file: %s' % bufr_fname)
 bufr_csv = bufr.bufrCSV(bufr_fname)
 
 # Only keep platforms if we are creating synthetic obs for them
@@ -186,11 +187,12 @@ hr_max = ((wrf_end - bufr_time).days * 24) + ((wrf_end - bufr_time).seconds / 36
 bufr_csv.df.drop(index=np.where(np.logical_or(bufr_csv.df['DHR'] < hr_min, 
                                               bufr_csv.df['DHR'] > hr_max))[0], inplace=True)
 bufr_csv.df.reset_index(drop=True, inplace=True)
+
 if use_raob_drift:
-    if not np.all(np.isnan(bufr_csv.df['HRDR'])):
-        bufr_csv.df.drop(index=np.where(np.logical_or(bufr_csv.df['HRDR'] < hr_min, 
-                                                      bufr_csv.df['HRDR'] > hr_max))[0], inplace=True)
-        bufr_csv.df.reset_index(drop=True, inplace=True)
+    bufr_csv.df.drop(index=np.where(np.logical_and(bufr_csv.df['subset'] == 'ADPUPA',
+                                                   np.logical_or(bufr_csv.df['HRDR'] < hr_min, 
+                                                                 bufr_csv.df['HRDR'] > hr_max)))[0], inplace=True)
+    bufr_csv.df.reset_index(drop=True, inplace=True)
 
 # Open wrfnat files
 start_grib = dt.datetime.now()
