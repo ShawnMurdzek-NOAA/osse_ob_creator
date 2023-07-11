@@ -94,7 +94,12 @@ wrf_step = 15
 # Option to set all entries for a certain BUFR field to NaN
 nan_fields = ['MXGS', 'HOVI', 'MSST', 'DBSS', 'SST1', 'SSTQM', 'SSTOE', 'CDTP', 'GCDTT', 'CDTP_QM',
               'HOWV', 'CEILING', 'QIFN', 'TOCC', 'HLBCS', 'VSSO', 'CLAM', 'HOCB', 'PRWE', 'TFC', 
-              'UFC', 'VFC', 'MXTM', 'MITM']
+              'MXTM', 'MITM']
+
+# Option to copy UOB and VOB to UFC and VFC, respectively.
+# This option is NOT recommended b/c it results in too many VAD obs being created by 
+# read_prepbufr.f90 in GSI
+copy_winds = False
 
 # Option to interpolate height obs (ZOB) for AIRCAR and AIRCFT platforms
 # Heights reported by aircraft are calculated by integrating the hydrostatic balance eqn assuming
@@ -696,6 +701,15 @@ for field in nan_fields:
     out_df.loc[:, field] = np.nan
     bufr_csv.df.loc[:, field] = np.nan
 
+# Copy UOB and VOB to UFC and VFC
+if copy_winds:
+    out_df['UFC'] = out_df['UOB']
+    out_df['VFC'] = out_df['VOB']
+    bufr_csv.df['UFC'] = bufr_csv.df['UOB']
+    bufr_csv.df['VFC'] = bufr_csv.df['VOB']
+    debug_df['UFC'] = debug_df['UOB']
+    debug_df['VFC'] = debug_df['VOB']
+
 # Write output DataFrame to a CSV file
 # real_red.prepbufr.csv file can be used for assessing interpolation accuracy
 bufr.df_to_csv(out_df, '%s/%s.%s.fake.prepbufr.csv%s' % (fake_bufr_dir, bufr_time.strftime('%Y%m%d%H%M'),  
@@ -716,5 +730,5 @@ print('total time = %s s' % (dt.datetime.now() - begin).total_seconds())
 
 
 """
-End create_conv_obs.py
+End create_synthetic_obs.py
 """
