@@ -1,4 +1,4 @@
-# Input parameters for run_synthetic_ob_creator.py
+# Input Parameters for Synthetic Observation Creation Program
 # 
 # The synthetic observation creation program consists of several components that can be turned on
 # or off using the "use" field below. Specific parameters for each component are specified in the
@@ -16,17 +16,23 @@
 paths:
   real_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
   real_csv: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv'
-  syn_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/data'
-  syn_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
+  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/data'
+  syn_err_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
+  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
+  syn_final_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
+  #syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_bufr'
+  syn_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   model: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'
-  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/log'
+  #log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/log'
+  log: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   plots: ''
   osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
 
 shared:
+  machine: 'orion'
   bufr_start: '202202010000'
-  bufr_end: '202202011200'
+  bufr_end: '202202010100'
   bufr_step: 60
   bufr_tag:
     - 'rap'
@@ -39,10 +45,13 @@ jobs:
   alloc: 'wrfruc'
   csv_name: 'syn_ob_creator_jobs.csv'
   maxtries: 3
+  mem: '30GB'
+  time: '08:00:00'
+  partition: 'orion'
 
 #-----------
 # Components
-# ----------
+#-----------
 
 convert_bufr: 
   use: True
@@ -54,14 +63,17 @@ create_csv:
   use: False
 
 interpolator: 
-  use: True
+  use: False
 
 obs_errors: 
-  use: True
+  use: False
+
+combine_csv:
+  use: False
 
 convert_csv: 
   use: True
 
 plots: 
-  use: True
+  use: False
 

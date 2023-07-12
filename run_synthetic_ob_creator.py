@@ -1,134 +1,35 @@
 """
-Master Script that Creates the Jobs for the Synthetic Obs Creation Program
+Submit Jobs for the Synthetic Observation Creation Program
 
 Command line arguments:
     argv[1] = YAML file with program parameters
 
 shawn.s.murdzek@noaa.gov
-Date Created: 15 June 2023
 """
 
 #---------------------------------------------------------------------------------------------------
 # Import Modules
 #---------------------------------------------------------------------------------------------------
 
-import numpy as np
-import os
 import sys
-import datetime as dt
-import time
-import pandas as pd
 import yaml
-
 import pyDA_utils.slurm_util as slurm
 
 
 #---------------------------------------------------------------------------------------------------
-# Create and Submit Job Scripts
+# Submit Job Scripts
 #---------------------------------------------------------------------------------------------------
 
 # Read in input from YAML
 with open(sys.argv[1], 'r') as fptr:
     param = yaml.safe_load(fptr)
 
-bufr_time = [dt.datetime.strptime(param['shared']['bufr_start'], '%Y%m%d%H%M')]
-bufr_end_time = dt.datetime.strptime(param['shared']['bufr_end'], '%Y%m%d%H%M')
-while bufr_time[-1] < bufr_end_time:
-    bufr_time.append(bufr_time[-1] + dt.timedelta(minutes=param['shared']['bufr_step']))
-
-# Read in (or create) DataFrame with job info
-if os.path.isfile('%s/%s' % (param['paths']['log'], param['jobs']['csv_name'])):
-    sub_jobs = pd.read_csv('%s/%s' % (param['paths']['log'], param['jobs']['csv_name']))
-else:
-    tmp_dict = {'date':[], 'idate':[], 'tag':[]}
-    for i, t in enumerate(bufr_time):
-        for tag in bufr_tag:
-            tmp_dict['date'].append(t)
-            tmp_dict['idate'].append(i)
-            tmp_dict['tag'].append(tag)
-    sub_jobs = pd.DataFrame(tmp_dict)
-    sub_jobs['submitted'] = [False] * len(sub_jobs)
-    sub_jobs['completed'] = [False] * len(sub_jobs)
-    sub_jobs['jobID'] = np.zeros(len(sub_jobs), dtype=int)
-    sub_jobs['tries'] = np.zeros(len(sub_jobs), dtype=int)
-
-# Determine current job statuses
-sub_jobs, njobs = slurm.job_info(sub_jobs, param['jobs']['user'], param['jobs']['maxtries'])
-print('njobs = %d' % njobs)
-
-# Submit new jobs
-while njobs < max_jobs:
-
-    # End script if all jobs have been submitted
-    if np.all(sub_jobs['submitted']):
-        break
-
-    cond = np.logical_and(sub_jobs['submitted'] == False, sub_jobs['tries'] < maxtries)
-    idx = np.where(cond)[0][0]
-    idate = sub_jobs.loc[idx, 'idate']
-
-    # Skip to next job if the required prepBUFR file does not exist
-    fname = '%s/%s.%s.prepbufr.csv' % (param['paths']['real_csv'], bufr_time[idate].strftime('%Y%m%d%H00'),
-                                       sub_jobs.loc[idx, 'tag'])
-    if not os.path.isfile(fname):
-        sub_jobs.loc[idx, 'submitted'] = True
-        sub_jobs.loc[idx, 'completed'] = True
-        sub_jobs.loc[idx, 'tries'] = 0
-        continue
-
-    # Determine first and last WRF file time
-    wrf_start = None
-    hr = 3
-    while wrf_start == None:
-        tmp = bufr_time[idate] - dt.timedelta(hours=hr)
-        if os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'))):
-            wrf_start = tmp
-            break
-        hr = hr - 1
-
-    tmp = bufr_time[idate] + dt.timedelta(hours=1)
-    if os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'))):
-        wrf_end = tmp
-    else:
-        wrf_end = bufr_time[idate]
-
-    # Create job script
-    j_name = '%s/syn_obs_%s_%s.sh' % (param['paths']['log'], bufr_time[idate].strftime('%Y%m%d%H%M'), 
-                                      sub_jobs.loc[idx, 'tag'])
-    fptr = open(j_name, 'w') 
-    fptr.write('#!/bin/sh\n\n')
-    fptr.write('#SBATCH -A %s\n' % param['jobs']['alloc'])
-    fptr.write('#SBATCH -t 08:00:00\n')
-    fptr.write('#SBATCH --nodes=1 --ntasks=1\n')
-    fptr.write('#SBATCH --mem=30GB\n')
-    fptr.write('#SBATCH -o %s/%s.%s.log\n' % (param['paths']['log'], bufr_time[idate].strftime('%Y%m%d%H%M'),
-                                              sub_jobs.loc[idx, 'tag']))
-    fptr.write('#SBATCH --partition=orion\n\n')
-    fptr.write('date\n. ~/.bashrc\nmy_py\n\n')
-    fptr.write('python %s/create_synthetic_obs.py %s \\\n' % (param['paths']['osse_code'], param['paths']['model']))
-    fptr.write('                                  %s \\\n' % param['paths']['real_csv'])
-    fptr.write('                                  %s \\\n' % param['paths']['syn_csv'])
-    fptr.write('                                  %s \\\n' % bufr_time[idate].strftime('%Y%m%d%H'))
-    fptr.write('                                  %s \\\n' % wrf_start.strftime('%Y%m%d%H'))
-    fptr.write('                                  %s \\\n' % wrf_end.strftime('%Y%m%d%H'))
-    fptr.write('                                  %s \n\n' % sub_jobs.loc[idx, 'tag'])
-    fptr.write('date')
-    fptr.close()
-   
-    # Submit job and mark it as submitted
-    sub_jobs.loc[idx, 'jobID'] = int(os.popen('sbatch %s' % j_name).read().strip().split(' ')[-1])
-    print()
-    print('submitted job %d' % sub_jobs.loc[idx, 'jobID'])
-    sub_jobs.loc[idx, 'tries'] = sub_jobs.loc[idx, 'tries'] + 1
-    sub_jobs.loc[idx, 'submitted'] = True
-
-    # Wait a few seconds for the job to submit, then check number of jobs
-    time.sleep(5)
-    sub_jobs, njobs = slurm.job_info(sub_jobs, param['jobs']['user'], param['jobs']['maxtries'])
-    print('njobs = %d' % njobs)
-
-# Save updated job submission CSV
-sub_jobs.to_csv('%s/%s' % (param['paths']['log'], param['jobs']['csv_name']))
+# Read in DataFrame with job info, then submit jobs
+job_csv_fname = '%s/%s' % (param['paths']['log'], param['jobs']['csv_name'])
+job_obj = slurm.job_list(fname=job_csv_fname)
+job_obj.update(param['jobs']['user'], param['jobs']['maxtries'])
+job_obj.submit_jobs(param['jobs']['user'], param['jobs']['max'])
+job_obj.save(job_csv_fname)
 
 
 """
