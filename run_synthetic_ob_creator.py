@@ -16,6 +16,7 @@ import datetime as dt
 import time
 import pandas as pd
 
+import pyDA_utils.slurm_util as slurm
 
 #---------------------------------------------------------------------------------------------------
 # Input Parameters
@@ -33,7 +34,6 @@ log_dir = ['/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfe
 
 # BUFR tags
 bufr_tag = ['rap', 'rap_e', 'rap_p']
-bufr_tag = ['rap']
 
 # Parameters for controlling number of jobs, allocation, maxtries, etc
 max_jobs = 25
@@ -44,50 +44,6 @@ maxtries = 3
 
 # Location of Python script
 py_dir = os.popen('pwd').read().strip()
-
-
-#---------------------------------------------------------------------------------------------------
-# Function to Grab Information from Slurm Job Scheduler
-#---------------------------------------------------------------------------------------------------
-
-def slurm_job_info(job_df, user, maxtries):
-    """
-    Returns information about active and completed jobs from Slurm
-
-    Parameters 
-    ----------
-    job_df : pd.DataFrame
-        DataFrame containing job information
-    user : string
-        User ID
-    maxtries : integer
-        Maximum number of attempts for each job
-
-    Returns
-    -------
-    job_df : pd.DataFrame
-        DataFrame containing updated job information
-    njobs : integer
-        Number jobs queued or running 
-
-    """
-
-    # Determine number of queued/running jobs
-    njobs = len(os.popen('squeue -u %s' % user).read().split('\n')) - 2
-
-    # Determine job statuses and mark jobs as either completed or need to be resubmitted
-    idx = np.where(np.logical_and(job_df['submitted'], ~job_df['completed']))[0]
-    for i in idx:
-        jobID = job_df.loc[i, 'jobID']
-        sacct_out = os.popen('sacct --jobs=%d' % jobID).read().split('\n')[2].split()
-        if sacct_out[5] == 'COMPLETED':
-            if sacct_out[6] == '0:0':
-                job_df.loc[i, 'completed'] = True
-            else:
-                if job_df.loc[i, 'tries'] < maxtries:
-                    job_df.loc[i, 'submitted'] = False
-
-    return job_df, njobs
 
 
 #---------------------------------------------------------------------------------------------------
@@ -111,7 +67,7 @@ else:
     sub_jobs['tries'] = np.zeros(len(sub_jobs), dtype=int)
 
 # Determine current job statuses
-sub_jobs, njobs = slurm_job_info(sub_jobs, user, maxtries)
+sub_jobs, njobs = slurm.job_info(sub_jobs, user, maxtries)
 print('njobs = %d' % njobs)
 
 # Submit new jobs
@@ -182,7 +138,7 @@ while njobs < max_jobs:
 
     # Wait a few seconds for the job to submit, then check number of jobs
     time.sleep(5)
-    sub_jobs, njobs = slurm_job_info(sub_jobs, user, maxtries)
+    sub_jobs, njobs = slurm.job_info(sub_jobs, user, maxtries)
     print('njobs = %d' % njobs)
 
 # Save updated job submission CSV
