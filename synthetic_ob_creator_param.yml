@@ -1,0 +1,67 @@
+# Input parameters for run_synthetic_ob_creator.py
+# 
+# The synthetic observation creation program consists of several components that can be turned on
+# or off using the "use" field below. Specific parameters for each component are specified in the
+# respective section. File paths are specified in their own section, as some paths are used by 
+# multiple components. 
+#
+# To execute the program, run the following command:
+#
+# python run_synthetic_ob_creator.py synthetic_ob_creator_param.yml
+#
+# shawn.s.murdzek@noaa.gov
+#
+# ==================================================================================================
+
+paths:
+  real_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
+  real_csv: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv'
+  syn_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/data'
+  syn_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
+  model: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'
+  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/log'
+  plots: ''
+  osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
+  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
+
+shared:
+  bufr_start: '202202010000'
+  bufr_end: '202202011200'
+  bufr_step: 60
+  bufr_tag:
+    - 'rap'
+    - 'rap_e'
+    - 'rap_p' 
+
+jobs:
+  max: 25
+  user: 'smurdzek'
+  alloc: 'wrfruc'
+  csv_name: 'syn_ob_creator_jobs.csv'
+  maxtries: 3
+
+#-----------
+# Components
+# ----------
+
+convert_bufr: 
+  use: True
+
+create_uas_grid: 
+  use: False
+
+create_csv: 
+  use: False
+
+interpolator: 
+  use: True
+
+obs_errors: 
+  use: True
+
+convert_csv: 
+  use: True
+
+plots: 
+  use: True
+
