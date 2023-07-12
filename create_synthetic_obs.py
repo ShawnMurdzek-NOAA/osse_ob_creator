@@ -97,8 +97,7 @@ nan_fields = ['MXGS', 'HOVI', 'MSST', 'DBSS', 'SST1', 'SSTQM', 'SSTOE', 'CDTP', 
               'MXTM', 'MITM']
 
 # Option to copy UOB and VOB to UFC and VFC, respectively.
-# This option is NOT recommended b/c it results in too many VAD obs being created by 
-# read_prepbufr.f90 in GSI
+# These fields are needed by read_prepbufr.f90 in GSI to create VAD obs
 copy_winds = False
 
 # Option to interpolate height obs (ZOB) for AIRCAR and AIRCFT platforms
