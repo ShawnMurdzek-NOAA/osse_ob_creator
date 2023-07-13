@@ -102,12 +102,16 @@ for bufr_t in bufr_times:
 
         if param['convert_bufr']['use']:
             fptr.write('# Convert real prepBUFR to CSV\n')
-            fptr.write('cd %s/bin\n' % param['paths']['bufr_code']) 
-            fptr.write('source ../env/bufr_%s.env\n' % param['shared']['machine'])
+            fptr.write('cd %s\n' % param['paths']['real_csv'])
+            fptr.write('mkdir tmp_%s_%s\n' % (bufr_t.strftime('%Y%m%d%H%M'), tag))
+            fptr.write('cd tmp_%s_%s\n' % (bufr_t.strftime('%Y%m%d%H%M'), tag))
+            fptr.write('cp -r  %s/bin/* .\n' % param['paths']['bufr_code']) 
+            fptr.write('source %s/env/bufr_%s.env\n' % (param['paths']['bufr_code'], param['shared']['machine']))
             fptr.write('cp %s ./prepbufr \n' % real_bufr_fname)
             fptr.write('./prepbufr_decode_csv.x\n')
             fptr.write('mv ./prepbufr.csv %s\n' % real_csv_fname)
-            fptr.write('rm ./prepbufr\n\n')    
+            fptr.write('cd ..\n')
+            fptr.write('rm -r %s/tmp_%s_%s\n\n' % (param['paths']['real_csv'], bufr_t.strftime('%Y%m%d%H%M'), tag))    
 
         if param['create_uas_grid']['use']:
             fptr.write('# Create UAS grid (not enabled yet)\n\n')
@@ -138,12 +142,16 @@ for bufr_t in bufr_times:
 
         if param['convert_csv']['use']:
             fptr.write('# Convert synthetic ob CSV to prepBUFR\n')
-            fptr.write('cd %s/bin\n' % param['paths']['bufr_code']) 
-            fptr.write('source ../env/bufr_%s.env\n' % param['shared']['machine'])
+            fptr.write('cd %s\n' % param['paths']['syn_bufr'])
+            fptr.write('mkdir tmp_%s_%s\n' % (bufr_t.strftime('%Y%m%d%H%M'), tag))
+            fptr.write('cd tmp_%s_%s\n' % (bufr_t.strftime('%Y%m%d%H%M'), tag))
+            fptr.write('cp -r %s/bin/* .\n' % param['paths']['bufr_code']) 
+            fptr.write('source %s/env/bufr_%s.env\n' % (param['paths']['bufr_code'], param['shared']['machine']))
             fptr.write('cp %s ./prepbufr.csv \n' % convert_csv_fname)
             fptr.write('./prepbufr_encode_csv.x\n')
             fptr.write('mv ./prepbufr %s\n' % fake_bufr_fname)
-            fptr.write('rm ./prepbufr.csv\n\n')    
+            fptr.write('cd ..\n')
+            fptr.write('rm -r %s/tmp_%s_%s\n\n' % (param['paths']['syn_bufr'], bufr_t.strftime('%Y%m%d%H%M'), tag))
 
         if param['plots']['use']:
             fptr.write('# Make plots (not enabled yet)\n\n')

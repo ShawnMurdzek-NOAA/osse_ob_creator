@@ -15,7 +15,8 @@
 
 paths:
   real_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
-  real_csv: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv'
+  #real_csv: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv'
+  real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/data'
   syn_err_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
   syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
