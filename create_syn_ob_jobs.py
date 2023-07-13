@@ -28,7 +28,8 @@ import pyDA_utils.slurm_util as slurm
 #---------------------------------------------------------------------------------------------------
 
 # Read in input from YAML
-with open(sys.argv[1], 'r') as fptr:
+in_yaml = sys.argv[1]
+with open(in_yaml, 'r') as fptr:
     param = yaml.safe_load(fptr)
 
 # Determine all the prepBUFR timestamps
@@ -134,6 +135,15 @@ for bufr_t in bufr_times:
 
         if param['obs_errors']['use']:
             fptr.write('# Add observation errors (not enabled yet)\n\n')
+            fptr.write('. ~/.bashrc\nmy_py\n')
+            fptr.write('# Insert code here to move input CSV file to param[paths][syn_err_csv]\n')
+            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('python add_obs_errors.py %s \\\n' % bufr_t.strftime('%Y%m%d%H%M'))
+            fptr.write('                         %s \\\n' % tag)
+            fptr.write('                         %s/%s \\\n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('mv %s/%s.%s.output.csv %s\n' % (param['paths']['syn_err_csv'], 
+                                                        bufr_t.strftime('%Y%m%d%H%M'), tag, 
+                                                        fake_csv_err_fname))
             convert_csv_fname = fake_csv_err_fname        
         
         if param['combine_csv']['use']:

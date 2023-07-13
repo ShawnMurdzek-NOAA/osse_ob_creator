@@ -68,6 +68,32 @@ interpolator:
 
 obs_errors: 
   use: False
+  errtable: '/work2/noaa/wrfruc/murdzek/real_obs/errtable.rrfs'
+  autocor_POB_obs:
+    - 120 
+    - 220
+  autocor_DHR_obs: 
+    - 130
+    - 131
+    - 133
+    - 134
+    - 135
+    - 230
+    - 231
+    - 233
+    - 234
+    - 235
+  autocor_ZOB_partition_DHR_obs: 
+    - 126
+    - 223
+    - 224
+    - 227
+    - 228
+    - 229
+  auto_reg_parm: 0.5
+  verbose: False
+  dewpt_check: False
+  plot_diff_hist: False
 
 combine_csv:
   use: False
