@@ -8,3 +8,6 @@ slurm*out
 # Figure files
 *.png
 *.pdf
+
+# Cron log files
+cron.log

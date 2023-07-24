@@ -17,7 +17,7 @@ To use this utility, do the following:
 2. Run ./prepbufr_decode_csv.x
 3. Move resulting CSV file to wherever you choose
 
-Passed Arguments:
+Optional command-line arguments:
     argv[1] = Directory containing WRF UPP output
     argv[2] = Directory containing real prepBUFR CSV files
     argv[3] = Output directory for simulated prepBUFR CSV files
@@ -25,7 +25,7 @@ Passed Arguments:
     argv[5] = Time for first UPP file (YYYYMMDDHH)
     argv[6] = Time for last UPP file (YYYYMMDDHH)
     argv[7] = Prepbufr file tag
-    argv[8] = Prepbufr file suffix
+    argv[8] = YAML file with program parameters
 
 shawn.s.murdzek@noaa.gov
 Date Created: 22 November 2022
@@ -46,6 +46,7 @@ import sys
 import metpy.constants as const
 import metpy.calc as mc
 from metpy.units import units
+import yaml
 
 import pyDA_utils.create_ob_utils as cou 
 import pyDA_utils.bufr as bufr
@@ -143,7 +144,17 @@ if len(sys.argv) > 1:
     wrf_start = dt.datetime.strptime(sys.argv[5], '%Y%m%d%H')
     wrf_end = dt.datetime.strptime(sys.argv[6], '%Y%m%d%H')
     bufr_tag = sys.argv[7]
-    debug = 0 
+    with open(sys.argv[8], 'r') as fptr:
+        param = yaml.safe_load(fptr)
+    obs_2d = param['interpolator']['obs_2d']
+    obs_3d = param['interpolator']['obs_3d']
+    copy_winds = param['interpolator']['copy_winds']
+    interp_z_aircft = param['interpolator']['interp_z_aircft']
+    use_raob_drift = param['interpolator']['use_raob_drift']
+    coastline_correct = param['interpolator']['coastline_correct']
+    use_Tv = param['interpolator']['use_Tv']
+    add_ceiling = param['interpolator']['add_ceiling']
+    debug = param['interpolator']['debug']
 
 
 #---------------------------------------------------------------------------------------------------
