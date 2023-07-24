@@ -3,6 +3,11 @@ Plot Observation Differences Between Two Prepbufr CSV
 
 This script should ideally be used to compare synthetic obs vs. real obs
 
+Optional command-line arguments:
+    argv[1] = Prepbufr file tag
+    argv[2] = BUFR time in YYYYMMDDHHMM format
+    argv[3] = YAML file with program parameters
+
 shawn.s.murdzek@noaa.gov
 Date Created: 14 February 2023
 """
@@ -27,16 +32,13 @@ import pyDA_utils.bufr as bufr
 #---------------------------------------------------------------------------------------------------
 
 # Input BUFR CSV directory
-bufr_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/data'
-#bufr_dir = '../'
+bufr_dir = '../'
 
 # Prepbufr file tag (e.g., 'rap', 'rap_e', 'rap_p')
-bufr_tag = 'rap'
-#bufr_tag = 'sample'
+bufr_tag = 'sample'
 
 # Range of datetimes to use for the comparison
-date_range = [dt.datetime(2022, 2, 1, 0) + dt.timedelta(hours=i) for i in range(13)]
-#date_range = [dt.datetime(2022, 2, 1, 12)]
+date_range = [dt.datetime(2022, 2, 1, 12)]
 
 # Plotting parameters. List of dictionaries (each dictionary is for a separate plot) with the 
 # following keys...
@@ -44,22 +46,25 @@ date_range = [dt.datetime(2022, 2, 1, 0) + dt.timedelta(hours=i) for i in range(
 #     subsets: Observation subsets
 #     obs_vars: Variables to plot
 #     vcoord: Vertical coordinate (POB or ZOB)
-plot_param = [{'save_fname':'./ob_diffs_profiler_vprof_%s_%s_%s.png',
+plot_param = [{'save_fname':'%s/ob_diffs_profiler_vprof_%s_%s_%s.png',
                'subsets':['RASSDA', 'PROFLR'],
                'obs_vars':['POB', 'ZOB', 'TOB', 'QOB', 'UOB', 'VOB', 'WSPD', 'WDIR', 'TDO'],
                'vcoord':'ZOB'},
-              {'save_fname':'./ob_diffs_aircraft_vprof_%s_%s_%s.png',
+              {'save_fname':'%s/ob_diffs_aircraft_vprof_%s_%s_%s.png',
                'subsets':['AIRCFT', 'AIRCAR'],
                'obs_vars':['POB', 'ZOB', 'TOB', 'QOB', 'UOB', 'VOB', 'WSPD', 'WDIR', 'TDO'],
                'vcoord':'POB'},
-              {'save_fname':'./ob_diffs_vadwnd_vprof_%s_%s_%s.png',
+              {'save_fname':'%s/ob_diffs_vadwnd_vprof_%s_%s_%s.png',
                'subsets':['VADWND'],
                'obs_vars':['POB', 'ZOB', 'TOB', 'QOB', 'UOB', 'VOB', 'WSPD', 'WDIR', 'TDO'],
                'vcoord':'ZOB'},
-              {'save_fname':'./ob_diffs_adpupa_vprof_%s_%s_%s.png',
+              {'save_fname':'%s/ob_diffs_adpupa_vprof_%s_%s_%s.png',
                'subsets':['ADPUPA'],
                'obs_vars':['POB', 'ZOB', 'TOB', 'QOB', 'UOB', 'VOB', 'WSPD', 'WDIR', 'TDO'],
                'vcoord':'POB'}]
+
+# Directory to save output figures to
+save_dir = '.'
 
 # SIDs to exclude.
 # Some aircraft have bad temperature data (e.g., T < -50 degC below 500 hPa), but TQM < 2, so
@@ -68,6 +73,16 @@ exclude_sid = ['00000775']
 
 # Title
 title = 'synthetic obs $-$ real obs'
+
+# Option to used passed arguments
+if len(sys.argv) > 1:
+    bufr_tag = str(sys.argv[1])
+    date_range = [dt.datetime.strptime(sys.argv[2], '%Y%m%d%H%M')]
+    with open(sys.argv[3], 'r') as fptr:
+        param = yaml.safe_load(fptr)
+    bufr_dir = param['paths'][param['plots']['diff_3d']['bufr_dir']]
+    exclude_sid = param['plots']['diff_3d']['exclude_sid']
+    save_dir = param['paths']['plots']
 
 
 #---------------------------------------------------------------------------------------------------
@@ -197,7 +212,7 @@ for param in plot_param:
                               size=12)
 
     plt.suptitle(title, size=18)
-    plt.savefig(param['save_fname'] % (bufr_tag, date_range[0].strftime('%Y%m%d%H'), 
+    plt.savefig(param['save_fname'] % (save_dir, bufr_tag, date_range[0].strftime('%Y%m%d%H'), 
                                        date_range[-1].strftime('%Y%m%d%H')))
     plt.close()
 

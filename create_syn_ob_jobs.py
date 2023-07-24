@@ -57,27 +57,22 @@ for bufr_t in bufr_times:
         wrf_end = tmp
     else:
         wrf_end = bufr_t
+
+    t_str = bufr_t.strftime('%Y%m%d%H%M')
     
     for tag in param['shared']['bufr_tag']:
+
+        print('creating job script for time = %s, tag = %s' % (t_str, tag))
+
         real_bufr_fname = '%s/%s.%s.t%sz.prepbufr.tm00' % (param['paths']['real_bufr'], 
                                                            bufr_t.strftime('%Y%m%d%H'),
                                                            tag,
                                                            bufr_t.strftime('%H'))
-        real_csv_fname = '%s/%s.%s.prepbufr.csv' % (param['paths']['real_csv'],
-                                                    bufr_t.strftime('%Y%m%d%H%M'),
-                                                    tag)
-        fake_csv_perf_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_perf_csv'],
-                                                              bufr_t.strftime('%Y%m%d%H%M'),
-                                                              tag)
-        fake_csv_err_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_err_csv'],
-                                                              bufr_t.strftime('%Y%m%d%H%M'),
-                                                              tag)
-        fake_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_combine_csv'],
-                                                              bufr_t.strftime('%Y%m%d%H%M'),
-                                                              tag)
-        fake_csv_final_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_final_csv'],
-                                                               bufr_t.strftime('%Y%m%d%H%M'),
-                                                               tag)
+        real_csv_fname = '%s/%s.%s.prepbufr.csv' % (param['paths']['real_csv'], t_str, tag)
+        fake_csv_bogus_fname = '%s/%s.bogus.prepbufr.csv' % (param['paths']['syn_bogus_csv'], t_str)
+        fake_csv_perf_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_perf_csv'], t_str, tag)
+        fake_csv_err_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_err_csv'], t_str, tag)
+        fake_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_combine_csv'], t_str, tag)
         fake_bufr_fname = '%s/%s.%s.t%sz.prepbufr.tm00' % (param['paths']['syn_bufr'], 
                                                            bufr_t.strftime('%Y%m%d%H'),
                                                            tag,
@@ -87,7 +82,7 @@ for bufr_t in bufr_times:
             continue 
 
         # Create job script
-        j_names.append('%s/syn_obs_%s_%s.sh' % (param['paths']['log'], bufr_t.strftime('%Y%m%d%H%M'), tag))
+        j_names.append('%s/syn_obs_%s_%s.sh' % (param['paths']['log'], t_str, tag))
 
         fptr = open(j_names[-1], 'w') 
         fptr.write('#!/bin/sh\n\n')
@@ -95,76 +90,102 @@ for bufr_t in bufr_times:
         fptr.write('#SBATCH -t %s\n' % param['jobs']['time'])
         fptr.write('#SBATCH --nodes=1 --ntasks=1\n')
         fptr.write('#SBATCH --mem=%s\n' % param['jobs']['mem'])
-        fptr.write('#SBATCH -o %s/%s.%s.log\n' % (param['paths']['log'], 
-                                                  bufr_t.strftime('%Y%m%d%H%M'), tag))
+        fptr.write('#SBATCH -o %s/%s.%s.log\n' % (param['paths']['log'], t_str, tag))
         fptr.write('#SBATCH --partition=%s\n\n' % param['jobs']['partition'])
-
+            
         fptr.write('date\n\n')
 
         if param['convert_bufr']['use']:
             fptr.write('# Convert real prepBUFR to CSV\n')
             fptr.write('cd %s\n' % param['paths']['real_csv'])
-            fptr.write('mkdir tmp_%s_%s\n' % (bufr_t.strftime('%Y%m%d%H%M'), tag))
-            fptr.write('cd tmp_%s_%s\n' % (bufr_t.strftime('%Y%m%d%H%M'), tag))
+            fptr.write('mkdir tmp_%s_%s\n' % (t_str, tag))
+            fptr.write('cd tmp_%s_%s\n' % (t_str, tag))
             fptr.write('cp -r  %s/bin/* .\n' % param['paths']['bufr_code']) 
             fptr.write('source %s/env/bufr_%s.env\n' % (param['paths']['bufr_code'], param['shared']['machine']))
             fptr.write('cp %s ./prepbufr \n' % real_bufr_fname)
             fptr.write('./prepbufr_decode_csv.x\n')
             fptr.write('mv ./prepbufr.csv %s\n' % real_csv_fname)
             fptr.write('cd ..\n')
-            fptr.write('rm -r %s/tmp_%s_%s\n\n' % (param['paths']['real_csv'], bufr_t.strftime('%Y%m%d%H%M'), tag))    
+            fptr.write('rm -r %s/tmp_%s_%s\n\n' % (param['paths']['real_csv'], t_str, tag))    
 
         if param['create_uas_grid']['use']:
-            fptr.write('# Create UAS grid (not enabled yet)\n\n')
+            fptr.write('# Create UAS grid\n')
+            fptr.write('. ~/.bashrc\nmy_py\n')
+            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('python uas_sites.py %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
 
         if param['create_csv']['use']:
-            fptr.write('# Create UAS CSV (not enabled yet)\n\n')
+            fptr.write('# Create UAS CSV\n')
+            fptr.write('. ~/.bashrc\nmy_py\n')
+            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('python create_uas_csv.py %s \\\n' % fake_csv_bogus_fname)
+            fptr.write('                         %s \\\n' % t_str)
+            fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            convert_csv_fname = fake_csv_bogus_fname
 
         if param['interpolator']['use']:
             fptr.write('# Perform interpolation from model grid to obs location\n')
             fptr.write('. ~/.bashrc\nmy_py\n')
-            fptr.write('cd %s\n' % param['paths']['osse_code'])
+            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('python create_synthetic_obs.py %s \\\n' % param['paths']['model'])
-            fptr.write('                               %s \\\n' % param['paths']['real_csv'])
+            if param['create_csv']['use']:
+                fptr.write('                               %s \\\n' % param['paths']['syn_bogus_csv'])
+            else:
+                fptr.write('                               %s \\\n' % param['paths']['real_csv'])
             fptr.write('                               %s \\\n' % param['paths']['syn_perf_csv'])
             fptr.write('                               %s \\\n' % bufr_t.strftime('%Y%m%d%H'))
             fptr.write('                               %s \\\n' % wrf_start.strftime('%Y%m%d%H'))
             fptr.write('                               %s \\\n' % wrf_end.strftime('%Y%m%d%H'))
-            fptr.write('                               %s \n\n' % tag)
+            if param['create_csv']['use']:
+                fptr.write('                               %s \\\n' % 'bogus')
+            else:
+                fptr.write('                               %s \\\n' % tag)
+            fptr.write('                               %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_perf_fname        
 
         if param['obs_errors']['use']:
             fptr.write('# Add observation errors (not enabled yet)\n\n')
             fptr.write('. ~/.bashrc\nmy_py\n')
-            fptr.write('# Insert code here to move input CSV file to param[paths][syn_err_csv]\n')
+            fptr.write('mv %s %s/%s.%s.input.csv\n' % (fake_csv_perf_fname,
+                                                       param['paths']['syn_err_csv'], 
+                                                       t_str, tag))
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
-            fptr.write('python add_obs_errors.py %s \\\n' % bufr_t.strftime('%Y%m%d%H%M'))
+            fptr.write('python add_obs_errors.py %s \\\n' % t_str)
             fptr.write('                         %s \\\n' % tag)
-            fptr.write('                         %s/%s \\\n' % (param['paths']['osse_code'], in_yaml))
-            fptr.write('mv %s/%s.%s.output.csv %s\n' % (param['paths']['syn_err_csv'], 
-                                                        bufr_t.strftime('%Y%m%d%H%M'), tag, 
-                                                        fake_csv_err_fname))
+            fptr.write('                         %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_err_csv'], 
+                                                          t_str, tag, 
+                                                          fake_csv_err_fname))
             convert_csv_fname = fake_csv_err_fname        
         
         if param['combine_csv']['use']:
             fptr.write('# Combine CSV files (not enabled yet)\n\n')
-            convert_csv_fname = fake_csv_final_fname        
+            convert_csv_fname = fake_csv_comb_fname        
 
         if param['convert_csv']['use']:
             fptr.write('# Convert synthetic ob CSV to prepBUFR\n')
             fptr.write('cd %s\n' % param['paths']['syn_bufr'])
-            fptr.write('mkdir tmp_%s_%s\n' % (bufr_t.strftime('%Y%m%d%H%M'), tag))
-            fptr.write('cd tmp_%s_%s\n' % (bufr_t.strftime('%Y%m%d%H%M'), tag))
+            fptr.write('mkdir tmp_%s_%s\n' % (t_str, tag))
+            fptr.write('cd tmp_%s_%s\n' % (t_str, tag))
             fptr.write('cp -r %s/bin/* .\n' % param['paths']['bufr_code']) 
             fptr.write('source %s/env/bufr_%s.env\n' % (param['paths']['bufr_code'], param['shared']['machine']))
             fptr.write('cp %s ./prepbufr.csv \n' % convert_csv_fname)
             fptr.write('./prepbufr_encode_csv.x\n')
             fptr.write('mv ./prepbufr %s\n' % fake_bufr_fname)
             fptr.write('cd ..\n')
-            fptr.write('rm -r %s/tmp_%s_%s\n\n' % (param['paths']['syn_bufr'], bufr_t.strftime('%Y%m%d%H%M'), tag))
+            fptr.write('rm -r %s/tmp_%s_%s\n\n' % (param['paths']['syn_bufr'], t_str, tag))
 
         if param['plots']['use']:
-            fptr.write('# Make plots (not enabled yet)\n\n')
+            fptr.write('# Make plots\n')
+            fptr.write('. ~/.bashrc\nmy_py\n')
+            fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
+            if not param['create_csv']['use']:
+                fptr.write('python plot_ob_diffs_2d.py %s \\\n' % tag)
+                fptr.write('                           %s \\\n' % t_str)
+                fptr.write('                           %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+                fptr.write('python plot_ob_diffs_vprof.py %s \\\n' % tag)
+                fptr.write('                              %s \\\n' % t_str)
+                fptr.write('                              %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
 
         fptr.write('date')
         fptr.close()

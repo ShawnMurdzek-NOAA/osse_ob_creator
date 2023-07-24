@@ -3,7 +3,7 @@
 # The synthetic observation creation program consists of several components that can be turned on
 # or off using the "use" field below. Specific parameters for each component are specified in the
 # respective section. File paths are specified in their own section, as some paths are used by 
-# multiple components. 
+# multiple components. Note that either UAS OR conventional obs can be created, not both. 
 #
 # To execute the program, run the following command:
 #
@@ -11,22 +11,19 @@
 #
 # shawn.s.murdzek@noaa.gov
 #
-# ==================================================================================================
+#===================================================================================================
 
 paths:
   real_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
-  #real_csv: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv'
-  real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
-  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/data'
+  real_csv: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv'
+  syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/bogus_uas'
+  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
   syn_err_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
-  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
-  syn_final_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
-  #syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_bufr'
-  syn_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
+  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_all'
+  syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_bufr'
   model: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'
-  #log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/log'
-  log: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
-  plots: ''
+  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/logs'
+  plots: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/plots'
   osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
 
@@ -39,6 +36,7 @@ shared:
     - 'rap'
     - 'rap_e'
     - 'rap_p' 
+  uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/uas_site_locs_150km.txt'
 
 jobs:
   max: 25
@@ -59,12 +57,46 @@ convert_bufr:
 
 create_uas_grid: 
   use: False
+  dx: 150000.
+  npts_we: 155
+  npts_sn: 91
+  land_closing: True
+  max_hole_size: 2
+  shp_fname: '/home/smurdzek/.local/share/cartopy/shapefiles/natural_earth/cultural/ne_50m_admin_0_countries'
+  nshape: 16
+  proj_str: '+proj=lcc +lat_0=39 +lon_0=-96 +lat_1=33 +lat_2=45'
+  make_plot: False
 
 create_csv: 
   use: False
+  max_time: 1500.
+  ascent_rate: 3.
+  sample_freq: 60.
+  max_height: 2000.
+  sample_bufr_fname: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202010000.rap.prepbufr.csv'
+  uas_offset: 0.
 
 interpolator: 
-  use: False
+  use: True
+  obs_2d:
+    - 'ADPSFC'
+    - 'SFCSHP'
+    - 'MSONET'
+    - 'GPSIPW'
+  obs_3d:
+    - 'ADPUPA'
+    - 'AIRCAR'
+    - 'AIRCFT'
+    - 'RASSDA'
+    - 'PROFLR'
+    - 'VADWND'
+  copy_winds: False
+  interp_z_aircft: False
+  use_raob_drift: True
+  coastline_correct: False
+  use_Tv: False
+  add_ceiling: False
+  debug: 0
 
 obs_errors: 
   use: False
@@ -101,6 +133,36 @@ combine_csv:
 convert_csv: 
   use: True
 
-plots: 
-  use: False
+plots:
+  use: True
+  diff_2d:
+    bufr_dir: 'syn_perf_csv'
+    subsets:
+      - 'SFCSHP'
+      - 'ADPSFC'
+      - 'MSONET'
+      - 'GPSIPW'
+    obs_vars:
+      - 'WSPD'
+      - 'WDIR'
+      - 'ELV'
+      - 'POB'
+      - 'TOB'
+      - 'QOB'
+      - 'UOB'
+      - 'VOB'
+      - 'ZOB'
+      - 'PWO'
+    domain: 'all'
+    ob_type: null 
+    use_assim_sites: False
+    gsi_diag_fname: ''
+    remove_small_sim_wspd: False
+    sim_wspd_thres: 4.
+    only_compare_strong_winds: False
+    real_wspd_thres: 4. 
+  diff_3d:
+    bufr_dir: 'syn_perf_csv'
+    exclude_sid:
+      - '00000775'
 
