@@ -3,11 +3,10 @@ Plot Observation Differences Between Two Prepbufr CSV
 
 This script should ideally be used to compare synthetic obs vs. real obs
 
-Optional passed arguments:
-    argv[1] = bufr_tag
-    argv[2] = save_fname
-    argv[3] = observation subsets to use
-    argv[4] = domain
+Optional command-line arguments:
+    argv[1] = Prepbufr file tag
+    argv[2] = BUFR time in YYYYMMDDHHMM format
+    argv[3] = YAML file with program parameters
 
 shawn.s.murdzek@noaa.gov
 Date Created: 7 February 2023
@@ -27,6 +26,7 @@ import xarray as xr
 import metpy.calc as mc
 from metpy.units import units
 import sys
+import yaml
 
 import pyDA_utils.bufr as bufr
 
@@ -36,15 +36,12 @@ import pyDA_utils.bufr as bufr
 #---------------------------------------------------------------------------------------------------
 
 # Input BUFR CSV directory
-#bufr_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic/gsi_err_autoreg_0p5'
 bufr_dir = '../'
 
 # Prepbufr file tag (e.g., 'rap', 'rap_e', 'rap_p')
-#bufr_tag = 'rap'
 bufr_tag = 'sample'
 
 # Range of datetimes to use for the comparison
-#date_range = [dt.datetime(2022, 2, 1, 9) + dt.timedelta(hours=i) for i in range(4)]
 date_range = [dt.datetime(2022, 2, 1, 12)]
 
 # Dataset names
@@ -82,12 +79,21 @@ real_wspd_thres = 4.
 # Option to used passed arguments
 if len(sys.argv) > 1:
     bufr_tag = str(sys.argv[1])
-    save_fname = str(sys.argv[2])
-    if sys.argv[3] == 'all':
-        subsets = ['SFCSHP', 'ADPSFC', 'MSONET', 'GPSIPW']
-    else:
-        subsets = [str(sys.argv[3])]
-    domain = str(sys.argv[4])
+    date_range = [dt.datetime.strptime(sys.argv[2], '%Y%m%d%H%M')]
+    with open(sys.argv[3], 'r') as fptr:
+        param = yaml.safe_load(fptr)
+    bufr_dir = param['paths'][param['plots']['diff_2d']['bufr_dir']]
+    save_fname = '%s/%s' % (param['paths']['plots'], sys.argv[2]) + '/ob_2d_diffs_%s_%s_%s_%s_%s.png'
+    subsets = param['plots']['diff_2d']['subsets']
+    ob_vars = param['plots']['diff_2d']['obs_vars']
+    domain = param['plots']['diff_2d']['domain']
+    ob_type = param['plots']['diff_2d']['ob_type']
+    use_assim_sites = param['plots']['diff_2d']['use_assim_sites']
+    gsi_diag_fname = param['plots']['diff_2d']['gsi_diag_fname']
+    remove_small_sim_wspd = param['plots']['diff_2d']['remove_small_sim_wspd']
+    sim_wspd_thres = param['plots']['diff_2d']['sim_wspd_thres']
+    only_compare_strong_winds = param['plots']['diff_2d']['only_compare_strong_winds']
+    real_wspd_thres = param['plots']['diff_2d']['real_wspd_thres']
 
 
 #---------------------------------------------------------------------------------------------------
@@ -219,6 +225,10 @@ for v in obs_vars:
         diff = (field1 - field2).values
         lat = bufr_df_sim['YOB'].values
         lon = bufr_df_sim['XOB'].values
+
+    # Skip this variable if there is no data
+    if len(field1) == 0:
+        continue
 
     # Plot actual values
     maxval = max(np.percentile(field1, 99.75), np.percentile(field2, 99.75))

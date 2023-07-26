@@ -5,6 +5,11 @@ Also include some code to plot histograms of the difference between the perfect 
 added errors. These plots provide a sanity check to ensure that the distribution of the differences
 is approximately Gaussian with a standard deviation close to the prescribed errors.
 
+Optional command-line arguments:
+    argv[1] = BUFR time in YYYYMMDDHHMM format 
+    argv[2] = BUFR tag 
+    argv[3] = YAML file with program parameters
+
 shawn.s.murdzek@noaa.gov
 Date Created: 15 February 2023
 """
@@ -18,6 +23,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime as dt
 import glob
+import sys
+import yaml
 
 import metpy.calc as mc
 from metpy.units import units
@@ -31,19 +38,9 @@ import pyDA_utils.bufr as bufr
 # Input Parameters
 #---------------------------------------------------------------------------------------------------
 
-# For debugging
+# Input and output file names
 in_fnames = ['/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202205030000.rap.prepbufr.csv']
 out_fnames = ['./tmp.prepbufr.csv']
-
-#in_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect'
-#out_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic/gsi_err_autoreg_0p5'
-
-#fnames = glob.glob('%s/*.fake.prepbufr.csv' % in_dir)
-#for i in range(len(fnames)):
-#    fnames[i] = fnames[i].split('/')[-1]
-
-#in_fnames = ['%s/%s' % (in_dir, f) for f in fnames]
-#out_fnames = ['%s/%s' % (out_dir, f) for f in fnames]
 
 errtable = '/work2/noaa/wrfruc/murdzek/real_obs/errtable.rrfs'
 
@@ -58,15 +55,15 @@ verbose = False
 
 # Option to perform dewpoint check (i.e., is the dewpoint consistent with the errors added to TOB 
 # and QOB?)
-dewpt_check = True
+dewpt_check = False
 
 # Option to check obs errors by plotting differences between obs w/ and w/out errors (plots will
 # be made for the last BUFR CSV file)
-plot_diff_hist = True
+plot_diff_hist = False
 
 # Option to check autocorrelated obs errors by plotting timeseries or vertical profiles of errors
 # from a single station (plots will be made for the last BUFR CSV file)
-check_autocorr_err = True
+check_autocorr_err = False
 timeseries_ob_types = [133,           135,           233,           235]
 timeseries_stations = ['3OXWUWJA', 'CNJCA111', '3OXWUWJA', 'CNJCA111']
 vprof_ob_types = [120,     120,     220,     220]
@@ -74,9 +71,26 @@ vprof_stations = ['72520', '72476', '72520', '72476']
 
 # Option to check autocorrelated obs errors with DHR partitioning by creating 2D plots of errors
 # from a single station (plots will be made for the last BUFR CSV file)
-check_autocorr_partition_err = True
+check_autocorr_partition_err = False
 autocorr_partition_ob_types = [126, 224, 227]
 autocorr_partition_stations = ['SLDUT', 'KFDX', 'CFDUT']
+
+# Option to use inputs from YAML file
+if len(sys.argv) > 1:
+    bufr_t = sys.argv[1]
+    tag = sys.argv[2]
+    with open(sys.argv[3], 'r') as fptr:
+        param = yaml.safe_load(fptr)
+    in_fnames = ['%s/%s.%s.input.csv' % (param['paths']['syn_err_csv'], bufr_t, tag)]
+    out_fnames = ['%s/%s.%s.output.csv' % (param['paths']['syn_err_csv'], bufr_t, tag)]
+    errtable = param['obs_errors']['errtable']
+    autocor_POB_obs = param['obs_errors']['autocor_POB_obs']
+    autocor_DHR_obs = param['obs_errors']['autocor_DHR_obs']
+    autocor_ZOB_partition_DHR_obs = param['obs_errors']['autocor_ZOB_partition_DHR_obs']
+    auto_reg_parm = param['obs_errors']['auto_reg_parm']
+    verbose = param['obs_errors']['verbose']
+    dewpt_check = param['obs_errors']['dewpt_check']
+    plot_diff_hist = param['obs_errors']['plot_diff_hist']
 
 
 #---------------------------------------------------------------------------------------------------
