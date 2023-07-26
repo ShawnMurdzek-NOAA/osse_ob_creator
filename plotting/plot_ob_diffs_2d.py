@@ -26,6 +26,7 @@ import xarray as xr
 import metpy.calc as mc
 from metpy.units import units
 import sys
+import yaml
 
 import pyDA_utils.bufr as bufr
 
@@ -82,9 +83,9 @@ if len(sys.argv) > 1:
     with open(sys.argv[3], 'r') as fptr:
         param = yaml.safe_load(fptr)
     bufr_dir = param['paths'][param['plots']['diff_2d']['bufr_dir']]
-    save_fname = param['paths']['plots'] + '/ob_2d_diffs_%s_%s_%s_%s_%s.png'
+    save_fname = '%s/%s' % (param['paths']['plots'], sys.argv[2]) + '/ob_2d_diffs_%s_%s_%s_%s_%s.png'
     subsets = param['plots']['diff_2d']['subsets']
-    ob_vars = param['plots']['diff_2d']['ob_vars']
+    ob_vars = param['plots']['diff_2d']['obs_vars']
     domain = param['plots']['diff_2d']['domain']
     ob_type = param['plots']['diff_2d']['ob_type']
     use_assim_sites = param['plots']['diff_2d']['use_assim_sites']
@@ -224,6 +225,10 @@ for v in obs_vars:
         diff = (field1 - field2).values
         lat = bufr_df_sim['YOB'].values
         lon = bufr_df_sim['XOB'].values
+
+    # Skip this variable if there is no data
+    if len(field1) == 0:
+        continue
 
     # Plot actual values
     maxval = max(np.percentile(field1, 99.75), np.percentile(field2, 99.75))

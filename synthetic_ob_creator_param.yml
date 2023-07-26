@@ -21,6 +21,7 @@ paths:
   syn_err_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
   syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_all'
   syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_bufr'
+  real_red_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/real_red_obs_bufr'
   model: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'
   log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/logs'
   plots: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/plots'
@@ -37,6 +38,7 @@ shared:
     - 'rap_e'
     - 'rap_p' 
   uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/uas_site_locs_150km.txt'
+  log_str: 'uas'
 
 jobs:
   max: 25
@@ -53,7 +55,7 @@ jobs:
 #-----------
 
 convert_bufr: 
-  use: True
+  use: False
 
 create_uas_grid: 
   use: False
@@ -91,7 +93,8 @@ interpolator:
     - 'PROFLR'
     - 'VADWND'
   copy_winds: False
-  interp_z_aircft: False
+  interp_z_aircft: null
+  height_opt: null
   use_raob_drift: True
   coastline_correct: False
   use_Tv: False
@@ -129,9 +132,14 @@ obs_errors:
 
 combine_csv:
   use: False
+  csv1_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
+  csv2_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_uas'
 
-convert_csv: 
-  use: True
+convert_syn_csv: 
+  use: False
+
+convert_real_red_csv: 
+  use: False
 
 plots:
   use: True
@@ -165,4 +173,7 @@ plots:
     bufr_dir: 'syn_perf_csv'
     exclude_sid:
       - '00000775'
+  diff_uas:
+    bufr_dir: 'syn_perf_csv'
+    nclose: 10
 
