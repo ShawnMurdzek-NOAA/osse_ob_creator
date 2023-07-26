@@ -61,7 +61,7 @@ import pyDA_utils.map_proj as mp
 wrf_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/'
 
 # Directory containing real prepbufr CSV output
-bufr_dir = './tests/'
+bufr_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/bogus_uas'
 
 # Observation platforms to use (aka subsets, same ones used by BUFR)
 obs_2d = ['ADPSFC', 'SFCSHP', 'MSONET', 'GPSIPW']
@@ -79,17 +79,17 @@ vinterp = [{'subset':['ADPUPA', 'AIRCAR', 'AIRCFT'], 'var':'POB', 'type':'log',
 fake_bufr_dir = './'
 
 # PrepBUFR time
-bufr_time = dt.datetime(2022, 2, 1, 12)
+bufr_time = dt.datetime(2022, 2, 1, 0)
 
 # Prepbufr tag ('rap', 'rap_e', or 'rap_p')
-bufr_tag = 'sample'
+bufr_tag = 'rap'
 
 # Prepbufr suffix
 bufr_suffix = ''
 
 # Start and end times for wrfnat UPP output. Step is in min
-wrf_start = dt.datetime(2022, 2, 1, 10, 45)
-wrf_end = dt.datetime(2022, 2, 1, 12, 15)
+wrf_start = dt.datetime(2022, 2, 1, 0, 0)
+wrf_end = dt.datetime(2022, 2, 1, 1, 0)
 wrf_step = 15
 
 # Option to set all entries for a certain BUFR field to NaN
@@ -105,7 +105,11 @@ copy_winds = False
 # Heights reported by aircraft are calculated by integrating the hydrostatic balance eqn assuming
 # the US Standard Atmosphere. Therefore, the heights for the simulated obs should be the same as the
 # real obs b/c the pressures are the same.
-interp_z_aircft = False
+interp_z_aircft = False 
+
+# Are input heights (ZOB) in m above ground level (AGL) or in m above mean sea level (MSL)?
+# PrepBUFR files use heights above MSL, but UAS "bogus" CSVs use heights AGL
+height_opt = 'msl'
 
 # Option to use (XDR, YDR) for ADPUPA obs rather than (XOB, YOB)
 use_raob_drift = True
@@ -150,11 +154,31 @@ if len(sys.argv) > 1:
     obs_3d = param['interpolator']['obs_3d']
     copy_winds = param['interpolator']['copy_winds']
     interp_z_aircft = param['interpolator']['interp_z_aircft']
+    height_opt = param['interpolator']['height_opt']
     use_raob_drift = param['interpolator']['use_raob_drift']
     coastline_correct = param['interpolator']['coastline_correct']
     use_Tv = param['interpolator']['use_Tv']
     add_ceiling = param['interpolator']['add_ceiling']
     debug = param['interpolator']['debug']
+
+    # Use vertical interpolation in Z for UAS obs
+    if param['create_csv']['use']:
+        vinterp = [{'subset':['AIRCAR'], 'var':'ZOB', 'type':'linear',
+                    'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True}]
+
+    # If interp_z_aircft is None, set to a reasonable value
+    if interp_z_aircft == None:
+        if param['create_csv']['use']:
+            interp_z_aircft = True
+        else:
+            interp_z_aircft = False
+
+    # If height_opt is None, set to a reasonable value
+    if height_opt == None:
+        if param['create_csv']['use']:
+            height_opt = 'agl'
+        else:
+            height_opt = 'msl'
 
 
 #---------------------------------------------------------------------------------------------------
@@ -255,27 +279,28 @@ bufr_csv.df.drop(index=np.where(np.logical_or(bufr_csv.df['j0'] < 0,
                                               bufr_csv.df['j0'] > jmax))[0], inplace=True)
 bufr_csv.df.reset_index(drop=True, inplace=True)
 
+# Create output DataFrame
+out_df = bufr_csv.df.copy()
+bufr_csv.df.drop(labels=['xlc', 'ylc', 'i0', 'j0'], axis=1, inplace=True)
+drop_idx = []
+
 # Compute interpolation weights
-bufr_csv.df['iwgt'] = 1. - (bufr_csv.df['ylc'] - bufr_csv.df['i0'])
-bufr_csv.df['jwgt'] = 1. - (bufr_csv.df['xlc'] - bufr_csv.df['j0'])
+out_df['iwgt'] = 1. - (out_df['ylc'] - out_df['i0'])
+out_df['jwgt'] = 1. - (out_df['xlc'] - out_df['j0'])
 
 # Determine nearest neighbor for cloud ceiling
 if add_ceiling:
-    bufr_csv.df['inear'] = np.int32(np.around(bufr_csv.df['ylc']))
-    bufr_csv.df['jnear'] = np.int32(np.around(bufr_csv.df['xlc']))
+    out_df['inear'] = np.int32(np.around(out_df['ylc']))
+    out_df['jnear'] = np.int32(np.around(out_df['xlc']))
 
 if debug > 0:
     print('Finished with map projection and computing horiz interp weights (time = %.3f s)' % 
           (dt.datetime.now() - start_map_proj).total_seconds())
-    print('# BUFR entries remaining = %d' % len(bufr_csv.df))
+    print('# BUFR entries remaining = %d' % len(out_df))
 
 # Round time offsets to 6 decimal places to eliminate machine error
 # (this helps avoid some rare bugs in upper-air obs that leads to all obs being 0)
-bufr_csv.df['DHR'] = np.around(bufr_csv.df['DHR'], 6)
-
-# Create output DataFrame
-out_df = bufr_csv.df.copy()
-drop_idx = []
+out_df['DHR'] = np.around(out_df['DHR'], 6)
 
 # Determine row indices for each ob type
 ob_idx = {}
@@ -310,13 +335,6 @@ if not interp_z_aircft:
         out_df.loc[ob_idx['AIRCAR'], 'ZOB'] = np.nan
     if 'AIRCFT' in ob_idx.keys():
         out_df.loc[ob_idx['AIRCFT'], 'ZOB'] = np.nan
-
-# Use (XDR, YDR) for ADPUPA obs rather than (XOB, YOB)
-if use_raob_drift:
-    if 'ADPUPA' in ob_idx.keys():
-        out_df.loc[ob_idx['ADPUPA'], 'XOB'] = out_df.loc[ob_idx['ADPUPA'], 'XDR']
-        out_df.loc[ob_idx['ADPUPA'], 'YOB'] = out_df.loc[ob_idx['ADPUPA'], 'YDR']
-        out_df.loc[ob_idx['ADPUPA'], 'DHR'] = out_df.loc[ob_idx['ADPUPA'], 'HRDR']
 
 # Add some DataFrame columns
 nrow = len(out_df)
@@ -468,7 +486,23 @@ print()
 
 start3d = dt.datetime.now()
 
-# Create array to save v1d arrays (vertical coordinate)
+# Start by adjusting elevation to match Nature Run elevation for non-aircraft 3D obs
+for s in obs_3d:
+    if s in ['AIRCAR', 'AIRCFT']:
+        continue
+    for j in ob_idx[s]:
+        out_df.loc[j, 'ELV'] = cou.interp_x_y_t(wrf_data, wrf_hr, vars_2d['ZOB'], out_df.loc[j], 0, 
+                                                1)
+
+# Use (XDR, YDR) for ADPUPA obs rather than (XOB, YOB). Can't make this swap until after ELV 
+# adjustment
+if use_raob_drift:
+    if 'ADPUPA' in ob_idx.keys():
+        out_df.loc[ob_idx['ADPUPA'], 'XOB'] = out_df.loc[ob_idx['ADPUPA'], 'XDR']
+        out_df.loc[ob_idx['ADPUPA'], 'YOB'] = out_df.loc[ob_idx['ADPUPA'], 'YDR']
+        out_df.loc[ob_idx['ADPUPA'], 'DHR'] = out_df.loc[ob_idx['ADPUPA'], 'HRDR']
+
+# Create array to save v1d arrays (vertical coordinate) and surface height (sfch)
 v1d = np.ones([model_nz, len(out_df)]) * 1e9
 vdone = np.zeros(len(out_df), dtype=int)
 
@@ -485,6 +519,14 @@ vdone = np.zeros(len(out_df), dtype=int)
 
 # Loop over each vertical coordinate first to get weights for vertical interpolation
 for vg, vinterp_d in enumerate(vinterp):
+
+    # If ZOB is used as the vertical coordinate, change heights AGL to heights MSL
+    if (height_opt == 'agl') and (vinterp_d['var'] == 'ZOB'):
+        for j in np.where(out_df['vgroup'] == vg)[0]:
+            out_df.loc[j, 'ZOB'] = out_df.loc[j, 'ZOB'] + cou.interp_x_y_t(wrf_data, wrf_hr, 
+                                                                           vars_2d['ZOB'], 
+                                                                           out_df.loc[j], 0, 1)
+
     for hr in wrf_hr: 
 
         # Determine indices of obs within wrf_step of this output time
@@ -695,9 +737,11 @@ else:
 out_df = bufr.compute_dewpt(out_df)
 
 # If we didn't interpolate ZOB for AIRCAR and AIRCFT, copy values from original BUFR file
+# For aircraft, also copy ZOB to ELV
+air_idx = np.where((out_df['subset'] == 'AIRCAR') | (out_df['subset'] == 'AIRCFT'))[0]
 if not interp_z_aircft:
-    air_idx = np.where((out_df['subset'] == 'AIRCAR') | (out_df['subset'] == 'AIRCFT'))[0]
     out_df.loc[air_idx, 'ZOB'] = bufr_csv.df.loc[air_idx, 'ZOB']
+out_df.loc[air_idx, 'ELV'] = out_df.loc[air_idx, 'ZOB']
 
 # Reset (XOB, YOB) for ADPUPA obs if (XDR, YDR) was used for ADPUPA locations
 if use_raob_drift:

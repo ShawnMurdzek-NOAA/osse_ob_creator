@@ -7,7 +7,7 @@ UAS obs locations. Yet another script will be used for superobbing once UAS obs 
 Optional command-line arguments:
     argv[1] = UAS valid time in YYYYMMDDHHMM format
     argv[2] = Output CSV file name
-    argv[2] = YAML file with program parameters
+    argv[3] = YAML file with program parameters
 
 shawn.s.murdzek@noaa.gov
 Date Created: 8 May 2023

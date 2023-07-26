@@ -13,31 +13,33 @@ The programs included here create synthetic observations for an Observing System
 
 1. `activate_python_env.sh`: Helper program that activates the Python environment necessary for this program.
 
-1. `create_syn_ob_jobs.py`: Helper program that creates a bunch of bash jobs to create synthetic observations using the input parameters in `synthetic_ob_creator_param.yml`. 
+2. `create_syn_ob_jobs.py`: Helper program that creates a bunch of bash jobs to create synthetic observations using the input parameters in `synthetic_ob_creator_param.yml`. 
 
-2. `cron_run_synthetic_ob_creator.sh`: Bash script that runs `run_synthetic_ob_creator.py`. Can be run as a cron job.
+3. `cron_run_synthetic_ob_creator.sh`: Bash script that runs `run_synthetic_ob_creator.py`. Can be run as a cron job.
 
-3. `run_synthetic_ob_creator.py`: Helper program that submits a bunch of bash jobs (up to a certain limit). Failed jobs are also retried.
+4. `run_synthetic_ob_creator.py`: Helper program that submits a bunch of bash jobs (up to a certain limit). Failed jobs are also retried.
 
-4. `synthetic_ob_creator_param.yml`: Input settings for the synthetic observation creation program.
+5. `synthetic_ob_creator_param.yml`: Input settings for the synthetic observation creation program.
 
-5. `main`: Various programs needed to create synthetic observations. Inputs can either be specified within each of these programs or within `synthetic_ob_creator_param.yml`.
+6. `main`: Various programs needed to create synthetic observations. Inputs can either be specified within each of these programs or within `synthetic_ob_creator_param.yml`.
 
     1. `add_obs_errors.py`: Reads a series of prepBUFR CSV files and adds random observation errors.
 
-    2. `create_ims_snow_obs.py`: Creates snow cover and ice cover fields using NR output.
+    2. `combine_bufr_csv.py`: Combines two BUFR CSV files into a single BUFR CSV file.
     
-    3. `create_synthetic_obs.py`: Intepolates NR output to synthetic observation locations.
+    3. `create_ims_snow_obs.py`: Creates snow cover and ice cover fields using NR output.
+    
+    4. `create_synthetic_obs.py`: Intepolates NR output to synthetic observation locations.
 
-    4. `create_uas_csv.py`: Creates an "empty" CSV for UAS observations. This CSV can then be passed to `create_synthetic_obs.py`.
+    5. `create_uas_csv.py`: Creates an "empty" CSV for UAS observations. This CSV can then be passed to `create_synthetic_obs.py`.
 
-    5. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
+    6. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
 
-6. `plotting`: Various utilities for making comparison plots between synthetic and real observations.
+7. `plotting`: Various utilities for making comparison plots between synthetic and real observations.
 
-7. `tests`: Contains various scripts to test whether the synthetic observations are being created correctly.
+8. `tests`: Contains various scripts to test whether the synthetic observations are being created correctly.
 
-8. `utils`: Miscellaneous scripts that might be helpful (or that I haven't bothered deleting yet!)
+9. `utils`: Miscellaneous scripts that might be helpful (or that I haven't bothered deleting yet!)
 
 ## Dependencies
 

@@ -23,6 +23,7 @@ import pandas as pd
 import metpy.calc as mc
 from metpy.units import units
 import sys
+import yaml
 
 import pyDA_utils.bufr as bufr
 
@@ -82,7 +83,7 @@ if len(sys.argv) > 1:
         param = yaml.safe_load(fptr)
     bufr_dir = param['paths'][param['plots']['diff_3d']['bufr_dir']]
     exclude_sid = param['plots']['diff_3d']['exclude_sid']
-    save_dir = param['paths']['plots']
+    save_dir = '%s/%s' % (param['paths']['plots'], sys.argv[2])
 
 
 #---------------------------------------------------------------------------------------------------
