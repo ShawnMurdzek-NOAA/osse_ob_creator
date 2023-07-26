@@ -4,6 +4,11 @@ Create BUFR CSV for UAS Observations
 This CSV will be filled with bogus data. Use create_synthetic_obs.py to interpolate actual NR data to
 UAS obs locations. Yet another script will be used for superobbing once UAS obs are created.
 
+Optional command-line arguments:
+    argv[1] = UAS valid time in YYYYMMDDHHMM format
+    argv[2] = Output CSV file name
+    argv[3] = YAML file with program parameters
+
 shawn.s.murdzek@noaa.gov
 Date Created: 8 May 2023
 """
@@ -15,6 +20,8 @@ Date Created: 8 May 2023
 import datetime as dt
 import numpy as np
 import pandas as pd
+import sys
+import yaml
 
 import pyDA_utils.bufr as bufr
 
@@ -48,7 +55,22 @@ max_height = 2000.
 sample_bufr_fname = '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202010000.rap.prepbufr.csv'
 
 # Output BUFR CSV file (include %s placeholder for timestamp)
-out_fname = '%s.uas.bogus.prepbufr.csv'
+out_fname = '%s.bogus.prepbufr.csv'
+
+# Option to use inputs from YAML file
+if len(sys.argv) > 1:
+    bufr_t = sys.argv[1]
+    out_fname = sys.argv[2]
+    with open(sys.argv[3], 'r') as fptr:
+        param = yaml.safe_load(fptr)
+    valid_times = [dt.datetime.strptime(bufr_t, '%Y%m%d%H%M')]
+    flight_times = [valid_times[0] + dt.timedelta(seconds=param['create_csv']['uas_offset'])]
+    uas_loc_fname = param['shared']['uas_grid_file']
+    max_time = param['create_csv']['max_time']
+    ascent_rate = param['create_csv']['ascent_rate']
+    sample_freq = param['create_csv']['sample_freq']
+    max_height = param['create_csv']['max_height']
+    sample_bufr_fname = param['create_csv']['sample_bufr_fname']
 
 
 #---------------------------------------------------------------------------------------------------

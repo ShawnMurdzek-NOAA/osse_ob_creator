@@ -4,6 +4,9 @@ Determine Locations of UAS Observation Sites
 List of CartoPy map projections: https://scitools.org.uk/cartopy/docs/latest/reference/projections.html
 Primer on map projections: https://www.e-education.psu.edu/geog160/node/1918
 
+Optional commnd-line:
+    argv[1] = YAML file with program parameters
+
 shawn.s.murdzek@noaa.gov
 Date Created: 28 March 2023
 """
@@ -23,6 +26,8 @@ import datetime as dt
 import xarray as xr
 import shapefile
 import scipy.ndimage as sn
+import sys
+import yaml
 
 
 #---------------------------------------------------------------------------------------------------
@@ -63,10 +68,23 @@ out_file = 'uas_site_locs_150km.txt'
 # Options for plotting UAS sites
 make_plot = True
 plot_save_fname = 'uas_sites.pdf'
-#lon_lim = [-76.75, -73.5]
-#lat_lim = [38.75, 41.5]
 lon_lim = [-127, -65]
 lat_lim = [23, 49]
+
+# Option to use inputs from YAML file
+if len(sys.argv) > 1:
+    with open(sys.argv[1], 'r') as fptr:
+        param = yaml.safe_load(fptr)
+    dx = param['create_uas_grid']['dx']
+    npts_we = param['create_uas_grid']['npts_we']
+    npts_sn = param['create_uas_grid']['npts_sn']
+    land_closing = param['create_uas_grid']['land_closing']
+    max_hole_size = param['create_uas_grid']['max_hole_size']
+    shp_fname = param['create_uas_grid']['shp_fname']
+    nshape = param['create_uas_grid']['nshape']
+    proj_str = param['create_uas_grid']['proj_str']
+    out_file = param['shared']['uas_grid_file']
+    make_plot = param['create_uas_grid']['make_plot']
 
 
 #---------------------------------------------------------------------------------------------------

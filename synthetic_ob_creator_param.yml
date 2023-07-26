@@ -1,0 +1,179 @@
+# Input Parameters for Synthetic Observation Creation Program
+# 
+# The synthetic observation creation program consists of several components that can be turned on
+# or off using the "use" field below. Specific parameters for each component are specified in the
+# respective section. File paths are specified in their own section, as some paths are used by 
+# multiple components. Note that either UAS OR conventional obs can be created, not both. 
+#
+# To execute the program, run the following command:
+#
+# python run_synthetic_ob_creator.py synthetic_ob_creator_param.yml
+#
+# shawn.s.murdzek@noaa.gov
+#
+#===================================================================================================
+
+paths:
+  real_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
+  real_csv: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv'
+  syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/bogus_uas'
+  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
+  syn_err_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
+  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_all'
+  syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_bufr'
+  real_red_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/real_red_obs_bufr'
+  model: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'
+  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/logs'
+  plots: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/plots'
+  osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
+  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
+
+shared:
+  machine: 'orion'
+  bufr_start: '202202010000'
+  bufr_end: '202202010100'
+  bufr_step: 60
+  bufr_tag:
+    - 'rap'
+    - 'rap_e'
+    - 'rap_p' 
+  uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/uas_site_locs_150km.txt'
+  log_str: 'uas'
+
+jobs:
+  max: 25
+  user: 'smurdzek'
+  alloc: 'wrfruc'
+  csv_name: 'syn_ob_creator_jobs.csv'
+  maxtries: 3
+  mem: '30GB'
+  time: '08:00:00'
+  partition: 'orion'
+
+#-----------
+# Components
+#-----------
+
+convert_bufr: 
+  use: False
+
+create_uas_grid: 
+  use: False
+  dx: 150000.
+  npts_we: 155
+  npts_sn: 91
+  land_closing: True
+  max_hole_size: 2
+  shp_fname: '/home/smurdzek/.local/share/cartopy/shapefiles/natural_earth/cultural/ne_50m_admin_0_countries'
+  nshape: 16
+  proj_str: '+proj=lcc +lat_0=39 +lon_0=-96 +lat_1=33 +lat_2=45'
+  make_plot: False
+
+create_csv: 
+  use: False
+  max_time: 1500.
+  ascent_rate: 3.
+  sample_freq: 60.
+  max_height: 2000.
+  sample_bufr_fname: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202010000.rap.prepbufr.csv'
+  uas_offset: 0.
+
+interpolator: 
+  use: True
+  obs_2d:
+    - 'ADPSFC'
+    - 'SFCSHP'
+    - 'MSONET'
+    - 'GPSIPW'
+  obs_3d:
+    - 'ADPUPA'
+    - 'AIRCAR'
+    - 'AIRCFT'
+    - 'RASSDA'
+    - 'PROFLR'
+    - 'VADWND'
+  copy_winds: False
+  interp_z_aircft: null
+  height_opt: null
+  use_raob_drift: True
+  coastline_correct: False
+  use_Tv: False
+  add_ceiling: False
+  debug: 0
+
+obs_errors: 
+  use: False
+  errtable: '/work2/noaa/wrfruc/murdzek/real_obs/errtable.rrfs'
+  autocor_POB_obs:
+    - 120 
+    - 220
+  autocor_DHR_obs: 
+    - 130
+    - 131
+    - 133
+    - 134
+    - 135
+    - 230
+    - 231
+    - 233
+    - 234
+    - 235
+  autocor_ZOB_partition_DHR_obs: 
+    - 126
+    - 223
+    - 224
+    - 227
+    - 228
+    - 229
+  auto_reg_parm: 0.5
+  verbose: False
+  dewpt_check: False
+  plot_diff_hist: False
+
+combine_csv:
+  use: False
+  csv1_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
+  csv2_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_uas'
+
+convert_syn_csv: 
+  use: False
+
+convert_real_red_csv: 
+  use: False
+
+plots:
+  use: True
+  diff_2d:
+    bufr_dir: 'syn_perf_csv'
+    subsets:
+      - 'SFCSHP'
+      - 'ADPSFC'
+      - 'MSONET'
+      - 'GPSIPW'
+    obs_vars:
+      - 'WSPD'
+      - 'WDIR'
+      - 'ELV'
+      - 'POB'
+      - 'TOB'
+      - 'QOB'
+      - 'UOB'
+      - 'VOB'
+      - 'ZOB'
+      - 'PWO'
+    domain: 'all'
+    ob_type: null 
+    use_assim_sites: False
+    gsi_diag_fname: ''
+    remove_small_sim_wspd: False
+    sim_wspd_thres: 4.
+    only_compare_strong_winds: False
+    real_wspd_thres: 4. 
+  diff_3d:
+    bufr_dir: 'syn_perf_csv'
+    exclude_sid:
+      - '00000775'
+  diff_uas:
+    bufr_dir: 'syn_perf_csv'
+    nclose: 10
+
