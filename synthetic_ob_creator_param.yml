@@ -5,9 +5,7 @@
 # respective section. File paths are specified in their own section, as some paths are used by 
 # multiple components. Note that either UAS OR conventional obs can be created, not both. 
 #
-# To execute the program, run the following command:
-#
-# python run_synthetic_ob_creator.py synthetic_ob_creator_param.yml
+# Descriptions of the input parameters can be found here: README_inputs.md
 #
 # shawn.s.murdzek@noaa.gov
 #
@@ -31,7 +29,7 @@ paths:
 shared:
   machine: 'orion'
   bufr_start: '202202010000'
-  bufr_end: '202202010100'
+  bufr_end: '202202072300'
   bufr_step: 60
   bufr_tag:
     - 'rap'
@@ -55,7 +53,7 @@ jobs:
 #-----------
 
 convert_bufr: 
-  use: False
+  use: True
 
 create_uas_grid: 
   use: False
@@ -89,9 +87,6 @@ interpolator:
     - 'ADPUPA'
     - 'AIRCAR'
     - 'AIRCFT'
-    - 'RASSDA'
-    - 'PROFLR'
-    - 'VADWND'
   copy_winds: False
   interp_z_aircft: null
   height_opt: null
@@ -136,10 +131,10 @@ combine_csv:
   csv2_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_uas'
 
 convert_syn_csv: 
-  use: False
+  use: True
 
 convert_real_red_csv: 
-  use: False
+  use: True
 
 plots:
   use: True
