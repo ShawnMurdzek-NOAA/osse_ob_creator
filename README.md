@@ -60,3 +60,7 @@ The `tests` directory contains a sample prepBUFR CSV file for testing purposes. 
 4. Add `cron_run_synthetic_ob_creator.sh` to your crontab using the following line:
 
 `*/30 * * * * source /etc/profile && cd /path/to/osse_ob_creator && bash ./cron_run_synthetic_ob_creator.sh`
+
+## Additional Documentation
+
+- [Description of input parameters](https://github.com/ShawnMurdzek-NOAA/osse_ob_creator/blob/main/README_inputs.md)
