@@ -18,10 +18,11 @@ paths:
   syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
   syn_err_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
   syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_all'
+  syn_select_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/no_aircft'
   syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_bufr'
   real_red_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/real_red_obs_bufr'
   model: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'
-  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/logs'
+  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/logs_test'
   plots: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/plots'
   osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
@@ -36,7 +37,7 @@ shared:
     - 'rap_e'
     - 'rap_p' 
   uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/uas_site_locs_150km.txt'
-  log_str: 'uas'
+  log_str: 'test'
 
 jobs:
   max: 25
@@ -53,7 +54,7 @@ jobs:
 #-----------
 
 convert_bufr: 
-  use: True
+  use: False
 
 create_uas_grid: 
   use: False
@@ -77,7 +78,7 @@ create_csv:
   uas_offset: 0.
 
 interpolator: 
-  use: True
+  use: False
   obs_2d:
     - 'ADPSFC'
     - 'SFCSHP'
@@ -130,14 +131,53 @@ combine_csv:
   csv1_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
   csv2_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_uas'
 
-convert_syn_csv: 
+select_obs:
   use: True
+  obtypes:
+    - 120
+    - 126
+    - 153
+    - 180
+    - 181
+    - 183
+    - 187
+    - 188
+    - 192
+    - 193
+    - 194 
+    - 195
+    - 220
+    - 223
+    - 224
+    - 227
+    - 228
+    - 229
+    - 242
+    - 243
+    - 250
+    - 252
+    - 253
+    - 254
+    - 280
+    - 281
+    - 282
+    - 284
+    - 287
+    - 288
+    - 290
+    - 292
+    - 293
+    - 294
+    - 295
+
+convert_syn_csv: 
+  use: False
 
 convert_real_red_csv: 
-  use: True
+  use: False
 
 plots:
-  use: True
+  use: False
   diff_2d:
     bufr_dir: 'syn_perf_csv'
     subsets:

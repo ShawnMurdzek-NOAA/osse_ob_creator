@@ -17,6 +17,7 @@ Contains numerous paths that point to...
 - **syn_perf_csv**: "Perfect" (i.e., no added errors) synthetic observation CSV files. Synthetic observations are determined by interpolating Nature Run output to locations specified by the observation CSV files found in real_csv (if use = False in create_csv block) or syn_bogus_csv (if use = True in create_csv block).
 - **syn_err_csv**: Synthetic observation CSV files with added errors.
 - **syn_combine_csv**: Combined observation CSV files (conventional obs + UAS obs).
+- **syn_select_csv**: Observation CSV files with only certain observation types. Useful for data-denial experiments (OSEs).
 - **syn_bufr**: Synthetic observation prepBUFR files.
 - **real_red_bufr**: Real observation prepBUFR files, but only containing observations at the same locations as the synthetic observation prepBUFR files.
 - **model**: Nature Run model output.
@@ -117,6 +118,12 @@ Combine two observation CSV files together. Useful when combining conventional a
 
 - **csv1_dir**: Full path containing the first observation CSV file.
 - **csv2_dir**: Full path containing the second observation CSV file.
+
+### select_obs
+
+Only keep certain observation types in an observation CSV file. Useful when performing data-denial experiments (i.e., OSEs). Uses `main/select_obtypes.py`.
+
+- **ob_types**: PrepBUFR observation types (3-digit numbers) to keep.
 
 ### convert_syn_csv
 
