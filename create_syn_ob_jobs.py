@@ -24,7 +24,7 @@ import pyDA_utils.slurm_util as slurm
 
 
 #---------------------------------------------------------------------------------------------------
-# Create and Submit Job Scripts
+# Create Job Scripts
 #---------------------------------------------------------------------------------------------------
 
 # Read in input from YAML
@@ -76,6 +76,7 @@ for bufr_t in bufr_times:
         in1_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['combine_csv']['csv1_dir'], t_str, tag)
         in2_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['combine_csv']['csv2_dir'], t_str, tag)
         fake_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_combine_csv'], t_str, tag)
+        fake_csv_select_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_select_csv'], t_str, tag)
         fake_bufr_fname = '%s/%s.%s.t%sz.prepbufr.tm00' % (param['paths']['syn_bufr'], 
                                                            bufr_t.strftime('%Y%m%d%H'),
                                                            tag,
@@ -195,6 +196,19 @@ for bufr_t in bufr_times:
             fptr.write('                           %s \\\n' % in2_csv_comb_fname)
             fptr.write('                           %s \n\n' % fake_csv_comb_fname)
             convert_csv_fname = fake_csv_comb_fname        
+        
+        if param['select_obs']['use']:
+            fptr.write('# Only select certain ob types for CSV files\n')
+            fptr.write('echo ""\n')
+            fptr.write('echo "=============================================================="\n')
+            fptr.write('echo "Selecting certain obs for CSV files"\n')
+            fptr.write('echo ""\n')
+            fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
+            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('python select_obtypes.py %s \\\n' % convert_csv_fname)
+            fptr.write('                         %s \\\n' % fake_csv_select_fname)
+            fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            convert_csv_fname = fake_csv_select_fname        
 
         if param['convert_syn_csv']['use']:
             fptr.write('# Convert synthetic ob CSV to prepBUFR\n')
