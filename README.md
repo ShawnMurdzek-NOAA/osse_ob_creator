@@ -66,3 +66,4 @@ The `tests` directory contains a sample prepBUFR CSV file for testing purposes. 
 ## Additional Documentation
 
 - [Description of input parameters](https://github.com/ShawnMurdzek-NOAA/osse_ob_creator/blob/main/README_inputs.md)
+- [Google Doc with additional information](https://docs.google.com/document/d/16MsvUlINpu_hmiUjFbt8qi1Pt4swB6jdJiHcpnMwmEI/edit?usp=sharing)
