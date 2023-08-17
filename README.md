@@ -32,8 +32,10 @@ The programs included here create synthetic observations for an Observing System
     4. `create_synthetic_obs.py`: Intepolates NR output to synthetic observation locations.
 
     5. `create_uas_csv.py`: Creates an "empty" CSV for UAS observations. This CSV can then be passed to `create_synthetic_obs.py`.
+    
+    6. `select_obtypes.py`: Controls which observation types (3-digit numbers) are within an observation CSV file.
 
-    6. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
+    7. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
 
 7. `plotting`: Various utilities for making comparison plots between synthetic and real observations.
 
