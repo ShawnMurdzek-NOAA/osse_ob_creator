@@ -22,19 +22,19 @@ import pyDA_utils.gsi_fcts as gsi
 #---------------------------------------------------------------------------------------------------
 
 # Paths to NCO_dirs folder for real-data and OSSE RRFS runs
-path_real = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/real_data/winter/NCO_dirs'
-path_osse = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/tune_conv_ob_err/winter_DEBUG/NCO_dirs'
+path_real = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/real_red_data/winter/NCO_dirs'
+path_osse = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data/winter_perfect/NCO_dirs'
 
-dates = [dt.datetime(2022, 2, 1, 3) + dt.timedelta(hours=i) for i in range(6)]
+dates = [dt.datetime(2022, 2, 1, 9) + dt.timedelta(hours=i) for i in range(72)]
 
 initial_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtable.rrfs'
-output_err_spread_fname = './errtable.tmp'
+output_err_spread_fname = './errtable_72hr.tmp'
 
 initial_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtable_mean.rrfs'
-output_err_mean_fname = './errtable_mean.tmp'
+output_err_mean_fname = './errtable_mean_72hr.tmp'
 
 # Observation types (set to None for all observation types)
-ob_types = [126]
+ob_types = None
 
 
 #---------------------------------------------------------------------------------------------------
@@ -45,13 +45,18 @@ ob_types = [126]
 start = dt.datetime.now()
 print('start = %s' % start.strftime('%Y%m%d %H:%M:%S'))
 print('reading GSI diag files...')
+print()
+print('Dates:')
+for d in dates:
+    print(d)
+print()
 real_omb_fnames = []
 osse_omb_fnames = []
 for v in ['t', 'q', 'uv', 'pw', 'ps']:
     for d in dates:
-        real_omb_fnames.append('%s/ptmp/prod/rrfs.%s/%s_spinup/diag_conv_%s_ges.%s.nc4' % 
+        real_omb_fnames.append('%s/ptmp/prod/rrfs.%s/%s/diag_conv_%s_ges.%s.nc4' % 
                                (path_real, d.strftime('%Y%m%d'), d.strftime('%H'), v, d.strftime('%Y%m%d%H')))
-        osse_omb_fnames.append('%s/ptmp/prod/rrfs.%s/%s_spinup/diag_conv_%s_ges.%s.nc4' % 
+        osse_omb_fnames.append('%s/ptmp/prod/rrfs.%s/%s/diag_conv_%s_ges.%s.nc4' % 
                                (path_osse, d.strftime('%Y%m%d'), d.strftime('%H'), v, d.strftime('%Y%m%d%H')))
 omf_df = {}
 omf_df['real'] = gsi.read_diag(real_omb_fnames)
