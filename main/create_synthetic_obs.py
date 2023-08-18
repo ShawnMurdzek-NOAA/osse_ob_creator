@@ -47,6 +47,7 @@ import metpy.constants as const
 import metpy.calc as mc
 from metpy.units import units
 import yaml
+import glob
 
 import pyDA_utils.create_ob_utils as cou 
 import pyDA_utils.bufr as bufr
@@ -145,8 +146,8 @@ if len(sys.argv) > 1:
     bufr_dir = sys.argv[2]
     fake_bufr_dir = sys.argv[3]
     bufr_time = dt.datetime.strptime(sys.argv[4], '%Y%m%d%H')
-    wrf_start = dt.datetime.strptime(sys.argv[5], '%Y%m%d%H')
-    wrf_end = dt.datetime.strptime(sys.argv[6], '%Y%m%d%H')
+    wrf_start = dt.datetime.strptime(sys.argv[5], '%Y%m%d%H%M')
+    wrf_end = dt.datetime.strptime(sys.argv[6], '%Y%m%d%H%M')
     bufr_tag = sys.argv[7]
     with open(sys.argv[8], 'r') as fptr:
         param = yaml.safe_load(fptr)
@@ -236,21 +237,26 @@ if use_raob_drift:
 # Open wrfnat files
 start_grib = dt.datetime.now()
 hr_start = math.floor(bufr_csv.df['DHR'].min()*4) / 4
-hr_end = math.ceil(bufr_csv.df['DHR'].max()*4) / 4 + (2*wrf_step_dec)
+hr_end = bufr_csv.df['DHR'].max() + (1.001 * wrf_step_dec)
 if use_raob_drift:
     if not np.all(np.isnan(bufr_csv.df['HRDR'])):
         hr_start = min([hr_start, math.floor(bufr_csv.df['HRDR'].min()*4) / 4])
-        hr_end = max([hr_end, math.ceil(bufr_csv.df['HRDR'].max()*4) / 4 + (2*wrf_step_dec)])
+        hr_end = max([hr_end, bufr_csv.df['HRDR'].max() + (1.001 * wrf_step_dec)])
 print('min/max WRF hours = %.2f, %.2f' % (hr_min, hr_max))
 print('min/max BUFR DHR = %.2f, %.2f' % (bufr_csv.df['DHR'].min(), bufr_csv.df['DHR'].max()))
 print('min/max BUFR HRDR = %.2f, %.2f' % (bufr_csv.df['HRDR'].min(), bufr_csv.df['HRDR'].max()))
+print('hr_start, hr_end = %.3f, %.3f' % (hr_start, hr_end))
 wrf_ds = {}
 wrf_hr = np.arange(hr_start, hr_end, wrf_step_dec)
 for hr in wrf_hr:
     wrf_t = bufr_time + dt.timedelta(hours=hr)
-    print(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'))
-    wrf_ds[hr] = xr.open_dataset(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'), 
-                                 engine='pynio')
+    suffix = glob.glob(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M*'))[0].split('.')[-1]
+    print(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M.') + suffix)
+    if suffix == 'grib2':
+        wrf_ds[hr] = xr.open_dataset(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'), 
+                                     engine='pynio')
+    elif suffix == 'nc':
+        wrf_ds[hr] = xr.open_dataset(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M.nc'))
 
 print('time to open GRIB files = %.2f s' % (dt.datetime.now() - start_grib).total_seconds())
     
@@ -265,10 +271,8 @@ if debug > 0:
     start_map_proj = dt.datetime.now()
     print('Performing map projection with obs...')
 
-model_dx = wrf_ds[wrf_hr[0]]['gridlat_0'].attrs['Dx'][0]
 model_nz = len(wrf_ds[wrf_hr[0]]['lv_HYBL0'])
-bufr_csv.df['xlc'], bufr_csv.df['ylc'] = mp.ll_to_xy_lc(bufr_csv.df['YOB'], bufr_csv.df['XOB'] - 360.,
-                                                        dx=model_dx)
+bufr_csv.df['xlc'], bufr_csv.df['ylc'] = mp.ll_to_xy_lc(bufr_csv.df['YOB'], bufr_csv.df['XOB'] - 360.)
 bufr_csv.df['i0'] = np.int32(np.floor(bufr_csv.df['ylc']))
 bufr_csv.df['j0'] = np.int32(np.floor(bufr_csv.df['xlc']))
 
