@@ -32,8 +32,10 @@ The programs included here create synthetic observations for an Observing System
     4. `create_synthetic_obs.py`: Intepolates NR output to synthetic observation locations.
 
     5. `create_uas_csv.py`: Creates an "empty" CSV for UAS observations. This CSV can then be passed to `create_synthetic_obs.py`.
+    
+    6. `select_obtypes.py`: Controls which observation types (3-digit numbers) are within an observation CSV file.
 
-    6. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
+    7. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
 
 7. `plotting`: Various utilities for making comparison plots between synthetic and real observations.
 
@@ -44,10 +46,6 @@ The programs included here create synthetic observations for an Observing System
 ## Dependencies
 
 In addition to several Python modules that are commonly used in meteorological research (e.g., NumPy, Matplotlib, Pandas, MetPy, etc.), the scripts found here also rely on modules found within [pyDA_utils](https://github.com/ShawnMurdzek-NOAA/pyDA_utils). To install pyDA_utils, I recommend cloning the repo and adding the location of pyDA_utils to the `PYTHONPATH` environment variable. 
-
-## Test Data
-
-The `tests` directory contains a sample prepBUFR CSV file for testing purposes. In order to create synthetic obs using this test CSV, NR data must be pulled from elsewhere (these files are too large to be stored on GitHub). 1-km WRF NR output can be found on NOAA HPSS. 
 
 ## Running the Program
 
@@ -60,3 +58,24 @@ The `tests` directory contains a sample prepBUFR CSV file for testing purposes. 
 4. Add `cron_run_synthetic_ob_creator.sh` to your crontab using the following line:
 
 `*/30 * * * * source /etc/profile && cd /path/to/osse_ob_creator && bash ./cron_run_synthetic_ob_creator.sh`
+
+## Testing
+
+Limited testing capabilities can be found in the `tests` directory. There is currently only one formal test (linear_interp_test), which tests the ability to convert a prepBUFR file to a CSV, create "perfect" synthetic observations via linear interpolation, then convert the output CSV back to a prepBUFR file. All data needed to run this test are included in the `tests/data` directory. Because the Nature Run output files and the prepBUFR file only contain a very small subset of the total Nature Run output and prepBUFR observations, respectively, this test runs relatively quickly (in a few minutes). 
+
+Steps to run a test:
+
+1. Edit the appropriate YAML file (e.g., `linear_interp_test.yml`).
+
+2. Select the tests to run by editing the beginning of the `run_tests.sh` script. There is also an option to re-create the test data from the full Nature Run output and the prepBUFR file with all the observations.
+
+3. Run the test using `bash run_tests.sh`. The program will print output to the screen containing the status of the test and whether the test passed/failed.
+
+4. Output from the test will be saved to a newly created directory that contains the name of the test. 
+
+In addition to the formal tests listed above, there are also some miscellaneous scripts in the `tests/legacy` directory, which may be helpful in examining the performance of the osse_ob_creator program.
+
+## Additional Documentation
+
+- [Description of input parameters](https://github.com/ShawnMurdzek-NOAA/osse_ob_creator/blob/main/README_inputs.md)
+- [Google Doc with additional information](https://docs.google.com/document/d/16MsvUlINpu_hmiUjFbt8qi1Pt4swB6jdJiHcpnMwmEI/edit?usp=sharing)
