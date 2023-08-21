@@ -1,5 +1,5 @@
 """
-Determine Error Variance Needed to Conventional Observation Error Tuning
+Determine Error Variance Needed for Conventional Observation Error Tuning
 
 shawn.s.murdzek@noaa.gov
 Date Created: 18 May 2023
@@ -13,6 +13,8 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 import datetime as dt
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 import pyDA_utils.gsi_fcts as gsi
 
@@ -25,16 +27,20 @@ import pyDA_utils.gsi_fcts as gsi
 path_real = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/real_red_data/winter/NCO_dirs'
 path_osse = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data/winter_perfect/NCO_dirs'
 
-dates = [dt.datetime(2022, 2, 1, 9) + dt.timedelta(hours=i) for i in range(72)]
+dates = [dt.datetime(2022, 2, 1, 9) + dt.timedelta(hours=i) for i in range(159)]
 
-initial_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtable.rrfs'
-output_err_spread_fname = './errtable_72hr.tmp'
+initial_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtable.perfect'
+output_err_spread_fname = './errtable.tmp'
 
-initial_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtable_mean.rrfs'
-output_err_mean_fname = './errtable_mean_72hr.tmp'
+initial_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtable_mean.perfect'
+output_err_mean_fname = './errtable_mean.tmp'
 
 # Observation types (set to None for all observation types)
 ob_types = None
+
+# Option to create plot with vertical profile of observation error statistics
+make_plot = True
+plot_fname = './err_stat_vprof_7day.pdf'
 
 
 #---------------------------------------------------------------------------------------------------
@@ -72,13 +78,30 @@ new_mean_errtable = init_mean_errtable.copy()
 if ob_types == None:
     ob_types = np.unique(omf_df['osse']['Observation_Type'])
 
+# Create output PDF
+if make_plot:
+    pdf = PdfPages(plot_fname)
+
 for typ in ob_types:
-    for v, err in zip(['t', 'q', 'uv', 'pw', 'ps'], ['Terr', 'RHerr', 'UVerr', 'PWerr', 'PSerr']):
+
+    if make_plot:
+        fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(12, 8), sharey=True)
+        plt.subplots_adjust(left=0.07, bottom=0.08, right=0.98, top=0.92)
+
+    for j, (v, err) in enumerate(zip(['t', 'q', 'uv', 'pw', 'ps'], 
+                                     ['Terr', 'RHerr', 'UVerr', 'PWerr', 'PSerr'])):
         print()
         print('computing errors for type = %d, var = %s' % (typ, v))
         prs = init_spread_errtable[typ]['prs'].values
         prs[1:] = 0.5 * (prs[:-1] + prs[1:])
         prs[0] = prs[1] + 0.5 * (prs[1] - prs[2])
+
+        ob_err_stat = {}
+        for run in ['real', 'osse']:
+            ob_err_stat[run] = {}
+            for stat in ['mean', 'spread', 'n']:
+                ob_err_stat[run][stat] = np.zeros(len(prs) - 1) * np.nan
+
         for k in range(len(prs) - 1):
 
             subset = {}
@@ -90,31 +113,54 @@ for typ in ob_types:
             if len(subset['osse']) == 0:
                 continue 
 
-            ob_err_stat = {}
             for run in ['real', 'osse']:
-                ob_err_stat[run] = {}
-                for stat, stat_fct in zip(['mean', 'spread', 'n'], [np.mean, np.std, len]):
+                for stat, stat_fct in zip(['mean', 'spread', 'n'], [np.mean, np.var, len]):
                     if v == 'uv':
-                        ob_err_stat[run][stat] = stat_fct(np.concatenate([subset[run]['u_Obs_Minus_Forecast_adjusted'].values,
-                                                                          subset[run]['v_Obs_Minus_Forecast_adjusted'].values]))
+                        ob_err_stat[run][stat][k] = stat_fct(np.concatenate([subset[run]['u_Obs_Minus_Forecast_adjusted'].values,
+                                                                             subset[run]['v_Obs_Minus_Forecast_adjusted'].values]))
                     elif v == 'q':
                         obs_q = subset[run]['Observation'].values
                         background_q = obs_q - subset[run]['Obs_Minus_Forecast_adjusted'].values
                         qs = subset[run]['Forecast_Saturation_Spec_Hum'].values
                         omf_q = 10 * ((obs_q / qs) - (background_q / qs))
-                        ob_err_stat[run][stat] = stat_fct(omf_q)
+                        ob_err_stat[run][stat][k] = stat_fct(omf_q)
                     else:
-                        ob_err_stat[run][stat] = stat_fct(subset[run]['Obs_Minus_Forecast_adjusted'])
-            new_spread_errtable[typ][err][k] = max(0, init_spread_errtable[typ][err][k] + 
-                                               (ob_err_stat['real']['spread'] - ob_err_stat['osse']['spread']))
+                        ob_err_stat[run][stat][k] = stat_fct(subset[run]['Obs_Minus_Forecast_adjusted'])
+
+            # NOTE: The measure of spread in the error table is the standard deviation, but the 
+            # variance is needed for tuning. Thus, we square the error table spread and take the 
+            # square root of the result after tuning
+            new_spread_errtable[typ][err][k] = np.sqrt(max(0, init_spread_errtable[typ][err][k]**2 + 
+                                                           (ob_err_stat['real']['spread'][k] - ob_err_stat['osse']['spread'][k])))
             new_mean_errtable[typ][err][k] = (init_mean_errtable[typ][err][k] + 
-                                              (ob_err_stat['real']['mean'] - ob_err_stat['osse']['mean']))
-            print(('prs = %6.1f | Real n, mean, std = %6d, %10.3e, %10.3e | ' +
-                   'OSSE n, mean, std = %6d, %10.3e, %10.3e | ' +
+                                              (ob_err_stat['real']['mean'][k] - ob_err_stat['osse']['mean'][k]))
+            print(('prs = %6.1f | Real n, mean, var = %6d, %10.3e, %10.3e | ' +
+                   'OSSE n, mean, var = %6d, %10.3e, %10.3e | ' +
                    'Diff mean = %10.3e | New OSSE std = %10.3e') % 
-                  (prs[k], ob_err_stat['real']['n'], ob_err_stat['real']['mean'], ob_err_stat['real']['spread'], 
-                   ob_err_stat['osse']['n'], ob_err_stat['osse']['mean'], ob_err_stat['osse']['spread'], 
+                  (prs[k], ob_err_stat['real']['n'][k], ob_err_stat['real']['mean'][k], ob_err_stat['real']['spread'][k], 
+                   ob_err_stat['osse']['n'][k], ob_err_stat['osse']['mean'][k], ob_err_stat['osse']['spread'][k], 
                    new_mean_errtable[typ][err][k], new_spread_errtable[typ][err][k]))
+
+        if make_plot:
+            ax = axes[int(j/3), j%3]
+            for run, c in zip(['real', 'osse'], ['k', 'r']):
+                ax.plot(ob_err_stat[run]['spread'], prs[:-1], c=c, ls='--', label=run)
+                ax.plot(ob_err_stat[run]['mean'], prs[:-1], c=c, ls='-')
+            ax.legend()
+            ax.grid()
+            ax.set_yscale('log')
+            ax.set_ylim([1100, 10])
+            ax.set_xlabel('%s' % v, size=14)
+
+    if make_plot:
+        plt.suptitle('Type = %d O$-$B (mean: solid, variance: dashed)' % typ, size=20)
+        for j in range(2):
+            axes[j, 0].set_ylabel('pressure (mb)', size=14)
+        pdf.savefig(fig)
+        plt.close(fig)
+
+if make_plot:
+    pdf.close()
 
 print('saving new errtables')
 gsi.write_errtable(output_err_spread_fname, new_spread_errtable)
