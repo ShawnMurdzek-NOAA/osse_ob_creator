@@ -11,3 +11,6 @@ slurm*out
 
 # Cron log files
 cron.log
+
+# Test directories
+/tests/linear_interp_test/
