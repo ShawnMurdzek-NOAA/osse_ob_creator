@@ -59,10 +59,10 @@ import pyDA_utils.map_proj as mp
 #---------------------------------------------------------------------------------------------------
 
 # Directory containing wrfnat output from UPP
-wrf_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/'
+wrf_dir = '../tests/data'
 
 # Directory containing real prepbufr CSV output
-bufr_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/bogus_uas'
+bufr_dir = '../tests/linear_interp_test/real_csv'
 
 # Observation platforms to use (aka subsets, same ones used by BUFR)
 obs_2d = ['ADPSFC', 'SFCSHP', 'MSONET', 'GPSIPW']
@@ -80,7 +80,7 @@ vinterp = [{'subset':['ADPUPA', 'AIRCAR', 'AIRCFT'], 'var':'POB', 'type':'log',
 fake_bufr_dir = './'
 
 # PrepBUFR time
-bufr_time = dt.datetime(2022, 2, 1, 0)
+bufr_time = dt.datetime(2022, 2, 1, 12)
 
 # Prepbufr tag ('rap', 'rap_e', or 'rap_p')
 bufr_tag = 'rap'
@@ -89,8 +89,8 @@ bufr_tag = 'rap'
 bufr_suffix = ''
 
 # Start and end times for wrfnat UPP output. Step is in min
-wrf_start = dt.datetime(2022, 2, 1, 0, 0)
-wrf_end = dt.datetime(2022, 2, 1, 1, 0)
+wrf_start = dt.datetime(2022, 2, 1, 12, 0)
+wrf_end = dt.datetime(2022, 2, 1, 12, 15)
 wrf_step = 15
 
 # Option to set all entries for a certain BUFR field to NaN
@@ -113,7 +113,7 @@ interp_z_aircft = False
 height_opt = 'msl'
 
 # Option to use (XDR, YDR) for ADPUPA obs rather than (XOB, YOB)
-use_raob_drift = True
+use_raob_drift = False
 
 # Option to "correct" obs that occur near coastlines
 coastline_correct = False 
@@ -127,7 +127,7 @@ ceil_field = 'HGT_P0_L215_GLC0'
 #ceil_field = 'CEIL_P0_L215_GLC0'  # Experimental ceiling diagnostic #1
 
 # Option for debugging output (0 = none, 1 = some, 2 = a lot)
-debug = 1
+debug = 2
 
 # Option to interpolate (lat, lon) coordinates for surface obs (ADPSFC, SFCSHP, MSONET)
 # Helpful for debugging, but should usually be set to False b/c it increases runtime
@@ -395,6 +395,7 @@ for j in ob_idx['2d']:
 
     # Determine WRF hour right before observation and weight for temporal interpolation
     ihr, twgt = cou.determine_twgt(wrf_hr, out_df.loc[j, 'DHR'])
+    out_df.loc[j, 'twgt'] = twgt
 
     # Option to use only land gridpoints for land stations and only water gridpoints for 
     # marine stations

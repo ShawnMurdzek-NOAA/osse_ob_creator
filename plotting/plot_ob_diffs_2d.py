@@ -56,7 +56,7 @@ save_fname = './ob_diffs_%s_%s_%s_%s_%s.png'
 subsets = ['SFCSHP', 'ADPSFC', 'MSONET', 'GPSIPW']
 
 # Variables to plot
-obs_vars = ['WSPD', 'WDIR', 'ELV', 'POB', 'TOB', 'QOB', 'UOB', 'VOB', 'ZOB', 'PWO']
+obs_vars = ['ELV', 'POB', 'TOB', 'QOB', 'UOB', 'VOB', 'ZOB', 'PWO', 'WDIR', 'WSPD']
 
 # Domain to examine ('all', 'easternUS', 'westernUS')
 domain = 'all'

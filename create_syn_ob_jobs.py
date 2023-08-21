@@ -47,16 +47,21 @@ for bufr_t in bufr_times:
     hr = 3
     while wrf_start == None:
         tmp = bufr_t - dt.timedelta(hours=hr)
-        if os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'))):
+        if (os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'))) or
+            os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.nc')))):
             wrf_start = tmp
-            break
-        hr = hr - 1
+        hr = hr - 0.25
 
-    tmp = bufr_t + dt.timedelta(hours=1)
-    if os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'))):
-        wrf_end = tmp
-    else:
-        wrf_end = bufr_t
+    wrf_end = None
+    hr = 1
+    while wrf_end == None:
+        tmp = bufr_t + dt.timedelta(hours=hr)
+        if (tmp == wrf_start):
+            wrf_end = wrf_start
+        if (os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'))) or
+            os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.nc')))):
+            wrf_end = tmp
+        hr = hr - 0.25
 
     t_str = bufr_t.strftime('%Y%m%d%H%M')
     
@@ -159,8 +164,8 @@ for bufr_t in bufr_times:
                 fptr.write('                               %s \\\n' % param['paths']['real_csv'])
             fptr.write('                               %s \\\n' % param['paths']['syn_perf_csv'])
             fptr.write('                               %s \\\n' % bufr_t.strftime('%Y%m%d%H'))
-            fptr.write('                               %s \\\n' % wrf_start.strftime('%Y%m%d%H'))
-            fptr.write('                               %s \\\n' % wrf_end.strftime('%Y%m%d%H'))
+            fptr.write('                               %s \\\n' % wrf_start.strftime('%Y%m%d%H%M'))
+            fptr.write('                               %s \\\n' % wrf_end.strftime('%Y%m%d%H%M'))
             fptr.write('                               %s \\\n' % tag)
             fptr.write('                               %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_perf_fname        
