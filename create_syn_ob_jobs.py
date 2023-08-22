@@ -133,6 +133,7 @@ for bufr_t in bufr_times:
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('source ../activate_python_env.sh\n')
             fptr.write('python uas_sites.py %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
 
@@ -144,6 +145,7 @@ for bufr_t in bufr_times:
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('python create_uas_csv.py %s \\\n' % t_str)
             fptr.write('                         %s \\\n' % fake_csv_bogus_fname)
             fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
@@ -157,6 +159,7 @@ for bufr_t in bufr_times:
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('python create_synthetic_obs.py %s \\\n' % param['paths']['model'])
             if param['create_csv']['use']:
                 fptr.write('                               %s \\\n' % param['paths']['syn_bogus_csv'])
@@ -181,6 +184,7 @@ for bufr_t in bufr_times:
                                                        param['paths']['syn_err_csv'], 
                                                        t_str, tag))
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('python add_obs_errors.py %s \\\n' % t_str)
             fptr.write('                         %s \\\n' % tag)
             fptr.write('                         %s/%s \n' % (param['paths']['osse_code'], in_yaml))
@@ -197,6 +201,7 @@ for bufr_t in bufr_times:
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('python combine_bufr_csv.py %s \\\n' % in1_csv_comb_fname)
             fptr.write('                           %s \\\n' % in2_csv_comb_fname)
             fptr.write('                           %s \n\n' % fake_csv_comb_fname)
@@ -210,6 +215,7 @@ for bufr_t in bufr_times:
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('python select_obtypes.py %s \\\n' % convert_csv_fname)
             fptr.write('                         %s \\\n' % fake_csv_select_fname)
             fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
@@ -258,6 +264,7 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('mkdir %s/%s\n' % (param['paths']['plots'], t_str))
             fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             if param['create_csv']['use']:
                 fptr.write('python plot_uas_NR_diffs.py %s \\\n' % tag)
                 fptr.write('                            %s \\\n' % t_str)
