@@ -177,7 +177,7 @@ for bufr_t in bufr_times:
             fptr.write('echo "Add observation errors"\n')
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
-            fptr.write('mv %s %s/%s.%s.input.csv\n' % (fake_csv_perf_fname,
+            fptr.write('cp %s %s/%s.%s.input.csv\n' % (fake_csv_perf_fname,
                                                        param['paths']['syn_err_csv'], 
                                                        t_str, tag))
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
