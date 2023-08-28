@@ -32,6 +32,9 @@ in_yaml = sys.argv[1]
 with open(in_yaml, 'r') as fptr:
     param = yaml.safe_load(fptr)
 
+# Copy YAML to log directory
+os.system('cp %s %s' % (in_yaml, param['paths']['log']))
+
 # Determine all the prepBUFR timestamps
 bufr_times = [dt.datetime.strptime(param['shared']['bufr_start'], '%Y%m%d%H%M')]
 bufr_end_time = dt.datetime.strptime(param['shared']['bufr_end'], '%Y%m%d%H%M')
