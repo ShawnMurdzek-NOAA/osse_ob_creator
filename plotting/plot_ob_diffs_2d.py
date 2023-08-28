@@ -36,13 +36,13 @@ import pyDA_utils.bufr as bufr
 #---------------------------------------------------------------------------------------------------
 
 # Input BUFR CSV directory
-bufr_dir = '../'
+bufr_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/'
 
 # Prepbufr file tag (e.g., 'rap', 'rap_e', 'rap_p')
-bufr_tag = 'sample'
+bufr_tag = 'rap'
 
 # Range of datetimes to use for the comparison
-date_range = [dt.datetime(2022, 2, 1, 12)]
+date_range = [dt.datetime(2022, 2, 1, i) for i in range(9, 22)]
 
 # Dataset names
 name1 = 'Sim Obs'

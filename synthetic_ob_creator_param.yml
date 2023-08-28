@@ -18,11 +18,11 @@ paths:
   syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
   syn_err_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
   syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_all'
-  syn_select_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/no_aircft'
-  syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_bufr'
-  real_red_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/real_red_obs_bufr'
+  syn_select_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/no_raob_perfect'
+  syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_bufr/no_raob_perfect'
+  real_red_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/real_red_obs_bufr/no_raob'
   model: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'
-  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/logs'
+  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/logs/no_raob_perfect'
   plots: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/plots'
   osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
@@ -37,7 +37,7 @@ shared:
     - 'rap_e'
     - 'rap_p' 
   uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/uas_site_locs_150km.txt'
-  log_str: 'perfect_conv'
+  log_str: 'no_raob_perfect'
 
 jobs:
   max: 25
@@ -54,7 +54,7 @@ jobs:
 #-----------
 
 convert_bufr: 
-  use: True
+  use: False
 
 create_uas_grid: 
   use: False
@@ -78,7 +78,7 @@ create_csv:
   uas_offset: 0.
 
 interpolator: 
-  use: True
+  use: False
   obs_2d:
     - 'ADPSFC'
     - 'SFCSHP'
@@ -98,29 +98,14 @@ interpolator:
   debug: 0
 
 obs_errors: 
-  use: True
-  errtable: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/utils/errtable.tmp'
+  use: False
+  errtable: '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable.1st_iter.7day'
   autocor_POB_obs:
-    - 120 
-    - 220
+    - 126 
   autocor_DHR_obs: 
-    - 130
-    - 131
-    - 133
-    - 134
-    - 135
-    - 230
-    - 231
-    - 233
-    - 234
-    - 235
+    - 126
   autocor_ZOB_partition_DHR_obs: 
     - 126
-    - 223
-    - 224
-    - 227
-    - 228
-    - 229
   auto_reg_parm: 0.5
   verbose: False
   dewpt_check: False
@@ -132,13 +117,19 @@ combine_csv:
   csv2_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_uas'
 
 select_obs:
-  use: False
+  use: True
   obtypes:
-    - 120
-    - 126
+#    - 120
+    - 130
+    - 131
+    - 132
+    - 133
+    - 134
+    - 135
     - 153
     - 180
     - 181
+    - 182
     - 183
     - 187
     - 188
@@ -146,12 +137,18 @@ select_obs:
     - 193
     - 194 
     - 195
-    - 220
+#    - 220
     - 223
     - 224
     - 227
     - 228
     - 229
+    - 230
+    - 231
+    - 232
+    - 233
+    - 234
+    - 235
     - 242
     - 243
     - 250
@@ -171,13 +168,13 @@ select_obs:
     - 295
 
 convert_syn_csv: 
-  use: True
+  use: False
 
 convert_real_red_csv: 
   use: True
 
 plots:
-  use: True
+  use: False
   diff_2d:
     bufr_dir: 'syn_perf_csv'
     subsets:

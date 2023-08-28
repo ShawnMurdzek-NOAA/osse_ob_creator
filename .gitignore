@@ -12,5 +12,8 @@ slurm*out
 # Cron log files
 cron.log
 
+# Temporary directories
+tmp/
+
 # Test directories
 /tests/linear_interp_test/
