@@ -27,20 +27,20 @@ import pyDA_utils.gsi_fcts as gsi
 path_real = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/real_red_data/winter/NCO_dirs'
 path_osse = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data/winter_perfect/NCO_dirs'
 
-dates = [dt.datetime(2022, 2, 1, 9) + dt.timedelta(hours=i) for i in range(159)]
+dates = [dt.datetime(2022, 2, 1, 9) + dt.timedelta(hours=i) for i in range(1*24)]
 
-initial_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtable.perfect'
-output_err_spread_fname = './errtable.tmp'
+initial_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable.perfect'
+output_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter/errtable.1st_iter.1day'
 
-initial_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtable_mean.perfect'
-output_err_mean_fname = './errtable_mean.tmp'
+initial_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable_mean.perfect'
+output_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter/errtable_mean.1st_iter.1day'
 
 # Observation types (set to None for all observation types)
 ob_types = None
 
 # Option to create plot with vertical profile of observation error statistics
 make_plot = True
-plot_fname = './err_stat_vprof_7day.pdf'
+plot_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter/err_stat_vprof_1iter_1day.pdf'
 
 
 #---------------------------------------------------------------------------------------------------
@@ -92,9 +92,10 @@ for typ in ob_types:
                                      ['Terr', 'RHerr', 'UVerr', 'PWerr', 'PSerr'])):
         print()
         print('computing errors for type = %d, var = %s' % (typ, v))
-        prs = init_spread_errtable[typ]['prs'].values
-        prs[1:] = 0.5 * (prs[:-1] + prs[1:])
-        prs[0] = prs[1] + 0.5 * (prs[1] - prs[2])
+        prs_ctr = init_spread_errtable[typ]['prs'].values
+        prs = np.zeros(len(prs_ctr))
+        prs[1:] = 0.5 * (prs_ctr[:-1] + prs_ctr[1:])
+        prs[0] = prs_ctr[0] + 0.5 * (prs_ctr[1] - prs_ctr[2])
 
         ob_err_stat = {}
         for run in ['real', 'osse']:
@@ -109,7 +110,8 @@ for typ in ob_types:
                 subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
                                               (omf_df[run]['var'] == v) &
                                               (omf_df[run]['Pressure'] < prs[k]) & 
-					      (omf_df[run]['Pressure'] >= prs[k+1])]
+					      (omf_df[run]['Pressure'] >= prs[k+1]) &
+					      (omf_df[run]['Prep_QC_Mark'] < 3)]
             if len(subset['osse']) == 0:
                 continue 
 
@@ -137,15 +139,15 @@ for typ in ob_types:
             print(('prs = %6.1f | Real n, mean, var = %6d, %10.3e, %10.3e | ' +
                    'OSSE n, mean, var = %6d, %10.3e, %10.3e | ' +
                    'Diff mean = %10.3e | New OSSE std = %10.3e') % 
-                  (prs[k], ob_err_stat['real']['n'][k], ob_err_stat['real']['mean'][k], ob_err_stat['real']['spread'][k], 
+                  (prs_ctr[k], ob_err_stat['real']['n'][k], ob_err_stat['real']['mean'][k], ob_err_stat['real']['spread'][k], 
                    ob_err_stat['osse']['n'][k], ob_err_stat['osse']['mean'][k], ob_err_stat['osse']['spread'][k], 
                    new_mean_errtable[typ][err][k], new_spread_errtable[typ][err][k]))
 
         if make_plot:
             ax = axes[int(j/3), j%3]
             for run, c in zip(['real', 'osse'], ['k', 'r']):
-                ax.plot(ob_err_stat[run]['spread'], prs[:-1], c=c, ls='--', label=run)
-                ax.plot(ob_err_stat[run]['mean'], prs[:-1], c=c, ls='-')
+                ax.plot(ob_err_stat[run]['spread'], prs_ctr[:-1], c=c, ls='--', label=run)
+                ax.plot(ob_err_stat[run]['mean'], prs_ctr[:-1], c=c, ls='-')
             ax.legend()
             ax.grid()
             ax.set_yscale('log')
