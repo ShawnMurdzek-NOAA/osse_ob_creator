@@ -133,6 +133,8 @@ combine_csv:
 
 select_obs:
   use: False
+  in_csv_dir: 'syn_perf_csv'
+  include_real_red: True
   obtypes:
     - 120
     - 126
