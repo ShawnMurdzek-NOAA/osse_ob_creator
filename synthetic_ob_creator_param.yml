@@ -13,18 +13,18 @@
 
 paths:
   real_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
-  real_csv: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv'
-  syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/bogus_uas'
-  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
-  syn_err_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_conv'
-  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/realistic_all'
-  syn_select_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/no_raob_perfect'
-  syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_bufr/no_raob_perfect'
-  real_red_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/real_red_obs_bufr/no_raob'
+  real_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/perfect_conv_v2/real_csv'
+  syn_bogus_csv: ''
+  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/perfect_conv_v2/perfect_csv'
+  syn_err_csv: ''
+  syn_combine_csv: ''
+  syn_select_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/real_red_no_raob/csv'
+  syn_bufr: ''
+  real_red_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/real_red_no_raob/real_red_bufr'
   model: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'
-  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/logs/no_raob_perfect'
-  plots: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/plots'
-  osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
+  log: '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/real_red_no_raob/log'
+  plots: ''
+  osse_code: '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/real_red_no_raob/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
 
 shared:
@@ -37,7 +37,7 @@ shared:
     - 'rap_e'
     - 'rap_p' 
   uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/uas_site_locs_150km.txt'
-  log_str: 'no_raob_perfect'
+  log_str: 'real_red_no_raob'
 
 jobs:
   max: 25
@@ -45,8 +45,8 @@ jobs:
   alloc: 'wrfruc'
   csv_name: 'syn_ob_creator_jobs.csv'
   maxtries: 3
-  mem: '30GB'
-  time: '08:00:00'
+  mem: '5GB'
+  time: '01:00:00'
   partition: 'orion'
 
 #-----------
@@ -118,11 +118,14 @@ combine_csv:
 
 select_obs:
   use: True
+  in_csv_dir: 'syn_perf_csv'
+  include_real_red: True
   obtypes:
 #    - 120
+#    - 122
     - 130
     - 131
-    - 132
+#    - 132
     - 133
     - 134
     - 135
@@ -138,30 +141,20 @@ select_obs:
     - 194 
     - 195
 #    - 220
-    - 223
-    - 224
-    - 227
-    - 228
-    - 229
+#    - 221
+#    - 222
     - 230
     - 231
-    - 232
+#    - 232
     - 233
     - 234
     - 235
-    - 242
-    - 243
-    - 250
-    - 252
-    - 253
-    - 254
     - 280
     - 281
     - 282
     - 284
     - 287
     - 288
-    - 290
     - 292
     - 293
     - 294

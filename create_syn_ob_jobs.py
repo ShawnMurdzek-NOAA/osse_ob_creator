@@ -84,6 +84,7 @@ for bufr_t in bufr_times:
         in1_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['combine_csv']['csv1_dir'], t_str, tag)
         in2_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['combine_csv']['csv2_dir'], t_str, tag)
         fake_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_combine_csv'], t_str, tag)
+        in_csv_select_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['select_obs']['in_csv_dir']], t_str, tag)
         fake_csv_select_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_select_csv'], t_str, tag)
         fake_bufr_fname = '%s/%s.%s.t%sz.prepbufr.tm00' % (param['paths']['syn_bufr'], 
                                                            bufr_t.strftime('%Y%m%d%H'),
@@ -219,9 +220,17 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python select_obtypes.py %s \\\n' % convert_csv_fname)
+            fptr.write('python select_obtypes.py %s \\\n' % in_csv_select_fname)
             fptr.write('                         %s \\\n' % fake_csv_select_fname)
-            fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('                         %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            if param['select_obs']['include_real_red']:
+                in_csv_real = '/'.join(in_csv_select_fname.split('/')[:-1] + 
+                                       [in_csv_select_fname.split('/')[-1].replace('fake', 'real_red')])
+                out_csv_real = '/'.join(fake_csv_select_fname.split('/')[:-1] + 
+                                        [fake_csv_select_fname.split('/')[-1].replace('fake', 'real_red')])
+                fptr.write('python select_obtypes.py %s \\\n' % in_csv_real)
+                fptr.write('                         %s \\\n' % out_csv_real)
+                fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_select_fname        
 
         if param['convert_syn_csv']['use']:
@@ -252,7 +261,10 @@ for bufr_t in bufr_times:
             fptr.write('cd tmp_%s_%s\n' % (t_str, tag))
             fptr.write('cp -r %s/bin/* .\n' % param['paths']['bufr_code']) 
             fptr.write('source %s/env/bufr_%s.env\n' % (param['paths']['bufr_code'], param['shared']['machine']))
-            fptr.write('cp %s ./prepbufr.csv \n' % real_red_csv_fname)
+            if param['select_obs']['use'] and param['select_obs']['include_real_red']:
+                fptr.write('cp %s ./prepbufr.csv \n' % out_csv_real)
+            else:
+                fptr.write('cp %s ./prepbufr.csv \n' % real_red_csv_fname)
             fptr.write('./prepbufr_encode_csv.x\n')
             fptr.write('mv ./prepbufr %s\n' % real_red_bufr_fname)
             fptr.write('cd ..\n')

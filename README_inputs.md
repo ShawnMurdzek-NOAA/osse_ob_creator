@@ -123,6 +123,8 @@ Combine two observation CSV files together. Useful when combining conventional a
 
 Only keep certain observation types in an observation CSV file. Useful when performing data-denial experiments (i.e., OSEs). Uses `main/select_obtypes.py`.
 
+- **in_csv_dir**: Which path from the `paths` section to pull observation CSVs from.
+- **include_real_red**: Option to also select certain observations from real_red observation CSVs. Synthetic (fake) observation CSVs are always included.
 - **ob_types**: PrepBUFR observation types (3-digit numbers) to keep.
 
 ### convert_syn_csv
