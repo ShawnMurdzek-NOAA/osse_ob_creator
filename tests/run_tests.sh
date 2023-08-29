@@ -8,7 +8,7 @@
 machine='orion'
 
 # Option to re-create test data
-create_test_data=true
+create_test_data=false
 prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/
 
 # Option to run linear_interp_test
