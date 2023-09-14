@@ -35,12 +35,16 @@ output_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_ite
 initial_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable_mean.perfect'
 output_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter/errtable_mean.2nd_iter.1day'
 
+# Observation types (set to None for all observation types)
+ob_types = None
+
 # Option to use all obs or only those obs that are assimilated
 # If use_assim_only = False, then only obs with Prep_QC_Mark < 3 are used
 use_assim_only = True
 
-# Observation types (set to None for all observation types)
-ob_types = None
+# Option to use another errtable file as the upper bound for the error veriance tuning
+use_upper_bound = False
+upper_bound_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable.rrfs'
 
 # Option to create plot with vertical profile of observation error statistics
 make_plot = True
@@ -77,6 +81,10 @@ init_spread_errtable = gsi.read_errtable(initial_err_spread_fname)
 new_spread_errtable = init_spread_errtable.copy()
 init_mean_errtable = gsi.read_errtable(initial_err_mean_fname)
 new_mean_errtable = init_mean_errtable.copy()
+
+# Read upper bound errtable
+if use_upper_bound:
+    upper_spread_errtable = gsi.read_errtable(upper_bound_spread_fname)
 
 # Compute obs errors and necessary adjustments
 if ob_types == None:
@@ -147,6 +155,11 @@ for typ in ob_types:
                                                            (ob_err_stat['real']['spread'][k] - ob_err_stat['osse']['spread'][k])))
             new_mean_errtable[typ][err][k] = (init_mean_errtable[typ][err][k] + 
                                               (ob_err_stat['real']['mean'][k] - ob_err_stat['osse']['mean'][k]))
+
+            if use_upper_bound:
+                new_spread_errtable[typ][err][k] = min(new_spread_errtable[typ][err][k], 
+                                                       upper_spread_errtable[typ][err][k])
+
             print(('prs = %6.1f | Real n, mean, var = %6d, %10.3e, %10.3e | ' +
                    'OSSE n, mean, var = %6d, %10.3e, %10.3e | ' +
                    'Diff mean = %10.3e | New OSSE std = %10.3e') % 
