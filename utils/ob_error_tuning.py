@@ -25,22 +25,26 @@ import pyDA_utils.gsi_fcts as gsi
 
 # Paths to NCO_dirs folder for real-data and OSSE RRFS runs
 path_real = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/real_red_data/winter/NCO_dirs'
-path_osse = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data/winter_perfect/NCO_dirs'
+path_osse = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data/winter_1st_iter_tuning/NCO_dirs'
 
 dates = [dt.datetime(2022, 2, 1, 9) + dt.timedelta(hours=i) for i in range(1*24)]
 
 initial_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable.perfect'
-output_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter/errtable.1st_iter.1day'
+output_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter/errtable.2nd_iter.1day'
 
 initial_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable_mean.perfect'
-output_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter/errtable_mean.1st_iter.1day'
+output_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter/errtable_mean.2nd_iter.1day'
+
+# Option to use all obs or only those obs that are assimilated
+# If use_assim_only = False, then only obs with Prep_QC_Mark < 3 are used
+use_assim_only = True
 
 # Observation types (set to None for all observation types)
 ob_types = None
 
 # Option to create plot with vertical profile of observation error statistics
 make_plot = True
-plot_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter/err_stat_vprof_1iter_1day.pdf'
+plot_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter/err_stat_vprof_2iter_1day.pdf'
 
 
 #---------------------------------------------------------------------------------------------------
@@ -107,11 +111,18 @@ for typ in ob_types:
 
             subset = {}
             for run in ['real', 'osse']:
-                subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
-                                              (omf_df[run]['var'] == v) &
-                                              (omf_df[run]['Pressure'] < prs[k]) & 
-					      (omf_df[run]['Pressure'] >= prs[k+1]) &
-					      (omf_df[run]['Prep_QC_Mark'] < 3)]
+                if use_assim_only:
+                    subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
+                                                  (omf_df[run]['var'] == v) &
+                                                  (omf_df[run]['Pressure'] < prs[k]) & 
+			    		          (omf_df[run]['Pressure'] >= prs[k+1]) &
+			    		          (omf_df[run]['Analysis_Use_Flag'] == 1)]
+                else:
+                    subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
+                                                  (omf_df[run]['var'] == v) &
+                                                  (omf_df[run]['Pressure'] < prs[k]) & 
+			    		          (omf_df[run]['Pressure'] >= prs[k+1]) &
+			    		          (omf_df[run]['Prep_QC_Mark'] < 3)]
             if len(subset['osse']) == 0:
                 continue 
 
