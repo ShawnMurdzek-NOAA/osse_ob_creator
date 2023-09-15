@@ -38,6 +38,11 @@ output_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter/
 # Observation types (set to None for all observation types)
 ob_types = None
 
+# 2D obs that use all obs for error tuning (rather than breaking down obs into different pressure 
+# bins). These obs do not necessarily need to be 2D, but the option is primarily recommended for
+# 2D obs
+2d_ob_types = [153, 180, 181, 182, 183, 187, 188, 280, 281, 282, 284, 287, 288]
+
 # Option to use all obs or only those obs that are assimilated
 # If use_assim_only = False, then only obs with Prep_QC_Mark < 3 are used
 use_assim_only = True
@@ -123,31 +128,30 @@ for typ in ob_types:
                     subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
                                                   (omf_df[run]['var'] == v) &
                                                   (omf_df[run]['Pressure'] < prs[k]) & 
-			    		          (omf_df[run]['Pressure'] >= prs[k+1]) &
-			    		          (omf_df[run]['Analysis_Use_Flag'] == 1)]
+			    	    	          (omf_df[run]['Pressure'] >= prs[k+1]) &
+			    	                  (omf_df[run]['Analysis_Use_Flag'] == 1)]
                 else:
                     subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
                                                   (omf_df[run]['var'] == v) &
                                                   (omf_df[run]['Pressure'] < prs[k]) & 
-			    		          (omf_df[run]['Pressure'] >= prs[k+1]) &
+			    	       	          (omf_df[run]['Pressure'] >= prs[k+1]) &
 			    		          (omf_df[run]['Prep_QC_Mark'] < 3)]
             if len(subset['osse']) == 0:
                 continue 
-            elif len(subset['osse']) < 50:
+            elif (len(subset['osse']) < 50) or (typ in 2d_ob_types):
                 # Use the variance computed using all obs in this case
-                for run in ['real', 'osse']:
+                 for run in ['real', 'osse']:
                     if use_assim_only:
                         subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
                                                       (omf_df[run]['var'] == v) &
-			    		              (omf_df[run]['Analysis_Use_Flag'] == 1)]
+                                                      (omf_df[run]['Analysis_Use_Flag'] == 1)]
                     else:
                         subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
                                                       (omf_df[run]['var'] == v) &
-			    		              (omf_df[run]['Prep_QC_Mark'] < 3)]
+                                                      (omf_df[run]['Prep_QC_Mark'] < 3)]
 
             if len(subset['osse']) < 50:
                 continue
-
 
             for run in ['real', 'osse']:
                 for stat, stat_fct in zip(['mean', 'spread', 'n'], [np.mean, np.var, len]):
