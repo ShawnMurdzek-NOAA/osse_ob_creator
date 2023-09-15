@@ -133,6 +133,21 @@ for typ in ob_types:
 			    		          (omf_df[run]['Prep_QC_Mark'] < 3)]
             if len(subset['osse']) == 0:
                 continue 
+            elif len(subset['osse']) < 50:
+                # Use the variance computed using all obs in this case
+                for run in ['real', 'osse']:
+                    if use_assim_only:
+                        subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
+                                                      (omf_df[run]['var'] == v) &
+			    		              (omf_df[run]['Analysis_Use_Flag'] == 1)]
+                    else:
+                        subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
+                                                      (omf_df[run]['var'] == v) &
+			    		              (omf_df[run]['Prep_QC_Mark'] < 3)]
+
+            if len(subset['osse']) < 50:
+                continue
+
 
             for run in ['real', 'osse']:
                 for stat, stat_fct in zip(['mean', 'spread', 'n'], [np.mean, np.var, len]):
