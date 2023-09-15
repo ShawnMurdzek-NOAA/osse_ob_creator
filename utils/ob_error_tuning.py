@@ -41,7 +41,7 @@ ob_types = None
 # 2D obs that use all obs for error tuning (rather than breaking down obs into different pressure 
 # bins). These obs do not necessarily need to be 2D, but the option is primarily recommended for
 # 2D obs
-2d_ob_types = [153, 180, 181, 182, 183, 187, 188, 280, 281, 282, 284, 287, 288]
+ob_types_2d = [153, 180, 181, 182, 183, 187, 188, 280, 281, 282, 284, 287, 288]
 
 # Option to use all obs or only those obs that are assimilated
 # If use_assim_only = False, then only obs with Prep_QC_Mark < 3 are used
@@ -138,7 +138,7 @@ for typ in ob_types:
 			    		          (omf_df[run]['Prep_QC_Mark'] < 3)]
             if len(subset['osse']) == 0:
                 continue 
-            elif (len(subset['osse']) < 50) or (typ in 2d_ob_types):
+            elif (len(subset['osse']) < 50) or (typ in ob_types_2d):
                 # Use the variance computed using all obs in this case
                  for run in ['real', 'osse']:
                     if use_assim_only:
