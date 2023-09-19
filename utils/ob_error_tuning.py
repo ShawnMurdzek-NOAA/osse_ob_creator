@@ -25,22 +25,23 @@ import pyDA_utils.gsi_fcts as gsi
 
 # Paths to NCO_dirs folder for real-data and OSSE RRFS runs
 path_real = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/real_red_data/winter/NCO_dirs'
-path_osse = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data/winter_1st_iter_tuning/NCO_dirs'
+path_osse = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data/winter_perfect/NCO_dirs'
 
-dates = [dt.datetime(2022, 2, 1, 9) + dt.timedelta(hours=i) for i in range(1*24)]
+dates = [dt.datetime(2022, 2, 1, 9) + dt.timedelta(hours=i) for i in range(4*24)]
 
 initial_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable.perfect'
-output_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter/errtable.2nd_iter.1day'
+output_err_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter_assim_only/tmp/errtable.1st_iter.4day'
 
 initial_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable_mean.perfect'
-output_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter/errtable_mean.2nd_iter.1day'
+output_err_mean_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter_assim_only/tmp/errtable_mean.1st_iter.4day'
 
 # Observation types (set to None for all observation types)
-ob_types = None
+ob_types = [181]
 
 # 2D obs that use all obs for error tuning (rather than breaking down obs into different pressure 
 # bins). These obs do not necessarily need to be 2D, but the option is primarily recommended for
-# 2D obs
+# 2D obs. For this option to work properly, all values in the initial errtables must be the same
+# for a given ob type / variable (in other words, the errtable values must be pressure independent)
 ob_types_2d = [153, 180, 181, 182, 183, 187, 188, 280, 281, 282, 284, 287, 288]
 
 # Option to use all obs or only those obs that are assimilated
@@ -48,12 +49,15 @@ ob_types_2d = [153, 180, 181, 182, 183, 187, 188, 280, 281, 282, 284, 287, 288]
 use_assim_only = True
 
 # Option to use another errtable file as the upper bound for the error veriance tuning
-use_upper_bound = False
+use_upper_bound = True
 upper_bound_spread_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable.rrfs'
+
+# Minimum number of observations required for error tuning
+min_obs = 50
 
 # Option to create plot with vertical profile of observation error statistics
 make_plot = True
-plot_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter/err_stat_vprof_2iter_1day.pdf'
+plot_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter_assim_only/tmp/err_stat_vprof_1iter_4day.pdf'
 
 
 #---------------------------------------------------------------------------------------------------
@@ -80,6 +84,12 @@ for v in ['t', 'q', 'uv', 'pw', 'ps']:
 omf_df = {}
 omf_df['real'] = gsi.read_diag(real_omb_fnames)
 omf_df['osse'] = gsi.read_diag(osse_omb_fnames)
+
+# Only retain obs with Analysis_Use_Flag = 1 if use_assim_only = True
+for run in ['real', 'osse']:
+    if use_assim_only:
+        omf_df[run] = omf_df[run].loc[omf_df[run]['Analysis_Use_Flag'] == 1].copy()
+    omf_df[run] = omf_df[run].loc[omf_df[run]['Prep_QC_Mark'] < 3].copy()
 
 # Read initial errtable
 init_spread_errtable = gsi.read_errtable(initial_err_spread_fname)
@@ -115,57 +125,49 @@ for typ in ob_types:
         prs[0] = prs_ctr[0] + 0.5 * (prs_ctr[1] - prs_ctr[2])
 
         ob_err_stat = {}
+        subset = {}
         for run in ['real', 'osse']:
             ob_err_stat[run] = {}
             for stat in ['mean', 'spread', 'n']:
                 ob_err_stat[run][stat] = np.zeros(len(prs) - 1) * np.nan
+            # Create subset for ob type and variable
+            subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
+                                          (omf_df[run]['var'] == v)]
+       
+        # Skip to next typ/var combo if too few obs
+        if len(subset['osse']) < min_obs:
+            continue
 
         for k in range(len(prs) - 1):
 
-            subset = {}
+            prs_subset = {}
             for run in ['real', 'osse']:
-                if use_assim_only:
-                    subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
-                                                  (omf_df[run]['var'] == v) &
-                                                  (omf_df[run]['Pressure'] < prs[k]) & 
-			    	    	          (omf_df[run]['Pressure'] >= prs[k+1]) &
-			    	                  (omf_df[run]['Analysis_Use_Flag'] == 1)]
-                else:
-                    subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
-                                                  (omf_df[run]['var'] == v) &
-                                                  (omf_df[run]['Pressure'] < prs[k]) & 
-			    	       	          (omf_df[run]['Pressure'] >= prs[k+1]) &
-			    		          (omf_df[run]['Prep_QC_Mark'] < 3)]
-            if len(subset['osse']) == 0:
+                prs_subset[run] = subset[run].loc[(subset[run]['Pressure'] < prs[k]) &
+                                                  (subset[run]['Pressure'] >= prs[k+1])]
+
+            if len(prs_subset['osse']) == 0:
                 continue 
-            elif (len(subset['osse']) < 50) or (typ in ob_types_2d):
+            elif (len(prs_subset['osse']) < min_obs) or (typ in ob_types_2d):
                 # Use the variance computed using all obs in this case
                  for run in ['real', 'osse']:
-                    if use_assim_only:
-                        subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
-                                                      (omf_df[run]['var'] == v) &
-                                                      (omf_df[run]['Analysis_Use_Flag'] == 1)]
-                    else:
-                        subset[run] = omf_df[run].loc[(omf_df[run]['Observation_Type'] == typ) & 
-                                                      (omf_df[run]['var'] == v) &
-                                                      (omf_df[run]['Prep_QC_Mark'] < 3)]
+                    prs_subset[run] = subset[run].copy()
 
-            if len(subset['osse']) < 50:
+            if len(prs_subset['osse']) < min_obs:
                 continue
 
             for run in ['real', 'osse']:
                 for stat, stat_fct in zip(['mean', 'spread', 'n'], [np.mean, np.var, len]):
                     if v == 'uv':
-                        ob_err_stat[run][stat][k] = stat_fct(np.concatenate([subset[run]['u_Obs_Minus_Forecast_adjusted'].values,
-                                                                             subset[run]['v_Obs_Minus_Forecast_adjusted'].values]))
+                        ob_err_stat[run][stat][k] = stat_fct(np.concatenate([prs_subset[run]['u_Obs_Minus_Forecast_adjusted'].values,
+                                                                             prs_subset[run]['v_Obs_Minus_Forecast_adjusted'].values]))
                     elif v == 'q':
-                        obs_q = subset[run]['Observation'].values
-                        background_q = obs_q - subset[run]['Obs_Minus_Forecast_adjusted'].values
-                        qs = subset[run]['Forecast_Saturation_Spec_Hum'].values
+                        obs_q = prs_subset[run]['Observation'].values
+                        background_q = obs_q - prs_subset[run]['Obs_Minus_Forecast_adjusted'].values
+                        qs = prs_subset[run]['Forecast_Saturation_Spec_Hum'].values
                         omf_q = 10 * ((obs_q / qs) - (background_q / qs))
                         ob_err_stat[run][stat][k] = stat_fct(omf_q)
                     else:
-                        ob_err_stat[run][stat][k] = stat_fct(subset[run]['Obs_Minus_Forecast_adjusted'])
+                        ob_err_stat[run][stat][k] = stat_fct(prs_subset[run]['Obs_Minus_Forecast_adjusted'])
 
             # NOTE: The measure of spread in the error table is the standard deviation, but the 
             # variance is needed for tuning. Thus, we square the error table spread and take the 
@@ -185,6 +187,15 @@ for typ in ob_types:
                   (prs_ctr[k], ob_err_stat['real']['n'][k], ob_err_stat['real']['mean'][k], ob_err_stat['real']['spread'][k], 
                    ob_err_stat['osse']['n'][k], ob_err_stat['osse']['mean'][k], ob_err_stat['osse']['spread'][k], 
                    new_mean_errtable[typ][err][k], new_spread_errtable[typ][err][k]))
+
+            # Only need one iteration over k if observation is 2D
+            if typ in ob_types_2d:
+                new_spread_errtable[typ][err][:] = new_spread_errtable[typ][err][k]
+                new_mean_errtable[typ][err][:] = new_mean_errtable[typ][err][k]
+                for run in ['real', 'osse']:
+                    for stat in ['spread', 'mean']:
+                        ob_err_stat[run][stat][:] = ob_err_stat[run][stat][k]
+                break
 
         if make_plot:
             ax = axes[int(j/3), j%3]
