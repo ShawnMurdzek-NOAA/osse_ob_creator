@@ -11,7 +11,7 @@ shawn.s.murdzek@noaa.gov
 
 Contains numerous paths that point to...
 
-- **real_bufr**: Real observation prepBUFR files
+- **real_bufr**: Real observation prepBUFR files. Note that create_syn_ob_jobs.py will not run if this path does not point to the location of the real prepBUFR files. This only applies to this path, other paths can be set to blank strings if not needed.
 - **real_csv**: Real observation CSV files. Decoded from the prepBUFR files in real_bufr.
 - **syn_bogus_csv**: "Empty" observation CSV files. Used to define UAS observation locations and times.
 - **syn_perf_csv**: "Perfect" (i.e., no added errors) synthetic observation CSV files. Synthetic observations are determined by interpolating Nature Run output to locations specified by the observation CSV files found in real_csv (if use = False in create_csv block) or syn_bogus_csv (if use = True in create_csv block).
