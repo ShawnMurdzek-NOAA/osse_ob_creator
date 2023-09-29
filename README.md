@@ -45,7 +45,21 @@ The programs included here create synthetic observations for an Observing System
 
 ## Dependencies
 
-In addition to several Python modules that are commonly used in meteorological research (e.g., NumPy, Matplotlib, Pandas, MetPy, etc.), the scripts found here also rely on modules found within [pyDA_utils](https://github.com/ShawnMurdzek-NOAA/pyDA_utils). To install pyDA_utils, I recommend cloning the repo and adding the location of pyDA_utils to the `PYTHONPATH` environment variable. 
+This program has been tested using a Python environment with the following packages:
+
+- CartoPy v0.21.1
+- Matplotlib v3.7.1
+- MetPy v1.4.1
+- NumPy v1.25.2
+- Pandas v2.1.0
+- PyNIO v1.5.5
+- pyproj v3.5.0
+- Python v3.11.3
+- SciPy v1.10.1
+- Xarray v2023.4.2
+- [pyDA_utils](https://github.com/ShawnMurdzek-NOAA/pyDA_utils)
+
+Most of the Python packages listed above can be installed using `conda` except for [pyDA_utils](https://github.com/ShawnMurdzek-NOAA/pyDA_utils). To avoid having to install each package independently, it is recommend that the user create an empty environment and install PyNIO followed by MetPy, which should install most of the other packages as dependencies. To install pyDA_utils, I recommend cloning the repo and adding the location of pyDA_utils to the `PYTHONPATH` environment variable. To be able to decode and encode prepBUFR files, the [prepbufr_decoder](https://github.com/ShawnMurdzek-NOAA/prepbufr_decoder) fortran program is also needed. 
 
 ## Running the Program
 
