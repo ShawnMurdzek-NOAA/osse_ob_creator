@@ -138,7 +138,6 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('source ../activate_python_env.sh\n')
             fptr.write('python uas_sites.py %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
 
         if param['create_csv']['use']:
