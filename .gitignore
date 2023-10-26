@@ -17,3 +17,4 @@ tmp/
 
 # Test directories
 /tests/linear_interp_test/
+/tests/select_obs_test/

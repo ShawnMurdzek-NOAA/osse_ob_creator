@@ -12,7 +12,10 @@ create_test_data=false
 prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/
 
 # Option to run linear_interp_test
-run_linear_interp_test=true
+run_linear_interp_test=false
+
+# Option to run select_obs test
+run_select_obs_test=true
 
 
 ################################################################################
@@ -103,7 +106,7 @@ if ${run_linear_interp_test}; then
     # First check to ensure that all output files exist
     err_linear_interp=0
     for s in ${subdirs}; do
-      if [[ `ls -l linear_interp_test/${s} | wc -l` -lt 1 ]]; then
+      if [[ `ls -l linear_interp_test/${s} | wc -l` -lt 2 ]]; then
         echo "missing output file(s) in linear_interp_test/${s}"
         err_linear_interp=1
         linear_interp_test_pass=false
@@ -130,6 +133,78 @@ fi
 
 
 ################################################################################
+# Run Select Obs Test
+################################################################################
+
+if ${run_select_obs_test}; then
+  
+  echo
+  echo '==============================='
+  echo "Running Select Obs Test"
+  echo
+
+  mkdir select_obs_test 
+  subdirs='select_csv logs'
+  for s in ${subdirs}; do
+    mkdir select_obs_test/${s}
+  done
+ 
+  source ../activate_python_env.sh
+  echo
+  echo 'calling create_syn_ob_jobs.py'
+  cp select_obs_test.yml ../
+  python ../create_syn_ob_jobs.py select_obs_test.yml
+
+  echo
+  echo 'calling run_synthetic_ob_creator.py'
+  job_line=$(python ../run_synthetic_ob_creator.py select_obs_test.yml | grep "submitted job")
+  if [[ `echo ${job_line} | wc -c` -lt 2 ]]; then
+    echo "no job submitted for select_obs test"
+    select_obs_test_pass=false
+  else
+    job_id=${job_line:16:8}  
+    echo "Slurm jobID = ${job_id}"
+
+    scomplete=`sacct --job ${job_id} | grep "COMPLETED" | wc -c`
+    while [ ${scomplete} -lt 2 ]; do
+      echo "waiting 15 s for job to finish..."
+      sleep 15
+      scomplete=`sacct --job ${job_id} | grep "COMPLETED" | wc -c`
+    done
+    rm ../select_obs_test.yml
+    echo "Job done. Start verification"
+    echo
+    
+    # First check to ensure that all output files exist
+    err_select_obs=0
+    for s in ${subdirs}; do
+      if [[ `ls -l select_obs_test/${s} | wc -l` -lt 2 ]]; then
+        echo "missing output file(s) in select_obs_test/${s}"
+        err_select_obs=1
+        select_obs_test_pass=false
+      fi
+    done
+    if [[ ${err_select_obs} -eq 0 ]]; then
+      echo "all output subdirectories are populated"
+    fi
+
+    # Perform verification using Python script
+    if [[ ${err_select_obs} -eq 0 ]]; then
+      python check_select_obs_test.py > ./select_obs_test/test.log
+      err_select_obs=`tail -1 ./select_obs_test/test.log`
+      if [[ ${err_select_obs} -eq 0 ]]; then
+        echo "select obs test passed"
+        select_obs_test_pass=true
+      else
+        echo "select obs test failed, error code = ${err_select_obs}"
+        select_obs_test_pass=false
+      fi
+    fi
+  fi
+fi
+
+
+################################################################################
 # Print Final Test Results
 ################################################################################
 
@@ -140,6 +215,9 @@ echo
 
 if ${run_linear_interp_test}; then
   echo "Pass Linear Interpolation Test? ${linear_interp_test_pass}"
+fi
+if ${run_select_obs_test}; then
+  echo "Pass Select Obs Test? ${select_obs_test_pass}"
 fi
 echo
 

@@ -155,7 +155,7 @@ if len(sys.argv) > 1:
         param = yaml.safe_load(fptr)
     obs_2d = param['interpolator']['obs_2d']
     obs_3d = param['interpolator']['obs_3d']
-    if params['interpolator']['uas_obs']:
+    if param['interpolator']['uas_obs']:
         vinterp = [{'subset':['ADPUPA'], 'var':'POB', 'type':'log', 
                     'model_field':'PRES_P0_L105_GLC0', 'conversion':1e-2, 'ascend':False},
                    {'subset':['AIRCAR', 'AIRCFT'], 'var':'ZOB', 'type':'linear', 
