@@ -88,6 +88,7 @@ interpolator:
     - 'ADPUPA'
     - 'AIRCAR'
     - 'AIRCFT'
+  uas_obs: True
   copy_winds: False
   interp_z_aircft: False
   height_opt: null

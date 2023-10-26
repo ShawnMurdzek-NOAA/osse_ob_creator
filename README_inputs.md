@@ -90,6 +90,7 @@ Interpolates Nature Run output in space and time to observation locations specif
 
 - **obs_2d**: List of 2-D observation subsets to use (e.g., ADPSFC, MSONET, etc.)
 - **obs_3d**: List of 3-D observation subsets to use (e.g., ADPUPA, AIRCAR, etc.)
+- **uas_obs**: Option to create UAS obs. Set to False if creating conventional obs, set to True for UAS obs. Controls whether vertical interpolation is in POB (conventional obs) or ZOB (UAS).
 - **copy_winds**: Option to copy UOB and VOB to UFC and VFC. These fields are used in `read_prepbufr.f90` to create VAD observations.
 - **interp_z_aircft**: Option to interpolate height obs (ZOB) for AIRCAR and AIRCFT platforms. Because altitudes are not actually measured by aircraft (instead, they are derived using the observed pressure and the US standard atmosphere), this should be set to `False`.
 - **height_opt**: Reference for height observations. Options: `msl` = above mean sea level, `agl` = above ground level. Heights from prepBUFR files are in MSL, but heights from "empty" UAS observation CSV files are in AGL.
