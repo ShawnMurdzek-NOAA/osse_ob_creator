@@ -13,17 +13,17 @@
 
 paths:
   real_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data'
-  real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/real_csv'
-  syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/perfect_conv'
-  syn_err_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_select_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/syn_bufr'
-  real_red_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/real_red_obs_bufr'
+  real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data'
+  syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test'
+  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data'
+  syn_err_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test'
+  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test'
+  syn_select_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/select_csv'
+  syn_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/syn_bufr'
+  real_red_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/real_red_obs_bufr'
   model: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data'
-  log: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/logs'
-  plots: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/plots'
+  log: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/logs'
+  plots: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/plots'
   osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
 
@@ -45,8 +45,8 @@ jobs:
   alloc: 'wrfruc'
   csv_name: 'syn_ob_creator_jobs.csv'
   maxtries: 3
-  mem: '30GB'
-  time: '08:00:00'
+  mem: '5GB'
+  time: '00:10:00'
   partition: 'orion'
 
 #-----------
@@ -54,7 +54,7 @@ jobs:
 #-----------
 
 convert_bufr: 
-  use: True
+  use: False
 
 create_uas_grid: 
   use: False
@@ -78,7 +78,7 @@ create_csv:
   uas_offset: 0.
 
 interpolator: 
-  use: True
+  use: False
   obs_2d:
     - 'ADPSFC'
     - 'SFCSHP'
@@ -133,54 +133,73 @@ combine_csv:
   csv2_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_uas'
 
 select_obs:
-  use: False
+  use: True
   in_csv_dir: 'syn_perf_csv'
-  include_real_red: True
+  include_real_red: False
   obtypes:
     - 120
-    - 126
+    - 122
+#    - 130
+#    - 131
+#    - 132
+#    - 133
+#    - 134
+#    - 135
     - 153
     - 180
     - 181
+    - 182
     - 183
     - 187
     - 188
     - 192
     - 193
-    - 194 
+    - 194
     - 195
     - 220
-    - 223
-    - 224
-    - 227
-    - 228
-    - 229
-    - 242
-    - 243
-    - 250
-    - 252
-    - 253
-    - 254
+    - 221
+    - 222
+    - 230
+    - 231
+    - 232
+    - 233
+    - 234
+    - 235
     - 280
     - 281
     - 282
     - 284
     - 287
     - 288
-    - 290
     - 292
     - 293
     - 294
     - 295
+  missing_var:
+    POB:
+      - 180
+      - 181
+      - 182
+      - 183
+      - 187
+      - 188
+  qm_to_5:
+    PQM:
+      - 180
+      - 181
+      - 182
+      - 183
+      - 187
+      - 188
 
 convert_syn_csv: 
-  use: True
+  use: False
 
 convert_real_red_csv: 
-  use: True
+  use: False
 
 plots:
-  use: True
+  use: False
   diff_2d:
     bufr_dir: 'syn_perf_csv'
     subsets:
