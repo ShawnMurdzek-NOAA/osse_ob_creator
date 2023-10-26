@@ -69,7 +69,7 @@ out_file = 'uas_site_locs_150km.txt'
 make_plot = True
 plot_save_fname = 'uas_sites.pdf'
 lon_lim = [-127, -65]
-lat_lim = [23, 49]
+lat_lim = [22, 49]
 
 # Option to use inputs from YAML file
 if len(sys.argv) > 1:
@@ -85,11 +85,14 @@ if len(sys.argv) > 1:
     proj_str = param['create_uas_grid']['proj_str']
     out_file = param['shared']['uas_grid_file']
     make_plot = param['create_uas_grid']['make_plot']
+    plot_save_fname = '%s/uas_sites.pdf' % param['paths']['plots']
 
 
 #---------------------------------------------------------------------------------------------------
 # Compute (lat, lon) coordinates of UAS Sites
 #---------------------------------------------------------------------------------------------------
+
+print('starting uas_sites.py program')
 
 x_uas, y_uas = np.meshgrid(np.arange(-0.5*npts_we*dx, 0.5*npts_we*dx + (0.1*dx), dx),
                            np.arange(-0.5*npts_sn*dx, 0.5*npts_sn*dx + (0.1*dx), dx))
@@ -153,12 +156,12 @@ fptr.close()
 #---------------------------------------------------------------------------------------------------
 
 if make_plot:
-    proj_cartopy = ccrs.PlateCarree()
-    #proj_cartopy = ccrs.LambertConformal()
-    fig = plt.figure()
+    #proj_cartopy = ccrs.PlateCarree()
+    proj_cartopy = ccrs.LambertConformal()
+    fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(1, 1, 1, projection=proj_cartopy)
 
-    ax.plot(lon_uas, lat_uas, 'r.', transform=proj_cartopy)
+    ax.plot(lon_uas, lat_uas, 'r.', transform=ccrs.PlateCarree(), ms=1.5)
 
     scale = '10m'
     ax.coastlines(scale)
