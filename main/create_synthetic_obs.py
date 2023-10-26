@@ -73,16 +73,8 @@ obs_3d = ['ADPUPA', 'AIRCAR', 'AIRCFT', 'RASSDA', 'PROFLR', 'VADWND']
 # units. Ascend denotes whether the vertical coordinate increases or decreases with height.
 
 # For creating conventional obs
-#vinterp = [{'subset':['ADPUPA', 'AIRCAR', 'AIRCFT'], 'var':'POB', 'type':'log', 
-#            'model_field':'PRES_P0_L105_GLC0', 'conversion':1e-2, 'ascend':False},
-#           {'subset':['RASSDA', 'PROFLR', 'VADWND'], 'var':'ZOB', 'type':'linear',
-#            'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True}]
-
-# For creating UAS obs
-vinterp = [{'subset':['ADPUPA'], 'var':'POB', 'type':'log', 
+vinterp = [{'subset':['ADPUPA', 'AIRCAR', 'AIRCFT'], 'var':'POB', 'type':'log', 
             'model_field':'PRES_P0_L105_GLC0', 'conversion':1e-2, 'ascend':False},
-           {'subset':['AIRCAR', 'AIRCFT'], 'var':'ZOB', 'type':'linear', 
-            'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True},
            {'subset':['RASSDA', 'PROFLR', 'VADWND'], 'var':'ZOB', 'type':'linear',
             'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True}]
 
@@ -163,6 +155,13 @@ if len(sys.argv) > 1:
         param = yaml.safe_load(fptr)
     obs_2d = param['interpolator']['obs_2d']
     obs_3d = param['interpolator']['obs_3d']
+    if params['interpolator']['uas_obs']:
+        vinterp = [{'subset':['ADPUPA'], 'var':'POB', 'type':'log', 
+                    'model_field':'PRES_P0_L105_GLC0', 'conversion':1e-2, 'ascend':False},
+                   {'subset':['AIRCAR', 'AIRCFT'], 'var':'ZOB', 'type':'linear', 
+                    'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True},
+                   {'subset':['RASSDA', 'PROFLR', 'VADWND'], 'var':'ZOB', 'type':'linear',
+                    'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True}]
     copy_winds = param['interpolator']['copy_winds']
     interp_z_aircft = param['interpolator']['interp_z_aircft']
     height_opt = param['interpolator']['height_opt']
