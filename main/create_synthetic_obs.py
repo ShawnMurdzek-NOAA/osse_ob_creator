@@ -71,8 +71,18 @@ obs_3d = ['ADPUPA', 'AIRCAR', 'AIRCFT', 'RASSDA', 'PROFLR', 'VADWND']
 # Variable to use for vertical interpolation for obs_3d platforms and type of interpolation 
 # ('log' or 'linear'). Conversion is a factor applied to the model field to convert to the correct
 # units. Ascend denotes whether the vertical coordinate increases or decreases with height.
-vinterp = [{'subset':['ADPUPA', 'AIRCAR', 'AIRCFT'], 'var':'POB', 'type':'log', 
+
+# For creating conventional obs
+#vinterp = [{'subset':['ADPUPA', 'AIRCAR', 'AIRCFT'], 'var':'POB', 'type':'log', 
+#            'model_field':'PRES_P0_L105_GLC0', 'conversion':1e-2, 'ascend':False},
+#           {'subset':['RASSDA', 'PROFLR', 'VADWND'], 'var':'ZOB', 'type':'linear',
+#            'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True}]
+
+# For creating UAS obs
+vinterp = [{'subset':['ADPUPA'], 'var':'POB', 'type':'log', 
             'model_field':'PRES_P0_L105_GLC0', 'conversion':1e-2, 'ascend':False},
+           {'subset':['AIRCAR', 'AIRCFT'], 'var':'ZOB', 'type':'linear', 
+            'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True},
            {'subset':['RASSDA', 'PROFLR', 'VADWND'], 'var':'ZOB', 'type':'linear',
             'model_field':'HGT_P0_L105_GLC0', 'conversion':1, 'ascend':True}]
 
@@ -572,6 +582,8 @@ for vg, vinterp_d in enumerate(vinterp):
             # Drop row if ob used for vertical interpolation is missing
             if np.isnan(out_df.loc[j, vinterp_d['var']]):
                 drop_idx.append(j)
+                if debug > 2:
+                    print('Dropping idx: Missing ob for vertical interp')
                 continue
 
             if debug > 1:
@@ -623,6 +635,8 @@ for vg, vinterp_d in enumerate(vinterp):
                                                                                                itype=vinterp_d['type'])
                 else:
                     drop_idx.append(j)
+                    if debug > 2:
+                        print('Dropping idx: Extrapolation in vertical')
                     continue
 
                 if debug > 1:
