@@ -25,6 +25,7 @@ import datetime as dt
 import glob
 import sys
 import yaml
+import os
 
 import metpy.calc as mc
 from metpy.units import units
@@ -60,6 +61,7 @@ dewpt_check = False
 # Option to check obs errors by plotting differences between obs w/ and w/out errors (plots will
 # be made for the last BUFR CSV file)
 plot_diff_hist = False
+plot_dir = './'
 
 # Option to check autocorrelated obs errors by plotting timeseries or vertical profiles of errors
 # from a single station (plots will be made for the last BUFR CSV file)
@@ -91,6 +93,9 @@ if len(sys.argv) > 1:
     verbose = param['obs_errors']['verbose']
     dewpt_check = param['obs_errors']['dewpt_check']
     plot_diff_hist = param['obs_errors']['plot_diff_hist']
+    plot_dir = '%s/err_diff_plots' % param['paths']['plots']
+    if plot_diff_hist:
+        os.system('mkdir -p %s' % plot_dir)
 
 
 #---------------------------------------------------------------------------------------------------
@@ -277,7 +282,7 @@ if plot_diff_hist:
                 ax.grid()
 
         plt.suptitle('Type = %d Difference Histograms' % t, size=16)
-        plt.savefig('diff_hist_%d.png' % t)
+        plt.savefig('%s/diff_hist_%d.png' % (plot_dir, t))
         plt.close()
 
 
@@ -332,7 +337,7 @@ if check_autocorr_err:
 
         axes[0].set_ylabel('pressure (%s)' % in_csv.meta['POB']['units'], size=12)
         plt.suptitle('Type = %d, SID = %s Differences' % (typ, sid), size=16)
-        plt.savefig('diff_autocorr_vprof_%d_%s.png' % (typ, sid))
+        plt.savefig('%s/diff_autocorr_vprof_%d_%s.png' % (plot_dir, typ, sid))
         plt.close()
 
     # Create plots for timeseries
@@ -377,7 +382,7 @@ if check_autocorr_err:
             axes[j].set_title('autocorrelation = %.3f' % np.corrcoef(diff[:-1], diff[1:])[0, 1], size=14)
 
         plt.suptitle('Type = %d, SID = %s Differences' % (typ, sid), size=16)
-        plt.savefig('diff_autocorr_time_%d_%s.png' % (typ, sid))
+        plt.savefig('%s/diff_autocorr_time_%d_%s.png' % (plot_dir, typ, sid))
         plt.close()
 
 
@@ -436,7 +441,7 @@ if check_autocorr_partition_err:
 
         axes[0].set_ylabel('height (%s)' % in_csv.meta['ZOB']['units'], size=12)
         plt.suptitle('Type = %d, SID = %s Differences' % (typ, sid), size=16)
-        plt.savefig('diff_autocorr_partition_%d_%s.png' % (typ, sid))
+        plt.savefig('%s/diff_autocorr_partition_%d_%s.png' % (plot_dir, typ, sid))
         plt.close()
 
 
