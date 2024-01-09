@@ -1,0 +1,24 @@
+# Input Parameters for Wind Rotation Utility Program
+# 
+# Descriptions of the input parameters can be found here: README_inputs.md
+#
+# shawn.s.murdzek@noaa.gov
+#
+#===================================================================================================
+
+start_time: '202202010000'
+end_time: '202202080000'
+time_step: 15
+file_tmpl_in: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'
+file_tmpl_out: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/%Y%m%d/wrfnat_%Y%m%d%H%M_er.grib2'
+run_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/rotate_wind_logs/'
+tag: ''
+
+job_max: 30
+user: 'smurdzek'
+alloc: 'wrfruc'
+csv_name: 'rotate_wind_jobs.csv'
+maxtries: 3
+job_mem: '5GB'
+job_time: '01:30:00'
+partition: 'orion'

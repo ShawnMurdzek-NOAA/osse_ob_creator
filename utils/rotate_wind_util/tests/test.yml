@@ -1,0 +1,12 @@
+# Wind Rotation Utility Program YAML File
+#
+# shawn.s.murdzek@noaa.gov
+#===================================================================================================
+
+grid_rel_fname: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202010100.grib2'
+earth_rel_fname: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202010100_er.grib2'
+
+diff_tolerance:
+  TMP_P0_L105_GLC0: 1e-6
+  UEAR_P0_L103_GLC0: 0.02
+  VEAR_P0_L103_GLC0: 0.02
