@@ -262,8 +262,14 @@ for hr in wrf_hr:
     suffix = glob.glob(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M*'))[0].split('.')[-1]
     print(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M.') + suffix)
     if suffix == 'grib2':
-        wrf_ds[hr] = xr.open_dataset(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'), 
-                                     engine='pynio')
+
+        # Abort if winds are not earth-relative
+        f = wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M_er.grib2')
+        if cou.check_wind_ref_frame(f):
+            wrf_ds[hr] = xr.open_dataset(f, engine='pynio')
+        else:
+            raise IOError('GRIB2 files contain grid-relative winds. Use wgrib2 to convert to earth-relative winds.')
+
     elif suffix == 'nc':
         wrf_ds[hr] = xr.open_dataset(wrf_dir + wrf_t.strftime('/%Y%m%d/wrfnat_%Y%m%d%H%M.nc'))
 
