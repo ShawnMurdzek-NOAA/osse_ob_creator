@@ -33,7 +33,7 @@ import pyDA_utils.bufr as bufr
 #---------------------------------------------------------------------------------------------------
 
 # Input BUFR CSV directory
-bufr_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv/'
+bufr_dir = '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/perfect_conv_v2/perfect_csv'
 
 # Prepbufr file tag (e.g., 'rap', 'rap_e', 'rap_p')
 bufr_tag = 'rap'

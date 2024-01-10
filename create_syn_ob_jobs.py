@@ -50,8 +50,8 @@ for bufr_t in bufr_times:
     hr = 3
     while wrf_start == None:
         tmp = bufr_t - dt.timedelta(hours=hr)
-        if (os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'))) or
-            os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.nc')))):
+        if (os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M_er.grib2'))) or
+            os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M_er.nc')))):
             wrf_start = tmp
         hr = hr - 0.25
 
@@ -61,8 +61,8 @@ for bufr_t in bufr_times:
         tmp = bufr_t + dt.timedelta(hours=hr)
         if (tmp == wrf_start):
             wrf_end = wrf_start
-        if (os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.grib2'))) or
-            os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M.nc')))):
+        if (os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M_er.grib2'))) or
+            os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M_er.nc')))):
             wrf_end = tmp
         hr = hr - 0.25
 
