@@ -21,8 +21,8 @@ import pyDA_utils.map_proj as mp
 #---------------------------------------------------------------------------------------------------
 
 # Input files
-input_upp1 = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202011200.grib2'
-input_upp2 = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202011215.grib2'
+input_upp1 = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202011200_er.grib2'
+input_upp2 = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202011215_er.grib2'
 input_bufr_csv = '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202011200.rap.prepbufr.csv'
 
 # Output directory
