@@ -40,7 +40,7 @@ shared:
   log_str: 'test'
 
 jobs:
-  max: 25
+  max: 50
   user: 'smurdzek'
   alloc: 'wrfruc'
   csv_name: 'syn_ob_creator_jobs.csv'

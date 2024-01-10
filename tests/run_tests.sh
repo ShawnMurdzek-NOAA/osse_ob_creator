@@ -71,6 +71,10 @@ if ${run_linear_interp_test}; then
   echo 'Running Linear Interpolation Test'
   echo
 
+  if [ -d ./linear_interp_test ]; then
+    echo 'removing old linear_interp_test directory'
+    rm -rf ./linear_interp_test
+  fi
   mkdir linear_interp_test 
   subdirs='real_csv perfect_conv syn_bufr real_red_obs_bufr logs plots'
   for s in ${subdirs}; do
@@ -143,6 +147,10 @@ if ${run_select_obs_test}; then
   echo "Running Select Obs Test"
   echo
 
+  if [ -d ./select_obs_test ]; then
+    echo 'removing old select_obs_test directory'
+    rm -rf ./select_obs_test
+  fi
   mkdir select_obs_test 
   subdirs='select_csv logs'
   for s in ${subdirs}; do
