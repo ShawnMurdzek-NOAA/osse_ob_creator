@@ -72,8 +72,8 @@ for wgrib2_t in wgrib2_times:
     fptr.write('       -new_grid_winds earth \\\n')
     fptr.write('       -new_grid_interpolation neighbor \\\n')
     fptr.write('       -new_grid `./grid_defn.pl {in_fname}` \\\n'.format(in_fname=in_fname))
-    fptr.write('       {out_fname}'.format(out_fname=out_fname))
-    fptr.write('date\n')
+    fptr.write('       {out_fname}\n'.format(out_fname=out_fname))
+    fptr.write('date')
 
     fptr.close()
 
