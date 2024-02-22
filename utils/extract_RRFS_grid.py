@@ -28,7 +28,7 @@ from metpy.units import units
 in_fname = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data_app_orion/spring/NCO_dirs/ptmp/prod/rrfs.20220429/21/rrfs.t21z.natlev.f001.conus_3km.grib2'
 
 # Output netCDF file name
-out_fname = './RRFS_grid_max.nc'
+out_fname = '../fix_data/RRFS_grid_max.nc'
 
 # Reduction function to use in the horizontal to obtain the vertical grid
 red_fct = np.amax
