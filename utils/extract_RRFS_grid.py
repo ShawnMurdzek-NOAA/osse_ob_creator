@@ -6,6 +6,8 @@ superobbing. Note that the RRFS vertical grid is not regular (i.e., a vertical l
 necessarily at the same pressure or height level all the time), so a horizontal reduction (e.g., 
 average, min, max, etc.) is used to obtain the vertical grid.
 
+This code is specific for FV3 dyn output netCDF files.
+
 shawn.s.murdzek@noaa.gov
 """
 
@@ -24,14 +26,14 @@ from metpy.units import units
 # Input Parameters
 #---------------------------------------------------------------------------------------------------
 
-# Input RRFS natlev file name
-in_fname = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data_app_orion/spring/NCO_dirs/ptmp/prod/rrfs.20220429/21/rrfs.t21z.natlev.f001.conus_3km.grib2'
+# Input RRFS file name (it's probably best to use raw RRFS output rather than UPP output)
+in_fname = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data_app_orion/spring_2iter/NCO_dirs/stmp/2022050514/fcst_fv3lam/dynf000.nc'
 
 # Output netCDF file name
-out_fname = '../fix_data/RRFS_grid_max.nc'
+out_fname = '../fix_data/RRFS_grid_mean.nc'
 
 # Reduction function to use in the horizontal to obtain the vertical grid
-red_fct = np.amax
+red_fct = np.mean
 
 
 #---------------------------------------------------------------------------------------------------
@@ -39,19 +41,21 @@ red_fct = np.amax
 #---------------------------------------------------------------------------------------------------
 
 # Open input grib file
-in_ds = xr.open_dataset(in_fname, engine='pynio')
+in_ds = xr.open_dataset(in_fname)
 
 # Compute height AGL for vertical grid
-hgt_sfc = mc.geopotential_to_height(in_ds['HGT_P0_L1_GLC0'].values * units.m * const.g).to('m').magnitude
-hgt_z_lvls = mc.geopotential_to_height(in_ds['HGT_P0_L105_GLC0'].values * units.m * const.g).to('m').magnitude
-hgt_agl = xr.DataArray(data=red_fct(hgt_z_lvls - hgt_sfc, axis=(1, 2)),
-                       coords={'lv_HYBL2':np.arange(1, np.shape(hgt_z_lvls)[0]+1)},
+nz = in_ds['pfull'].size
+hgt_z_lvls = np.zeros([nz+1, in_ds['grid_yt'].size, in_ds['grid_xt'].size])
+for i in range(in_ds['pfull'].size):
+    hgt_z_lvls[nz-i-1, :, :] = hgt_z_lvls[nz-i] - in_ds['delz'][0, nz-i-1, :, :].values
+hgt_agl = xr.DataArray(data=red_fct(hgt_z_lvls, axis=(1, 2)),
+                       coords={'phalf':in_ds['phalf']},
                        attrs={'long_name':'height above ground level',
                               'units':'m'})
 
 # Save to output netCDF
-out_ds = xr.Dataset(data_vars={'gridlat_0':in_ds['gridlat_0'],
-                               'gridlon_0':in_ds['gridlon_0'],
+out_ds = xr.Dataset(data_vars={'lat':in_ds['lat'],
+                               'lon':in_ds['lon'],
                                'HGT_AGL':hgt_agl})
 out_ds.to_netcdf(out_fname)
 
