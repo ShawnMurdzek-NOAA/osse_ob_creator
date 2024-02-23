@@ -27,13 +27,13 @@ from metpy.units import units
 #---------------------------------------------------------------------------------------------------
 
 # Input RRFS file name (it's probably best to use raw RRFS output rather than UPP output)
-in_fname = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data_app_orion/spring_2iter/NCO_dirs/stmp/2022050514/fcst_fv3lam/dynf000.nc'
+in_fname = '/work2/noaa/wrfruc/murdzek/RRFS_OSSE/syn_data_app_orion/spring_2iter/NCO_dirs/stmp/2022050610/fcst_fv3lam/dynf000.nc'
 
 # Output netCDF file name
-out_fname = '../fix_data/RRFS_grid_mean.nc'
+out_fname = '../fix_data/RRFS_grid_max.nc'
 
 # Reduction function to use in the horizontal to obtain the vertical grid
-red_fct = np.mean
+red_fct = np.amax
 
 
 #---------------------------------------------------------------------------------------------------
@@ -53,9 +53,18 @@ hgt_agl = xr.DataArray(data=red_fct(hgt_z_lvls, axis=(1, 2)),
                        attrs={'long_name':'height above ground level',
                               'units':'m'})
 
+# Compute terrain height
+gp_sfc = in_ds['hgtsfc'][0, :, :].values * units.m * const.g
+hgt_sfc = xr.DataArray(data=mc.geopotential_to_height(gp_sfc).to('m').magnitude,
+                       coords={'grid_yt':in_ds['grid_yt'],
+                               'grid_xt':in_ds['grid_xt']},
+                       attrs={'long_name':'height of model surface',
+                              'units':'m'})
+
 # Save to output netCDF
 out_ds = xr.Dataset(data_vars={'lat':in_ds['lat'],
                                'lon':in_ds['lon'],
+                               'HGT_SFC':hgt_sfc,
                                'HGT_AGL':hgt_agl})
 out_ds.to_netcdf(out_fname)
 
