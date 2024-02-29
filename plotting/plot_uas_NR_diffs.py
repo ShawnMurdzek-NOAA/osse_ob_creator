@@ -37,7 +37,7 @@ ob_typ_thermo = 136
 ob_typ_wind = 236
 
 # UPP file for comparison
-upp_file = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202010000.grib2'
+upp_file = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202010000_er.grib2'
 
 # Make plots for the closest n UAS profiles
 nclose = 2
@@ -53,7 +53,7 @@ if len(sys.argv) > 1:
         param = yaml.safe_load(fptr)
     bufr_file = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['plots']['diff_uas']['bufr_dir']],
                                                 t_str, tag)
-    upp_file = '%s/%s/wrfnat_%s.grib2' % (param['paths']['model'], t_str[:8], t_str)
+    upp_file = '%s/%s/wrfnat_%s_er.grib2' % (param['paths']['model'], t_str[:8], t_str)
     out_fname = '%s/%s' % (param['paths']['plots'], t_str) +'/uas_NR_compare_%d.png'
     nclose = param['plots']['diff_uas']['nclose']
 
