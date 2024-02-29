@@ -32,12 +32,16 @@ import pyDA_utils.map_proj as mp
 #---------------------------------------------------------------------------------------------------
 
 # Input BUFR file and obs TYP to use
-bufr_file = '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_uas/202202010000.rap.fake.prepbufr.csv'
+bufr_file = '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_hspace_150km_ctrl/err_uas_csv/202204291500.rap.fake.prepbufr.csv'
 ob_typ_thermo = 136
 ob_typ_wind = 236
 
+# Option to compare to a superobbed BUFR file
+compare_superob = False
+bufr_file_superob = '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/main/tmp_superob.csv'
+
 # UPP file for comparison
-upp_file = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202010000_er.grib2'
+upp_file = '/work2/noaa/wrfruc/murdzek/nature_run_spring/UPP/20220429/wrfnat_202204291500_er.grib2'
 
 # Make plots for the closest n UAS profiles
 nclose = 2
@@ -75,6 +79,11 @@ plot_df = bufr_csv.df.loc[np.logical_and(np.logical_or(bufr_csv.df['TYP'] == ob_
                                                        bufr_csv.df['TYP'] == ob_typ_wind),
                                          bufr_csv.df['dist'] <= ntop)]
 
+# Read in superobbed BUFR file
+if compare_superob:
+    bufr_csv_superob = bufr.bufrCSV(bufr_file_superob)
+    bufr_csv_superob.df = bufr.compute_wspd_wdir(bufr_csv_superob.df)
+
 # Open UPP file
 upp_ds = xr.open_dataset(upp_file, engine='pynio')
 
@@ -100,9 +109,22 @@ for i, nmsg in enumerate(np.unique(plot_df['nmsg'])):
     out.skew.plot(subset['POB'], Td, 'c--', lw=3.5)
     out.h.plot(subset['UOB'], subset['VOB'], c='c', ls='--')
 
-    plt.suptitle('UAS (dashed) vs NR nearest gridpoint (solid)\n' + 
-                 r'%.3f$^{\circ}$N, %.3f$^{\circ}$E (d = %.3f km)' % 
-                 (upp_lat, upp_lon, subset.loc[0, 'dist']), size=16)
+    if compare_superob:
+        subset_superob = bufr_csv_superob.df.loc[bufr_csv_superob.df['nmsg'] == nmsg].copy()
+        out.skew.plot(subset_superob['POB'], subset_superob['TOB'], 'ko', lw=3.5)
+        Td = mc.dewpoint_from_specific_humidity(subset_superob['POB'].values*units.hPa, 
+                                                subset_superob['TOB'].values*units.degC,
+                                                subset_superob['QOB'].values*units.mg/units.kg).to('degC').magnitude
+        out.skew.plot(subset_superob['POB'], Td, 'ko', lw=3.5)
+        out.h.plot(subset_superob['UOB'], subset_superob['VOB'], c='k')
+        plt.suptitle('UAS (dashed) vs NR nearest gridpoint (solid) vs Superob (dots)\n' + 
+                     r'%.3f$^{\circ}$N, %.3f$^{\circ}$E (d = %.3f km)' % 
+                     (upp_lat, upp_lon, subset.loc[0, 'dist']), size=16)
+
+    else:
+        plt.suptitle('UAS (dashed) vs NR nearest gridpoint (solid)\n' + 
+                     r'%.3f$^{\circ}$N, %.3f$^{\circ}$E (d = %.3f km)' % 
+                     (upp_lat, upp_lon, subset.loc[0, 'dist']), size=16)
     plt.savefig(out_fname % i)
 
 
