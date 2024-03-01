@@ -1,6 +1,11 @@
 """
 Create Superobs for a Specific Observation Type
 
+Optional command-line arguments:
+    argv[1] = BUFR time in YYYYMMDDHHMM format 
+    argv[2] = BUFR tag 
+    argv[3] = YAML file with program parameters
+
 shawn.s.murdzek@noaa.gov
 """
 
@@ -13,6 +18,7 @@ import xarray as xr
 import yaml
 import datetime as dt
 import pandas as pd
+import sys
 
 from pyDA_utils import bufr
 import pyDA_utils.superob_prepbufr as sp
@@ -31,9 +37,9 @@ out_csv_fname = './tmp_superob.csv'
 
 # Parameters for creating superobs
 map_proj = mp.ll_to_xy_lc
-map_proj_kw={'dx':3, 'knowni':899, 'knownj':529}
+map_proj_kw={'dx':6, 'knowni':449, 'knownj':264}
 grouping = 'grid'
-grouping_kw = {'grid_fname':'../fix_data/RRFS_grid_max.nc',
+grouping_kw = {'grid_fname':'../fix_data/RRFS_grid_mean_twice_gspacing.nc',
                'subtract_360_lon_grid':True}
 reduction_kw = {136:{'var_dict':{'TOB':{'method':'vert_cressman', 
                                         'qm_kw':{'field':'TQM', 'thres':2},
@@ -62,6 +68,9 @@ reduction_kw = {136:{'var_dict':{'TOB':{'method':'vert_cressman',
                                  'VOB':{'method':'vert_cressman', 
                                         'qm_kw':{'field':'WQM', 'thres':2},
                                         'reduction_kw':{'R':'max'}},
+                                 'POB':{'method':'vert_cressman', 
+                                        'qm_kw':{'field':'PQM', 'thres':2},
+                                        'reduction_kw':{'R':'max'}},
                                  'XOB':{'method':'mean', 
                                         'qm_kw':{'field':'WQM', 'thres':2},
                                         'reduction_kw':{}},
@@ -74,7 +83,19 @@ reduction_kw = {136:{'var_dict':{'TOB':{'method':'vert_cressman',
                                  'DHR':{'method':'mean', 
                                         'qm_kw':{'field':'WQM', 'thres':2},
                                         'reduction_kw':{}}}}}
-   
+
+# Option to use input from YAML file 
+if len(sys.argv) > 1:
+    bufr_t = sys.argv[1]
+    tag = sys.argv[2]
+    with open(sys.argv[8], 'r') as fptr:
+        param = yaml.safe_load(fptr)
+    in_csv_fname = '{parent}/{t}.{tag}.input.prepbufr.csv'.format(parent=param['paths']['superob_csv'],
+                                                                  t=bufr_t, tag=tag)
+    out_csv_fname = '{parent}/{t}.{tag}.output.prepbufr.csv'.format(parent=param['paths']['superob_csv'],
+                                                                    t=bufr_t, tag=tag)
+     
+
 
 #---------------------------------------------------------------------------------------------------
 # Create Superobs
