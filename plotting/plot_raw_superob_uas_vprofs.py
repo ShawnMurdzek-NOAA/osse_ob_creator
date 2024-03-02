@@ -71,14 +71,14 @@ for sid in all_sid:
         ax = axes[0, j]
         ax.plot(raw_thermo[v], raw_thermo['ZOB'], 'c-', label='raw')
         ax.plot(superob_thermo[v], superob_thermo['ZOB'], 'ko', label='superob')
-        ax.set_xlabel(v, size=16)
+        ax.set_xlabel('{v} ({u})'.format(v=v, u=bufr_csv_raw.meta[v]['units']), size=16)
         ax.grid()
 
     for j, v in enumerate(['UOB', 'VOB']):
         ax = axes[1, j]
         ax.plot(raw_wind[v], raw_wind['ZOB'], 'c-', label='raw')
         ax.plot(superob_wind[v], superob_wind['ZOB'], 'ko', label='superob')
-        ax.set_xlabel(v, size=16)
+        ax.set_xlabel('{v} ({u})'.format(v=v, u=bufr_csv_raw.meta[v]['units']), size=16)
         ax.grid()
 
     for j in range(2):

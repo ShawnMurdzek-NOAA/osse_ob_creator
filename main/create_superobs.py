@@ -33,7 +33,7 @@ import pyDA_utils.map_proj as mp
 in_csv_fname = '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_hspace_150km_ctrl/err_uas_csv/202204291500.rap.fake.prepbufr.csv'
 
 # Output BUFR CSV file name
-out_csv_fname = './tmp_superob.csv'
+out_csv_fname = './tmp_superob_yaml.csv'
 
 # Parameters for creating superobs
 map_proj = mp.ll_to_xy_lc
@@ -88,13 +88,18 @@ reduction_kw = {136:{'var_dict':{'TOB':{'method':'vert_cressman',
 if len(sys.argv) > 1:
     bufr_t = sys.argv[1]
     tag = sys.argv[2]
-    with open(sys.argv[8], 'r') as fptr:
+    with open(sys.argv[3], 'r') as fptr:
         param = yaml.safe_load(fptr)
-    in_csv_fname = '{parent}/{t}.{tag}.input.prepbufr.csv'.format(parent=param['paths']['superob_csv'],
+    in_csv_fname = '{parent}/{t}.{tag}.input.prepbufr.csv'.format(parent=param['paths']['syn_superob_csv'],
                                                                   t=bufr_t, tag=tag)
-    out_csv_fname = '{parent}/{t}.{tag}.output.prepbufr.csv'.format(parent=param['paths']['superob_csv'],
+    out_csv_fname = '{parent}/{t}.{tag}.output.prepbufr.csv'.format(parent=param['paths']['syn_superob_csv'],
                                                                     t=bufr_t, tag=tag)
-     
+    if param['superobs']['map_proj'] == 'll_to_xy_lc':
+        map_proj = mp.ll_to_xy_lc
+    map_proj_kw = param['superobs']['map_proj_kw']
+    grouping = param['superobs']['grouping']
+    grouping_kw = param['superobs']['grouping_kw']
+    reduction_kw = param['superobs']['reduction_kw']
 
 
 #---------------------------------------------------------------------------------------------------

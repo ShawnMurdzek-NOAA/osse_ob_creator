@@ -19,6 +19,7 @@ paths:
   syn_err_csv: ''
   syn_combine_csv: ''
   syn_select_csv: '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/real_red_no_raob/csv'
+  syn_superob_csv: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_hspace_150km_ctrl/err_uas_csv'
   syn_bufr: ''
   real_red_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/real_red_no_raob/real_red_bufr'
   model: '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP'
@@ -256,6 +257,79 @@ convert_syn_csv:
 
 convert_real_red_csv: 
   use: True
+
+superobs: 
+  use: False
+  map_proj: 'll_to_xy_lc'
+  map_proj_kw:
+    dx: 6
+    knowni: 449
+    knownj: 264
+  grouping: 'grid'
+  grouping_kw:
+    grid_fname: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/fix_data/RRFS_grid_mean_twice_gspacing.nc'
+    subtract_360_lon_grid: True
+  reduction_kw:
+    136:
+      var_dict:
+        TOB:
+          method: 'vert_cressman'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        QOB:
+          method: 'vert_cressman'
+          qm_kw: { field: 'QQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        POB:
+          method: 'vert_cressman'
+          qm_kw: { field: 'PQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        XOB:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+        YOB:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+        ZOB:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+        DHR:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+    236:
+      var_dict:
+        UOB:
+          method: 'vert_cressman'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        VOB:
+          method: 'vert_cressman'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        POB:
+          method: 'vert_cressman'
+          qm_kw: {field: 'PQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        XOB:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+        YOB:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+        ZOB:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+        DHR:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
 
 plots:
   use: False
