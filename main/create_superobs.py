@@ -90,9 +90,9 @@ if len(sys.argv) > 1:
     tag = sys.argv[2]
     with open(sys.argv[3], 'r') as fptr:
         param = yaml.safe_load(fptr)
-    in_csv_fname = '{parent}/{t}.{tag}.input.prepbufr.csv'.format(parent=param['paths']['syn_superob_csv'],
+    in_csv_fname = '{parent}/{t}.{tag}.input.csv'.format(parent=param['paths']['syn_superob_csv'],
                                                                   t=bufr_t, tag=tag)
-    out_csv_fname = '{parent}/{t}.{tag}.output.prepbufr.csv'.format(parent=param['paths']['syn_superob_csv'],
+    out_csv_fname = '{parent}/{t}.{tag}.output.csv'.format(parent=param['paths']['syn_superob_csv'],
                                                                     t=bufr_t, tag=tag)
     if param['superobs']['map_proj'] == 'll_to_xy_lc':
         map_proj = mp.ll_to_xy_lc
@@ -113,7 +113,7 @@ sp_obj = sp.superobPB(in_csv_fname,
                       map_proj_kw=map_proj_kw)
 
 # Create superobs
-out_df_list = []
+out_df_list = [sp_obj.full_df.copy()]
 for o in reduction_kw.keys():
     start = dt.datetime.now()
     print()
@@ -125,6 +125,9 @@ for o in reduction_kw.keys():
                                               reduction_kw=reduction_kw[o]))
     sp_obj.df = sp_obj.full_df.copy()
     print('Finished. Elapsed time = {t} s'.format(t=(dt.datetime.now() - start).total_seconds()))
+
+    # Remove superob from master DataFrame
+    out_df_list[0] = out_df_list[0].loc[out_df_list[0]['TYP'] != o, :].copy()
 
 # Save results
 print()
