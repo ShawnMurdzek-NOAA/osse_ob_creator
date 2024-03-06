@@ -2,8 +2,8 @@
 Plot Raw and Superobbed UAS Vertical Profiles
 
 Optional command-line arguments:
-    argv[1] = Prepbufr file tag
-    argv[2] = Time of prepbufr file (YYYYMMDDHH)
+    argv[1] = Time of prepbufr file (YYYYMMDDHH)
+    argv[2] = Prepbufr file tag
     argv[3] = YAML file with program parameters
 
 shawn.s.murdzek@noaa.gov
@@ -49,18 +49,18 @@ out_fname = './uas_raw_superob_compare_%s.png'
 
 # Use passed arguments, if they exist
 if len(sys.argv) > 1:
-    tag = sys.argv[1]
-    t_str = sys.argv[2]
+    t_str = sys.argv[1]
+    tag = sys.argv[2]
     with open(sys.argv[3], 'r') as fptr:
         param = yaml.safe_load(fptr)
-    bufr_file_raw = '%s/%s.%s.input.prepbufr.csv' % (param['paths']['syn_superob_csv'],
-                                                     t_str, tag)
+    bufr_file_raw = '%s/%s.%s.input.csv' % (param['paths']['syn_superob_csv'],
+                                            t_str, tag)
     bufr_file_superob = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_superob_csv'],
                                                         t_str, tag)
     ob_type_thermo = int(param['superobs']['plot_vprof']['ob_type_thermo'])
     ob_type_wind = int(param['superobs']['plot_vprof']['ob_type_wind'])
     all_sid = param['superobs']['plot_vprof']['all_sid']
-    out_fname = '%s/%s' % (param['paths']['plots'], t_str) +'/uas_raw_superob_compare_%s.png'
+    out_fname = '%s/%s' % (param['paths']['plots'], t_str) + '/uas_raw_superob_compare_%s.png'
 
 
 #---------------------------------------------------------------------------------------------------
