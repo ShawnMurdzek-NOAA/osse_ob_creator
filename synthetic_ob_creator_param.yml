@@ -65,6 +65,7 @@ create_uas_grid:
   shp_fname: '/home/smurdzek/.local/share/cartopy/shapefiles/natural_earth/cultural/ne_50m_admin_0_countries'
   nshape: 16
   proj_str: '+proj=lcc +lat_0=39 +lon_0=-96 +lat_1=33 +lat_2=45'
+  max_sites: 2500
   make_plot: False
 
 create_csv: 

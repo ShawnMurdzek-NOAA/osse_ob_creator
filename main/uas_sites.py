@@ -4,6 +4,14 @@ Determine Locations of UAS Observation Sites
 List of CartoPy map projections: https://scitools.org.uk/cartopy/docs/latest/reference/projections.html
 Primer on map projections: https://www.e-education.psu.edu/geog160/node/1918
 
+Note on UAS Sites Over Bodies of Water
+---------------------------------------
+The goal of the landmask, land_closing, and max_hole_size is to eliminate UAS observations over the 
+oceans and Great Lakes, but keep UAS obs over smaller inland bodies of water. The thought here is
+that it is not unreasonable to have UAS start from the shore of a large lake, fly over the lake, 
+then perform a vertical profile. Thus, having profiles over these bodies over water is still
+reasonable.
+
 Optional commnd-line:
     argv[1] = YAML file with program parameters
 
@@ -34,15 +42,27 @@ import yaml
 # Input Parameters
 #---------------------------------------------------------------------------------------------------
 
-# Spacing between UAS sites (m)
-dx = 150000.
-
+# Spacing between UAS sites (m) and
 # Grid points in east-west and north-south directions (similar to e_we and e_sn in WPS namelist)
-npts_we = 155
-npts_sn = 91
+
+#dx = 150000.
+#npts_we = 155
+#npts_sn = 91
+
+#dx = 100000.
+#npts_we = 233
+#npts_sn = 137
+
+#dx = 75000.
+#npts_we = 311
+#npts_sn = 183
+
+dx = 35000.
+npts_we = 665
+npts_sn = 391
 
 # Nature run output (for landmask)
-upp_file = '/work2/noaa/wrfruc/murdzek/nature_run_spring/UPP/20220429/wrfnat_202204291200.grib2'
+upp_file = '/work2/noaa/wrfruc/murdzek/nature_run_spring/UPP/20220429/wrfnat_202204291200_er.grib2'
 
 # Apply binary closing after applying landmask?
 # Goal here is to include UAS sites over small inland bodies of water (i.e., not the Great Lakes).
@@ -62,12 +82,15 @@ nshape = 16
 # https://proj.org/operations/projections/lcc.html
 proj_str = '+proj=lcc +lat_0=39 +lon_0=-96 +lat_1=33 +lat_2=45'
 
+# Maximum number of UAS sites per output file
+max_sites = 2500
+
 # Output text file to dump UAS site (lat, lon) coordinates
-out_file = 'uas_site_locs_150km.txt'
+out_file = '../fix_data/uas_site_locs_35km.txt'
 
 # Options for plotting UAS sites
 make_plot = True
-plot_save_fname = 'uas_sites.pdf'
+plot_save_fname = 'uas_sites_35km.pdf'
 lon_lim = [-127, -65]
 lat_lim = [22, 49]
 
@@ -83,6 +106,7 @@ if len(sys.argv) > 1:
     shp_fname = param['create_uas_grid']['shp_fname']
     nshape = param['create_uas_grid']['nshape']
     proj_str = param['create_uas_grid']['proj_str']
+    max_sites = param['create_uas_grid']['max_sites']
     out_file = param['shared']['uas_grid_file']
     make_plot = param['create_uas_grid']['make_plot']
     plot_save_fname = '%s/uas_sites.pdf' % param['paths']['plots']
@@ -144,11 +168,20 @@ lon_uas = lon_uas[uas_mask_us]
 lat_uas = lat_uas[uas_mask_us]
 
 # Save results
-fptr = open(out_file, 'w')
-fptr.write('lon (deg E),lat (deg N)\n')
-for lon, lat in zip(lon_uas, lat_uas):
-    fptr.write('%.3f,%.3f\n' % (lon, lat))
-fptr.close()
+if len(lat_uas) < max_sites:
+    fptr = open(out_file, 'w')
+    fptr.write('lon (deg E),lat (deg N)\n')
+    for lon, lat in zip(lon_uas, lat_uas):
+        fptr.write('%.3f,%.3f\n' % (lon, lat))
+    fptr.close()
+else:
+    for n, i in enumerate(range(0, len(lat_uas), max_sites)):
+        fptr = open(out_file + str(n+1), 'w')
+        fptr.write('lon (deg E),lat (deg N)\n')
+        iend = min([i + max_sites, len(lat_uas)])
+        for lon, lat in zip(lon_uas[i:iend], lat_uas[i:iend]):
+            fptr.write('%.3f,%.3f\n' % (lon, lat))
+        fptr.close()
 
 
 #---------------------------------------------------------------------------------------------------
