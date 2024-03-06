@@ -253,8 +253,9 @@ for bufr_t in bufr_times:
                                                           t_str, tag, 
                                                           fake_csv_superob_fname))
             if param['superobs']['plot_vprof']['use']:
+                fptr.write('mkdir %s/%s\n' % (param['paths']['plots'], t_str))
                 fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
-                fptr.write('python plotting_raw_superob_uas_vprofs.py %s \\\n' % t_str)
+                fptr.write('python plot_raw_superob_uas_vprofs.py %s \\\n' % t_str)
                 fptr.write('                                          %s \\\n' % tag)
                 fptr.write('                                          %s/%s \n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_superob_fname        
