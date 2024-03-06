@@ -81,8 +81,7 @@ for bufr_t in bufr_times:
         fake_csv_perf_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_perf_csv'], t_str, tag)
         real_red_csv_fname = '%s/%s.%s.real_red.prepbufr.csv' % (param['paths']['syn_perf_csv'], t_str, tag)
         fake_csv_err_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_err_csv'], t_str, tag)
-        in1_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['combine_csv']['csv1_dir'], t_str, tag)
-        in2_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['combine_csv']['csv2_dir'], t_str, tag)
+        csv_comb_list_fname = '%s/combine_csv_list_%s_%s.txt' % (param['paths']['syn_combine_csv'], t_str, tag)
         fake_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_combine_csv'], t_str, tag)
         in_csv_select_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['select_obs']['in_csv_dir']], t_str, tag)
         fake_csv_select_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_select_csv'], t_str, tag)
@@ -199,6 +198,13 @@ for bufr_t in bufr_times:
             convert_csv_fname = fake_csv_err_fname        
 
         if param['combine_csv']['use']:
+
+            # First, create file with CSV file names to be combined
+            comb_fptr = open(csv_comb_list_fname, 'w')
+            for d in param['combine_csv']['csv_dirs']:
+                comb_fptr.write('%s/%s.%s.fake.prepbufr.csv\n' % (d, t_str, tag))
+            comb_fptr.close()
+
             fptr.write('# Combine CSV files\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -207,8 +213,7 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python combine_bufr_csv.py %s \\\n' % in1_csv_comb_fname)
-            fptr.write('                           %s \\\n' % in2_csv_comb_fname)
+            fptr.write('python combine_bufr_csv.py %s \\\n' % csv_comb_list_fname)
             fptr.write('                           %s \n\n' % fake_csv_comb_fname)
             convert_csv_fname = fake_csv_comb_fname        
         

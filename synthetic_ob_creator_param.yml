@@ -114,8 +114,9 @@ obs_errors:
 
 combine_csv:
   use: False
-  csv1_dir: '/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/perfect_conv'
-  csv2_dir: '/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/perfect_uas'
+  csv_dirs: 
+    - '/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/perfect_conv'
+    - '/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/perfect_uas'
 
 select_obs:
   use: False
