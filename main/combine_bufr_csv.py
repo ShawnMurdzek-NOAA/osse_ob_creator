@@ -40,7 +40,7 @@ if len(sys.argv) > 1:
 csv_in_list = []
 fptr = open(bufr_list_fname, 'r')
 for l in fptr:
-    csv_in_list.append(bufr.bufrCSV(l).df)
+    csv_in_list.append(bufr.bufrCSV(l.strip()).df)
 fptr.close()
 
 # Combine BUFR CSV files
