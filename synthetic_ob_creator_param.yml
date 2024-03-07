@@ -100,7 +100,7 @@ interpolator:
 
 obs_errors: 
   use: False
-  errtable: '/work2/noaa/wrfruc/murdzek/real_obs/errtables/errtable.1st_iter.7day'
+  errtable: '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter_assim_only/include_uas/errtable.7day'
   autocor_POB_obs:
     - 126 
   autocor_DHR_obs: 
