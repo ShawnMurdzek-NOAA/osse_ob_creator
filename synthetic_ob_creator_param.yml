@@ -74,6 +74,7 @@ create_csv:
   ascent_rate: 3.
   sample_freq: 60.
   max_height: 2000.
+  init_sid: 1
   sample_bufr_fname: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202010000.rap.prepbufr.csv'
   uas_offset: 0.
 
