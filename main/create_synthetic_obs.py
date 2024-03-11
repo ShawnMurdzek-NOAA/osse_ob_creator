@@ -741,7 +741,7 @@ out_df['QOB'] = out_df['QOB'] * 1e6
 out_df['TOB'] = out_df['TOB'] - 273.15
 out_df['PWO'] = (out_df['PWO'] / 997.) * 1000.
 out_df['PMO'] = out_df['PMO'] * 1e-2
-out_df['ELV'] = np.int64(out_df['ELV'])
+out_df['ELV'] = np.int64(np.around(out_df['ELV']))
 idx_3d = np.where((out_df['subset'] == 'AIRCAR') | (out_df['subset'] == 'AIRCFT') | 
                   (out_df['subset'] == 'ADPUPA'))[0]
 out_df.loc[idx_3d, 'ZOB'] = mc.geopotential_to_height(out_df.loc[idx_3d, 'ZOB'].values * units.m * const.g).to('m').magnitude
@@ -766,7 +766,7 @@ out_df = bufr.compute_dewpt(out_df)
 air_idx = np.where((out_df['subset'] == 'AIRCAR') | (out_df['subset'] == 'AIRCFT'))[0]
 if not interp_z_aircft:
     out_df.loc[air_idx, 'ZOB'] = bufr_csv.df.loc[air_idx, 'ZOB']
-out_df.loc[air_idx, 'ELV'] = out_df.loc[air_idx, 'ZOB']
+out_df.loc[air_idx, 'ELV'] = np.int64(np.around(out_df.loc[air_idx, 'ZOB']))
 
 # Reset (XOB, YOB) for ADPUPA obs if (XDR, YDR) was used for ADPUPA locations
 if use_raob_drift:
