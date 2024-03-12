@@ -45,17 +45,17 @@ import yaml
 # Spacing between UAS sites (m) and
 # Grid points in east-west and north-south directions (similar to e_we and e_sn in WPS namelist)
 
-dx = 150000.
-npts_we = 155
-npts_sn = 91
+#dx = 150000.
+#npts_we = 155
+#npts_sn = 91
 
 #dx = 100000.
 #npts_we = 233
 #npts_sn = 137
 
-#dx = 75000.
-#npts_we = 311
-#npts_sn = 183
+dx = 75000.
+npts_we = 311
+npts_sn = 183
 
 #dx = 35000.
 #npts_we = 665
@@ -86,11 +86,11 @@ proj_str = '+proj=lcc +lat_0=39 +lon_0=-96 +lat_1=33 +lat_2=45'
 max_sites = 2500
 
 # Output text file to dump UAS site (lat, lon) coordinates
-out_file = '../fix_data/uas_site_locs_150km.txt'
+out_file = '../fix_data/uas_site_locs_75km.txt'
 
 # Options for plotting UAS sites
 make_plot = True
-plot_save_fname = '../fix_data/uas_sites_150km.pdf'
+plot_save_fname = '../fix_data/uas_sites_75km.pdf'
 lon_lim = [-127, -65]
 lat_lim = [22, 49]
 
