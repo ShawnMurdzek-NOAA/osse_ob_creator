@@ -8,6 +8,7 @@ slurm*out
 # Figure files
 *.png
 *.pdf
+!/fix_data/*.pdf
 
 # Cron log files
 cron.log
@@ -18,3 +19,4 @@ tmp/
 # Test directories
 /tests/linear_interp_test/
 /tests/select_obs_test/
+/tests/uas_test/

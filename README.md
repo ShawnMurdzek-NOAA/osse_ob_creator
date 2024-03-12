@@ -21,27 +21,31 @@ The programs included here create synthetic observations for an Observing System
 
 5. `synthetic_ob_creator_param.yml`: Input settings for the synthetic observation creation program.
 
-6. `main`: Various programs needed to create synthetic observations. Inputs can either be specified within each of these programs or within `synthetic_ob_creator_param.yml`.
+6. `fix_data`: Fixed input data (e.g., UAS site location text files).
+
+7. `main`: Various programs needed to create synthetic observations. Inputs can either be specified within each of these programs or within `synthetic_ob_creator_param.yml`.
 
     1. `add_obs_errors.py`: Reads a series of prepBUFR CSV files and adds random observation errors.
 
     2. `combine_bufr_csv.py`: Combines two BUFR CSV files into a single BUFR CSV file.
     
     3. `create_ims_snow_obs.py`: Creates snow cover and ice cover fields using NR output.
+  
+    4. `create_superobs.py`: Creates superobs from raw observations. Separate superobs are created for a set of input BUFR 3-digit types.
     
-    4. `create_synthetic_obs.py`: Intepolates NR output to synthetic observation locations.
+    5. `create_synthetic_obs.py`: Intepolates NR output to synthetic observation locations.
 
-    5. `create_uas_csv.py`: Creates an "empty" CSV for UAS observations. This CSV can then be passed to `create_synthetic_obs.py`.
+    6. `create_uas_csv.py`: Creates an "empty" CSV for UAS observations. This CSV can then be passed to `create_synthetic_obs.py`.
     
-    6. `select_obtypes.py`: Controls which observation types (3-digit numbers) are within an observation CSV file.
+    7. `select_obtypes.py`: Controls which observation types (3-digit numbers) are within an observation CSV file.
 
-    7. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
+    8. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
 
-7. `plotting`: Various utilities for making comparison plots between synthetic and real observations.
+8. `plotting`: Various utilities for making comparison plots between synthetic and real observations.
 
-8. `tests`: Contains various scripts to test whether the synthetic observations are being created correctly.
+9. `tests`: Contains various scripts to test whether the synthetic observations are being created correctly.
 
-9. `utils`: Miscellaneous scripts that might be helpful (or that I haven't bothered deleting yet!)
+10. `utils`: Miscellaneous scripts that might be helpful (or that I haven't bothered deleting yet!)
 
 ## Dependencies
 
