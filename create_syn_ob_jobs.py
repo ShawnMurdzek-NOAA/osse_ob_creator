@@ -81,11 +81,12 @@ for bufr_t in bufr_times:
         fake_csv_perf_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_perf_csv'], t_str, tag)
         real_red_csv_fname = '%s/%s.%s.real_red.prepbufr.csv' % (param['paths']['syn_perf_csv'], t_str, tag)
         fake_csv_err_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_err_csv'], t_str, tag)
-        in1_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['combine_csv']['csv1_dir'], t_str, tag)
-        in2_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['combine_csv']['csv2_dir'], t_str, tag)
+        csv_comb_list_fname = '%s/combine_csv_list_%s_%s.txt' % (param['paths']['syn_combine_csv'], t_str, tag)
         fake_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_combine_csv'], t_str, tag)
         in_csv_select_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['select_obs']['in_csv_dir']], t_str, tag)
         fake_csv_select_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_select_csv'], t_str, tag)
+        in_csv_superob_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['superobs']['in_csv_dir']], t_str, tag)
+        fake_csv_superob_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_superob_csv'], t_str, tag)
         fake_bufr_fname = '%s/%s.%s.t%sz.prepbufr.tm00' % (param['paths']['syn_bufr'], 
                                                            bufr_t.strftime('%Y%m%d%H'),
                                                            tag,
@@ -195,8 +196,15 @@ for bufr_t in bufr_times:
                                                           t_str, tag, 
                                                           fake_csv_err_fname))
             convert_csv_fname = fake_csv_err_fname        
-        
+
         if param['combine_csv']['use']:
+
+            # First, create file with CSV file names to be combined
+            comb_fptr = open(csv_comb_list_fname, 'w')
+            for d in param['combine_csv']['csv_dirs']:
+                comb_fptr.write('%s/%s.%s.fake.prepbufr.csv\n' % (d, t_str, tag))
+            comb_fptr.close()
+
             fptr.write('# Combine CSV files\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -205,8 +213,7 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python combine_bufr_csv.py %s \\\n' % in1_csv_comb_fname)
-            fptr.write('                           %s \\\n' % in2_csv_comb_fname)
+            fptr.write('python combine_bufr_csv.py %s \\\n' % csv_comb_list_fname)
             fptr.write('                           %s \n\n' % fake_csv_comb_fname)
             convert_csv_fname = fake_csv_comb_fname        
         
@@ -231,6 +238,32 @@ for bufr_t in bufr_times:
                 fptr.write('                         %s \\\n' % out_csv_real)
                 fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_select_fname        
+
+        if param['superobs']['use']:
+            fptr.write('# Creating superobs\n')
+            fptr.write('echo ""\n')
+            fptr.write('echo "=============================================================="\n')
+            fptr.write('echo "Create superobs"\n')
+            fptr.write('echo ""\n')
+            fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
+            fptr.write('cp %s %s/%s.%s.input.csv\n' % (in_csv_superob_fname,
+                                                       param['paths']['syn_superob_csv'], 
+                                                       t_str, tag))
+            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
+            fptr.write('python create_superobs.py %s \\\n' % t_str)
+            fptr.write('                          %s \\\n' % tag)
+            fptr.write('                          %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_superob_csv'], 
+                                                          t_str, tag, 
+                                                          fake_csv_superob_fname))
+            if param['superobs']['plot_vprof']['use']:
+                fptr.write('mkdir %s/%s\n' % (param['paths']['plots'], t_str))
+                fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
+                fptr.write('python plot_raw_superob_uas_vprofs.py %s \\\n' % t_str)
+                fptr.write('                                          %s \\\n' % tag)
+                fptr.write('                                          %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            convert_csv_fname = fake_csv_superob_fname        
 
         if param['convert_syn_csv']['use']:
             fptr.write('# Convert synthetic ob CSV to prepBUFR\n')

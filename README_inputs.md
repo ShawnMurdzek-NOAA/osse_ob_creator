@@ -18,6 +18,7 @@ Contains numerous paths that point to...
 - **syn_err_csv**: Synthetic observation CSV files with added errors.
 - **syn_combine_csv**: Combined observation CSV files (conventional obs + UAS obs).
 - **syn_select_csv**: Observation CSV files with only certain observation types. Useful for data-denial experiments (OSEs).
+- **syn_superob_csv**: Superobbed CSV files.
 - **syn_bufr**: Synthetic observation prepBUFR files.
 - **real_red_bufr**: Real observation prepBUFR files, but only containing observations at the same locations as the synthetic observation prepBUFR files.
 - **model**: Nature Run model output.
@@ -71,6 +72,7 @@ Creates a text file containing the horizontal locations of UAS sites. Uses `main
 - **shp_fname**: File name (including the path) of the shapefile containing the outline of the US.
 - **nshape**: Index in `shp_fname` that corresponds to the US.
 - **proj_str**: Map projection string in proj4 format. See documentation [here](https://proj.org/operations/projections/lcc.html).
+- **max_sites**: Max number of UAS sites to include in a single text file. Recommended value is 2500. If more sites are included in UAS text files, `interpolator` jobs may extend past 8 hours, which is often undesirable.
 - **make_plot**: Option to make a plot showing the UAS sites.
 
 ### create_csv
@@ -81,6 +83,7 @@ Creates an "empty" observation CSV file that includes UAS observation locations 
 - **ascent_rate**: UAS ascent speed (m/s).
 - **sample_freq**: UAS sampling frequency (s).
 - **max_height**: Maximum UAS flight altitude (m)
+- **init_sid**: Number assigned to the first station ID. Useful when using multiple input text files and you don't want the station IDs to repeat.
 - **sample_bufr_fname**: File (including the path) of an observation CSV. Needed to determine which fields to include in the "empty" observation CSV.
 - **uas_offset**: Difference between the actual UAS flight time and the observation CSV timestamp (s).
 
@@ -92,7 +95,7 @@ Interpolates Nature Run output in space and time to observation locations specif
 - **obs_3d**: List of 3-D observation subsets to use (e.g., ADPUPA, AIRCAR, etc.)
 - **uas_obs**: Option to create UAS obs. Set to False if creating conventional obs, set to True for UAS obs. Controls whether vertical interpolation is in POB (conventional obs) or ZOB (UAS).
 - **copy_winds**: Option to copy UOB and VOB to UFC and VFC. These fields are used in `read_prepbufr.f90` to create VAD observations.
-- **interp_z_aircft**: Option to interpolate height obs (ZOB) for AIRCAR and AIRCFT platforms. Because altitudes are not actually measured by aircraft (instead, they are derived using the observed pressure and the US standard atmosphere), this should be set to `False`.
+- **interp_z_aircft**: Option to interpolate height obs (ZOB) for AIRCAR and AIRCFT platforms. Because altitudes are not actually measured by aircraft (instead, they are derived using the observed pressure and the US standard atmosphere), this should be set to `False`, unless UAS observations are used.
 - **height_opt**: Reference for height observations. Options: `msl` = above mean sea level, `agl` = above ground level. Heights from prepBUFR files are in MSL, but heights from "empty" UAS observation CSV files are in AGL.
 - **use_raob_drift**: Option to use (XDR, YDR) rather tha (XOB, YOB) for ADPUPA observations.
 - **coastline_correct**: Option to "correct" observations that occur near coastlines. This does not appear to help much, so it should usually be set to `False`.
@@ -117,8 +120,7 @@ Add observation errors to observations within an observation CSV file. Uses `mai
 
 Combine two observation CSV files together. Useful when combining conventional and UAS observation CSVs together. Uses `main/combine_bufr_csv.py`.
 
-- **csv1_dir**: Full path containing the first observation CSV file.
-- **csv2_dir**: Full path containing the second observation CSV file.
+- **csv_dirs**: List of observation CSV files (use full path).
 
 ### select_obs
 
@@ -127,6 +129,21 @@ Only keep certain observation types in an observation CSV file. Useful when perf
 - **in_csv_dir**: Which path from the `paths` section to pull observation CSVs from.
 - **include_real_red**: Option to also select certain observations from real_red observation CSVs. Synthetic (fake) observation CSVs are always included.
 - **ob_types**: PrepBUFR observation types (3-digit numbers) to keep.
+
+### superobs
+
+Create superobs for various BUFR types (i.e., 3-digit numbers). To see all superob options, see the superobbing source code from pyDA_utils [here](https://github.com/ShawnMurdzek-NOAA/pyDA_utils/blob/main/superob_prepbufr.py).
+
+- **in_csv_dir**: Which path from the `paths` section to pull observation CSVs from.
+- **map_proj**: Map projection to use for the "grid" superob grouping method.
+- **map_proj_kw**: Keywords arguments passed to the map projection.
+- **grouping**: Superob grouping strategy.
+- **grouping_kw**: Keywords arguments passed to the superob grouping method (`grouping_kw` keyword argument in [pyDA_utils.superob_prepbufr.create_superobs](https://github.com/ShawnMurdzek-NOAA/pyDA_utils/blob/main/superob_prepbufr.py)).
+- **reduction_kw**: Keywords arguments passed to the superob reduction method (`reduction_kw` keyword argument in [pyDA_utils.superob_prepbufr.create_superobs](https://github.com/ShawnMurdzek-NOAA/pyDA_utils/blob/main/superob_prepbufr.py)).
+- **plot_vprof**: Parameters for creating vertical profile plots of superobs
+    - **ob_type_thermo**: 3-digit BUFR type corresponding to the thermodynamic obs (e.g., 136)
+    - **ob_type_wind**: 3-digit BUFR type corresponding to the wind obs (e.g., 236)
+    - **all_sid**: SIDs to plot
 
 ### convert_syn_csv
 

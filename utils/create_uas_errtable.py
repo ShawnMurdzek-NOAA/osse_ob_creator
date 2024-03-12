@@ -30,8 +30,8 @@ thermo_type = 136
 wind_type = 236
 
 # Input and output errtable names
-in_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/1st_iter_assim_only/errtable.1st_iter.7day'
-out_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/include_uas/errtable.7day'
+in_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter_assim_only/errtable.2nd_iter.7day'
+out_fname = '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter_assim_only/include_uas/errtable.7day'
 
 
 #---------------------------------------------------------------------------------------------------

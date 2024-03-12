@@ -19,6 +19,7 @@ paths:
   syn_err_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test'
   syn_combine_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test'
   syn_select_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/select_csv'
+  syn_superob_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/superob_uas'
   syn_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/syn_bufr'
   real_red_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/real_red_obs_bufr'
   model: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data'
@@ -74,6 +75,7 @@ create_csv:
   ascent_rate: 3.
   sample_freq: 60.
   max_height: 2000.
+  init_sid: 1
   sample_bufr_fname: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202010000.rap.prepbufr.csv'
   uas_offset: 0.
 
@@ -191,6 +193,88 @@ select_obs:
       - 183
       - 187
       - 188
+
+superobs:
+  use: False
+  in_csv_dir: 'syn_combine_csv'
+  map_proj: 'll_to_xy_lc'
+  map_proj_kw:
+    dx: 6
+    knowni: 449
+    knownj: 264
+  grouping: 'grid'
+  grouping_kw:
+    grid_fname: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/fix_data/RRFS_grid_mean_twice_gspacing.nc'
+    subtract_360_lon_grid: True
+  reduction_kw:
+    136:
+      var_dict:
+        TOB:
+          method: 'vert_cressman'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        QOB:
+          method: 'vert_cressman'
+          qm_kw: { field: 'QQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        POB:
+          method: 'vert_cressman'
+          qm_kw: { field: 'PQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        XOB:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+        YOB:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+        ZOB:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+        DHR:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+    236:
+      var_dict:
+        UOB:
+          method: 'vert_cressman'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        VOB:
+          method: 'vert_cressman'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        POB:
+          method: 'vert_cressman'
+          qm_kw: {field: 'PQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        XOB:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+        YOB:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+        ZOB:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+        DHR:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+  plot_vprof:
+    use: True
+    ob_type_thermo: 136
+    ob_type_wind: 236
+    all_sid:
+      - "'UA000001'"
+      - "'UA000010'"
+      - "'UA000050'"
 
 convert_syn_csv: 
   use: False

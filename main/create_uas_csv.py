@@ -51,6 +51,9 @@ sample_freq = 60.
 # UAS maximum height (m)
 max_height = 2000.
 
+# Starting SID number
+init_sid = 1
+
 # Sample BUFR CSV file (needed to determine which fields to include)
 sample_bufr_fname = '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202010000.rap.prepbufr.csv'
 
@@ -70,6 +73,7 @@ if len(sys.argv) > 1:
     ascent_rate = param['create_csv']['ascent_rate']
     sample_freq = param['create_csv']['sample_freq']
     max_height = param['create_csv']['max_height']
+    init_sid = param['create_csv']['init_sid']
     sample_bufr_fname = param['create_csv']['sample_bufr_fname']
 
 
@@ -110,7 +114,7 @@ for valid, start in zip(valid_times, flight_times):
     out_dict['subset'] = np.array([subset]*ntobs)
     out_dict['cycletime'] = np.array([valid.strftime('%Y%m%d%H')]*ntobs)
     out_dict['ntb'] = np.array(list(range(1, 2*nfobs+1))*nlocs)
-    out_dict['SID'] = np.array([["UA%06d" % i]*2*nfobs for i in range(1, nlocs+1)], dtype=str).ravel()
+    out_dict['SID'] = np.array([["UA%06d" % i]*2*nfobs for i in range(init_sid, nlocs+init_sid)], dtype=str).ravel()
     out_dict['XOB'] = np.array([[i]*2*nfobs for i in uas_locs['lon (deg E)'].values]).ravel() + 360.
     out_dict['YOB'] = np.array([[i]*2*nfobs for i in uas_locs['lat (deg N)'].values]).ravel()
     out_dict['DHR'] = np.array(list(np.arange((valid - start).total_seconds(), 
