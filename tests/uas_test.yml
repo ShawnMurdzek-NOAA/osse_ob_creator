@@ -13,18 +13,18 @@
 
 paths:
   real_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data'
-  real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/real_csv'
-  syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/perfect_conv'
-  syn_err_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_select_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_superob_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/superob_uas'
-  syn_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/syn_bufr'
-  real_red_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/real_red_obs_bufr'
+  real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/real_csv'
+  syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/bogus_csv'
+  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/perf_csv'
+  syn_err_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test'
+  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test'
+  syn_select_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test'
+  syn_superob_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/superob_uas'
+  syn_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/syn_bufr'
+  real_red_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/real_red_obs_bufr'
   model: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data'
-  log: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/logs'
-  plots: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/plots'
+  log: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/logs'
+  plots: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/plots'
   osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
 
@@ -35,9 +35,7 @@ shared:
   bufr_step: 60
   bufr_tag:
     - 'rap'
-    - 'rap_e'
-    - 'rap_p' 
-  uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/uas_site_locs_150km.txt'
+  uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data/uas_site_locs_TEST.txt'
   log_str: 'test'
 
 jobs:
@@ -46,8 +44,8 @@ jobs:
   alloc: 'wrfruc'
   csv_name: 'syn_ob_creator_jobs.csv'
   maxtries: 3
-  mem: '30GB'
-  time: '08:00:00'
+  mem: '5GB'
+  time: '00:15:00'
   partition: 'orion'
 
 #-----------
@@ -55,7 +53,7 @@ jobs:
 #-----------
 
 convert_bufr: 
-  use: True
+  use: False
 
 create_uas_grid: 
   use: False
@@ -70,13 +68,13 @@ create_uas_grid:
   make_plot: False
 
 create_csv: 
-  use: False
+  use: True
   max_time: 1500.
   ascent_rate: 3.
-  sample_freq: 60.
+  sample_freq: 1.
   max_height: 2000.
   init_sid: 1
-  sample_bufr_fname: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202010000.rap.prepbufr.csv'
+  sample_bufr_fname: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data/202202011200.rap.fake.prepbufr.csv'
   uas_offset: 0.
 
 interpolator: 
@@ -90,10 +88,10 @@ interpolator:
     - 'ADPUPA'
     - 'AIRCAR'
     - 'AIRCFT'
-  uas_obs: False
+  uas_obs: True
   copy_winds: False
-  interp_z_aircft: null
-  height_opt: null
+  interp_z_aircft: True
+  height_opt: 'agl'
   use_raob_drift: False
   coastline_correct: False
   use_Tv: False
@@ -176,8 +174,8 @@ select_obs:
     - 295
 
 superobs:
-  use: False
-  in_csv_dir: 'syn_combine_csv'
+  use: True
+  in_csv_dir: 'syn_perf_csv'
   map_proj: 'll_to_xy_lc'
   map_proj_kw:
     dx: 6
@@ -261,7 +259,7 @@ convert_syn_csv:
   use: True
 
 convert_real_red_csv: 
-  use: True
+  use: False
 
 plots:
   use: True
