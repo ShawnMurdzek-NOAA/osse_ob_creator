@@ -17,6 +17,9 @@ run_linear_interp_test=true
 # Option to run select_obs test
 run_select_obs_test=true
 
+# Option to run select_obs test
+run_uas_test=true
+
 
 ################################################################################
 # Create Test Data
@@ -213,6 +216,82 @@ fi
 
 
 ################################################################################
+# Run UAS Test
+################################################################################
+
+if ${run_uas_test}; then
+  
+  echo
+  echo '==============================='
+  echo "Running UAS Test"
+  echo
+
+  if [ -d ./uas_test ]; then
+    echo 'removing old uas_test directory'
+    rm -rf ./uas_test
+  fi
+  mkdir uas_test 
+  subdirs='bogus_csv perf_csv logs superob_uas syn_bufr plots'
+  for s in ${subdirs}; do
+    mkdir uas_test/${s}
+  done
+ 
+  source ../activate_python_env.sh
+  echo
+  echo 'calling create_syn_ob_jobs.py'
+  cp uas_test.yml ../
+  python ../create_syn_ob_jobs.py uas_test.yml
+
+  echo
+  echo 'calling run_synthetic_ob_creator.py'
+  job_line=$(python ../run_synthetic_ob_creator.py uas_test.yml | grep "submitted job")
+  if [[ `echo ${job_line} | wc -c` -lt 2 ]]; then
+    echo "no job submitted for uas test"
+    uas_test_pass=false
+  else
+    job_id=${job_line:16:8}  
+    echo "Slurm jobID = ${job_id}"
+
+    scomplete=`sacct --job ${job_id} | grep "COMPLETED" | wc -c`
+    while [ ${scomplete} -lt 2 ]; do
+      echo "waiting 1 min for job to finish..."
+      sleep 60
+      scomplete=`sacct --job ${job_id} | grep "COMPLETED" | wc -c`
+    done
+    rm ../uas_test.yml
+    echo "Job done. Start verification"
+    echo
+    
+    # First check to ensure that all output files exist
+    err_uas=0
+    for s in ${subdirs}; do
+      if [[ `ls -l uas_test/${s} | wc -l` -lt 2 ]]; then
+        echo "missing output file(s) in uas_test/${s}"
+        err_uas=1
+        uas_test_pass=false
+      fi
+    done
+    if [[ ${err_uas} -eq 0 ]]; then
+      echo "all output subdirectories are populated"
+    fi
+
+    # Perform verification using Python script
+    if [[ ${err_uas} -eq 0 ]]; then
+      python check_uas_test.py > ./uas_test/test.log
+      err_uas=`tail -1 ./uas_test/test.log`
+      if [[ ${err_uas} -eq 0 ]]; then
+        echo "UAS test passed"
+        uas_test_pass=true
+      else
+        echo "UAS test failed, error code = ${err_uas}"
+        uas_test_pass=false
+      fi
+    fi
+  fi
+fi
+
+
+################################################################################
 # Print Final Test Results
 ################################################################################
 
@@ -226,6 +305,9 @@ if ${run_linear_interp_test}; then
 fi
 if ${run_select_obs_test}; then
   echo "Pass Select Obs Test? ${select_obs_test_pass}"
+fi
+if ${run_UAS_test}; then
+  echo "Pass UAS Test? ${uas_test_pass}"
 fi
 echo
 
