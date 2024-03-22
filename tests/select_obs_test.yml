@@ -26,10 +26,10 @@ paths:
   log: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/logs'
   plots: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/plots'
   osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
-  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
+  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/hercules'
 
 shared:
-  machine: 'orion'
+  machine: 'hercules'
   bufr_start: '202202011200'
   bufr_end: '202202011200'
   bufr_step: 60
@@ -48,7 +48,7 @@ jobs:
   maxtries: 3
   mem: '5GB'
   time: '00:10:00'
-  partition: 'orion'
+  partition: 'hercules'
 
 #-----------
 # Components
