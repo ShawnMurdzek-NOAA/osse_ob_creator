@@ -1,0 +1,3 @@
+errtable.2nd_iter.7day: Tuned conventional observation errors using 2 iterations of the 
+                        Errico et al. (2013) method and all 7 days of the winter Nature Run period.
+                        See Murdzek et al. (2024, in prep) for details.
