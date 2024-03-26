@@ -5,11 +5,11 @@
 # User-specified options
 ################################################################################
 
-machine='orion'
+machine='hercules'
 
 # Option to re-create test data
 create_test_data=false
-prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/
+prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/hercules
 
 # Option to run linear_interp_test
 run_linear_interp_test=true
