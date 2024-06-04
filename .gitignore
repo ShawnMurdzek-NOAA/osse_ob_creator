@@ -20,3 +20,6 @@ tmp/
 /tests/linear_interp_test/
 /tests/select_obs_test/
 /tests/uas_test/
+
+# Test data
+*prepbufr*
