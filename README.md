@@ -79,6 +79,8 @@ Most of the Python packages listed above can be installed using `conda` except f
 
 ## Testing
 
+Before testing, the test data must be downloaded and linked (e.g., `ln -snf`) into the `tests/data` directory. Test data can be found on the MSU machines at `/work2/noaa/wrfruc/murdzek/src/bufr_test_data/osse_ob_creator`.
+
 Limited testing capabilities can be found in the `tests` directory. There is currently only one formal test (linear_interp_test), which tests the ability to convert a prepBUFR file to a CSV, create "perfect" synthetic observations via linear interpolation, then convert the output CSV back to a prepBUFR file. All data needed to run this test are included in the `tests/data` directory. Because the Nature Run output files and the prepBUFR file only contain a very small subset of the total Nature Run output and prepBUFR observations, respectively, this test runs relatively quickly (in a few minutes). 
 
 Steps to run a test:
