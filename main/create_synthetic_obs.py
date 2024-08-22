@@ -125,8 +125,8 @@ use_Tv = False
 
 # Option to add ceiling observations to surface-based platforms (ADPSFC, SFCSHP, MSONET)
 add_ceiling = False
-ceil_field = 'HGT_P0_L215_GLC0'
-#ceil_field = 'CEIL_P0_L215_GLC0'  # Experimental ceiling diagnostic #1
+#ceil_field = 'HGT_P0_L215_GLC0'  # Legacy ceiling diagnostic
+ceil_field = 'CEIL_P0_L2_GLC0'  # Experimental ceiling diagnostic #2
 
 # Option for debugging output (0 = none, 1 = some, 2 = a lot)
 debug = 2
@@ -774,6 +774,10 @@ if use_raob_drift:
         out_df.loc[ob_idx['ADPUPA'], 'XOB'] = bufr_csv.df.loc[ob_idx['ADPUPA'], 'XOB']
         out_df.loc[ob_idx['ADPUPA'], 'YOB'] = bufr_csv.df.loc[ob_idx['ADPUPA'], 'YOB']
         out_df.loc[ob_idx['ADPUPA'], 'DHR'] = bufr_csv.df.loc[ob_idx['ADPUPA'], 'DHR']
+
+# Set ceilings >= 20000 to NaN
+if add_ceiling:
+    out_df.loc[out_df['ceil'] > 19999.9, 'ceil'] = np.nan
 
 # Set certain fields all to NaN if desired
 for field in nan_fields:
