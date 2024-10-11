@@ -1,0 +1,380 @@
+# Input Parameters for Synthetic Observation Creation Program
+# 
+# The synthetic observation creation program consists of several components that can be turned on
+# or off using the "use" field below. Specific parameters for each component are specified in the
+# respective section. File paths are specified in their own section, as some paths are used by 
+# multiple components. Note that either UAS OR conventional obs can be created, not both. 
+#
+# Descriptions of the input parameters can be found here: README_inputs.md
+#
+# shawn.s.murdzek@noaa.gov
+#
+#===================================================================================================
+
+paths:
+  real_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
+  real_csv: ''
+  syn_bogus_csv: '/path/to/osse_ob_creator_EXAMPLE/bogus_uas_csv'
+  syn_perf_csv: '/path/to/osse_ob_creator_EXAMPLE/perf_uas_csv'
+  syn_err_csv: '/path/to/osse_ob_creator_EXAMPLE/err_uas_csv'
+  syn_combine_csv: '/path/to/osse_ob_creator_EXAMPLE/combine_csv'
+  syn_select_csv: ''
+  syn_superob_csv: '/path/to/osse_ob_creator_EXAMPLE/superob_uas'
+  syn_bufr: '/path/to/osse_ob_creator_EXAMPLE/syn_bufr'
+  real_red_bufr: ''
+  model: '/work2/noaa/wrfruc/murdzek/nature_run_spring/UPP'
+  log: '/path/to/osse_ob_creator_EXAMPLE/log'
+  plots: '/path/to/osse_ob_creator_EXAMPLE/plots'
+  osse_code: '/path/to/osse_ob_creator_EXAMPLE/osse_ob_creator'
+  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/hercules'
+
+shared:
+  machine: 'orion'
+  bufr_start: '202204291200'
+  bufr_end: '202204300000'
+  bufr_step: 60
+  bufr_tag:
+    - 'rap'
+  uas_grid_file: '/path/to/osse_ob_creator_EXAMPLE/osse_ob_creator/example/uas_sites_example.txt'
+  log_str: 'example'
+
+jobs:
+  max: 50
+  user: 'smurdzek'
+  alloc: 'wrfruc'
+  csv_name: 'syn_ob_creator_jobs.csv'
+  maxtries: 3
+  mem: '40GB'
+  time: '08:00:00'
+  partition: 'orion'
+
+#-----------
+# Components
+#-----------
+
+convert_bufr: 
+  use: False
+
+create_uas_grid: 
+  use: False
+  dx: 150000.
+  npts_we: 155
+  npts_sn: 91
+  land_closing: True
+  max_hole_size: 2
+  shp_fname: '/home/smurdzek/.local/share/cartopy/shapefiles/natural_earth/cultural/ne_50m_admin_0_countries'
+  nshape: 16
+  proj_str: '+proj=lcc +lat_0=39 +lon_0=-96 +lat_1=33 +lat_2=45'
+  max_sites: 2500
+  make_plot: False
+
+create_csv: 
+  use: True
+  max_time: 1500.
+  ascent_rate: 3.
+  sample_freq: 1.
+  max_height: 2000.
+  init_sid: 1
+  sample_bufr_fname: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/perfect_conv/real_csv/202204291800.rap.prepbufr.csv'
+  uas_offset: 0.
+
+interpolator: 
+  use: True
+  obs_2d:
+    - 'ADPSFC'
+    - 'SFCSHP'
+    - 'MSONET'
+    - 'GPSIPW'
+  obs_3d:
+    - 'ADPUPA'
+    - 'AIRCAR'
+    - 'AIRCFT'
+  uas_obs: True
+  copy_winds: False
+  interp_z_aircft: True
+  height_opt: 'agl'
+  use_raob_drift: True
+  coastline_correct: False
+  use_Tv: False
+  add_ceiling: False
+  debug: 0
+
+obs_errors: 
+  use: True
+  errtable: '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter_assim_only/include_uas/errtable.7day'
+  autocor_POB_obs:
+    - 126 
+  autocor_DHR_obs: 
+    - 136
+    - 236
+  autocor_ZOB_partition_DHR_obs: 
+    - 126
+  auto_reg_parm: 0.5
+  verbose: False
+  dewpt_check: False
+  plot_diff_hist: True
+
+combine_csv:
+  use: True
+  csv_dirs: 
+    - '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/corr_errors_2iter/err_csv'
+    - '/path/to/osse_ob_creator_EXAMPLE/err_uas_csv'
+
+select_obs:
+  use: False
+  in_csv_dir: 'syn_combine_csv'
+  include_real_red: True
+  obtypes:
+#    - 120
+#    - 122
+    - 130
+    - 131
+#    - 132
+    - 133
+    - 134
+    - 135
+    - 153
+    - 180
+    - 181
+    - 182
+    - 183
+    - 187
+    - 188
+    - 192
+    - 193
+    - 194 
+    - 195
+#    - 220
+#    - 221
+#    - 222
+    - 230
+    - 231
+#    - 232
+    - 233
+    - 234
+    - 235
+    - 280
+    - 281
+    - 282
+    - 284
+    - 287
+    - 288
+    - 292
+    - 293
+    - 294
+    - 295
+  missing_var:
+    POB:
+      - 180
+      - 181
+      - 182
+      - 183
+      - 187
+      - 188
+      - 192
+      - 193
+      - 194 
+      - 195
+      - 280
+      - 281
+      - 282
+      - 284
+      - 287
+      - 288
+      - 292
+      - 293
+      - 294
+      - 295
+    PRSS:
+      - 120
+      - 180
+      - 181
+      - 182
+      - 183
+      - 187
+      - 188
+      - 192
+      - 193
+      - 194 
+      - 195
+      - 220
+      - 280
+      - 281
+      - 282
+      - 284
+      - 287
+      - 288
+      - 292
+      - 293
+      - 294
+      - 295
+  qm_to_5:
+    PQM:
+      - 180
+      - 181
+      - 182
+      - 183
+      - 187
+      - 188
+      - 192
+      - 193
+      - 194 
+      - 195
+      - 280
+      - 281
+      - 282
+      - 284
+      - 287
+      - 288
+      - 292
+      - 293
+      - 294
+      - 295
+    PMQ:
+      - 120
+      - 180
+      - 181
+      - 182
+      - 183
+      - 187
+      - 188
+      - 192
+      - 193
+      - 194 
+      - 195
+      - 220
+      - 280
+      - 281
+      - 282
+      - 284
+      - 287
+      - 288
+      - 292
+      - 293
+      - 294
+      - 295
+
+superobs: 
+  use: True
+  in_csv_dir: 'syn_combine_csv'
+  map_proj: 'll_to_xy_lc'
+  map_proj_kw:
+    dx: 6
+    knowni: 449
+    knownj: 264
+  grouping: 'grid'
+  grouping_kw:
+    grid_fname: '/path/to/osse_ob_creator_EXAMPLE/osse_ob_creator/fix_data/RRFS_grid_mean_twice_gspacing.nc'
+    subtract_360_lon_grid: True
+  reduction_kw:
+    136:
+      var_dict:
+        TOB:
+          method: 'vert_cressman'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        QOB:
+          method: 'vert_cressman'
+          qm_kw: { field: 'QQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        POB:
+          method: 'vert_cressman'
+          qm_kw: { field: 'PQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        XOB:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+        YOB:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+        ZOB:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+        DHR:
+          method: 'mean'
+          qm_kw: { field: 'TQM', thres: 2 }
+          reduction_kw: {}
+    236:
+      var_dict:
+        UOB:
+          method: 'vert_cressman'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        VOB:
+          method: 'vert_cressman'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        POB:
+          method: 'vert_cressman'
+          qm_kw: {field: 'PQM', thres: 2 }
+          reduction_kw: { R: 'max' }
+        XOB:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+        YOB:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+        ZOB:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+        DHR:
+          method: 'mean'
+          qm_kw: {field: 'WQM', thres: 2 }
+          reduction_kw: {}
+  plot_vprof:
+    use: True
+    ob_type_thermo: 136
+    ob_type_wind: 236
+    all_sid:
+      - "'UA000001'"
+      - "'UA000002'"
+      - "'UA000003'"
+
+convert_syn_csv: 
+  use: True
+
+convert_real_red_csv: 
+  use: False
+
+plots:
+  use: True
+  diff_2d:
+    bufr_dir: 'syn_perf_csv'
+    subsets:
+      - 'SFCSHP'
+      - 'ADPSFC'
+      - 'MSONET'
+      - 'GPSIPW'
+    obs_vars:
+      - 'WSPD'
+      - 'WDIR'
+      - 'ELV'
+      - 'POB'
+      - 'TOB'
+      - 'QOB'
+      - 'UOB'
+      - 'VOB'
+      - 'ZOB'
+      - 'PWO'
+    domain: 'all'
+    ob_type: null 
+    use_assim_sites: False
+    gsi_diag_fname: ''
+    remove_small_sim_wspd: False
+    sim_wspd_thres: 4.
+    only_compare_strong_winds: False
+    real_wspd_thres: 4. 
+  diff_3d:
+    bufr_dir: 'syn_perf_csv'
+    exclude_sid:
+      - '00000775'
+  diff_uas:
+    bufr_dir: 'syn_perf_csv'
+    nclose: 3
+
