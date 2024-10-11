@@ -83,6 +83,7 @@ for bufr_t in bufr_times:
         fake_csv_err_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_err_csv'], t_str, tag)
         csv_comb_list_fname = '%s/combine_csv_list_%s_%s.txt' % (param['paths']['syn_combine_csv'], t_str, tag)
         fake_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_combine_csv'], t_str, tag)
+        in_csv_limit_uas_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['limit_uas']['in_csv_dir']], t_str, tag)
         in_csv_select_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['select_obs']['in_csv_dir']], t_str, tag)
         fake_csv_select_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_select_csv'], t_str, tag)
         in_csv_superob_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['superobs']['in_csv_dir']], t_str, tag)
@@ -216,6 +217,27 @@ for bufr_t in bufr_times:
             fptr.write('python combine_bufr_csv.py %s \\\n' % csv_comb_list_fname)
             fptr.write('                           %s \n\n' % fake_csv_comb_fname)
             convert_csv_fname = fake_csv_comb_fname        
+
+        if param['limit_uas']['use']:
+            fptr.write('# Limiting UAS flights\n')
+            fptr.write('echo ""\n')
+            fptr.write('echo "=============================================================="\n')
+            fptr.write('echo "Limiting UAS flights"\n')
+            fptr.write('echo ""\n')
+            fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
+            fptr.write('cp %s %s/%s.%s.input.csv\n' % (in_csv_limit_uas_fname,
+                                                       param['paths']['syn_limit_uas_csv'], 
+                                                       t_str, tag))
+            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
+            fptr.write('python limit_uas_flights.py %s \\\n' % t_str)
+            fptr.write('                            %s \\\n' % tag)
+            fptr.write('                            %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_limit_uas_csv'], 
+                                                          t_str, tag, 
+                                                          fake_csv_limit_uas_fname))
+            convert_csv_fname = fake_csv_limit_uas_fname        
+
         
         if param['select_obs']['use']:
             fptr.write('# Only select certain ob types for CSV files\n')
