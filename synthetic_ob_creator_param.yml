@@ -104,6 +104,8 @@ interpolator:
 limit_uas:
   use: True
   in_csv_dir: 'syn_perf_csv'
+  drop_col:
+    - 
   verbose: 2
   limits:
     236:

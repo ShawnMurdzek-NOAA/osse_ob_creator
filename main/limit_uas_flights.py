@@ -34,6 +34,9 @@ if len(sys.argv) > 1:
         param = yaml.safe_load(fptr)
     in_csv_fname = f"{param['paths']['syn_limit_uas_csv']}/{bufr_t}.{tag}.input.csv"
     out_csv_fname = f"{param['paths']['syn_limit_uas_csv']}/{bufr_t}.{tag}.output.csv"
+    drop_col = param['limit_uas']['drop_col']
+    if drop_col[0] == None:
+        drop_col = []
     verbose = param['limit_uas']['verbose']
     limits_param = param['limit_uas']['limits']
 else:
@@ -101,7 +104,6 @@ if verbose > 0:
 
 # Remove intermediate fields and save results
 if verbose > 1: print('removing intermediate columns', dt.datetime.now())
-drop_col = []
 for c in bufr_obj.df:
     if c not in keep_col:
         drop_col.append(c)
