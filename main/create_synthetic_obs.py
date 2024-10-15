@@ -344,6 +344,10 @@ for j, vinterp_d in enumerate(vinterp):
         if o in ob_idx.keys():
             out_df.loc[ob_idx[o], 'vgroup'] = j
 
+# Add liquid mixing ratio column to DataFrame
+if add_liq_mix:
+    out_df['liqmix'] = np.zeros(len(out_df))
+
 # Initialize variables (other than vertical coordinate) for 3D obs as 1e9 (note that this is 
 # different from NaN, which is used for missing values)
 for i, vinterp_d in enumerate(vinterp):
@@ -374,9 +378,6 @@ extra_col_float = extra_col_float + ['xlc', 'ylc', 'iwgt', 'jwgt']
 if add_ceiling:
     extra_col_int = extra_col_int + ['inear', 'jnear']
     out_df['ceil'] = np.zeros(nrow) * np.nan
-
-if add_liq_mix:
-    out_df['liqmix'] = np.zeros(nrow) * np.nan
 
 # Compute derived fields
 if add_liq_mix:

@@ -23,7 +23,7 @@ import pyDA_utils.map_proj as mp
 # Input files
 input_upp1 = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202011200_er.grib2'
 input_upp2 = '/work2/noaa/wrfruc/murdzek/nature_run_winter/UPP/20220201/wrfnat_202202011215_er.grib2'
-input_bufr_csv = '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202011200.rap.prepbufr.csv'
+input_bufr_csv = '/work2/noaa/wrfruc/murdzek/nature_run_winter/obs/perfect_conv/real_csv/202202011200.rap.prepbufr.csv'
 
 # Output directory
 output_dir = './'
@@ -40,12 +40,13 @@ vars_2d = {'TOB':'TMP_P0_L103_GLC0', 'QOB':'SPFH_P0_L103_GLC0', 'PWO':'PWAT_P0_L
            'PMO':'PRMSL_P0_L101_GLC0'}
 vars_2d_3d = {'UOB':'UGRD_P0_L103_GLC0', 'VOB':'VGRD_P0_L103_GLC0'}
 vars_3d = {'TOB':'TMP_P0_L105_GLC0',
-           'QOB':'SPFH_P0_L105_GLC0', 'UOB':'UGRD_P0_L105_GLC0', 'VOB':'VGRD_P0_L105_GLC0'}
+           'QOB':'SPFH_P0_L105_GLC0', 'UOB':'UGRD_P0_L105_GLC0', 'VOB':'VGRD_P0_L105_GLC0',
+           'QCOB':'CLWMR_P0_L105_GLC0', 'QROB':'RWMR_P0_L105_GLC0'}
 
 # Min and max values for each variable
 # Range of winds are made large on purpose to exaggerate any potential interpolation errors
-var_min = {'TOB':-30, 'QOB':0, 'PWO':0, 'PMO':990, 'UOB':-90, 'VOB':-90}
-var_max = {'TOB':20, 'QOB':5000, 'PWO':10, 'PMO':1010, 'UOB':90, 'VOB':90}
+var_min = {'TOB':-30, 'QOB':0, 'PWO':0, 'PMO':990, 'UOB':-90, 'VOB':-90, 'QCOB':0, 'QROB':0}
+var_max = {'TOB':20, 'QOB':5000, 'PWO':10, 'PMO':1010, 'UOB':90, 'VOB':90, 'QCOB':0.25, 'QROB':0.025}
 
 # Observation types to retain (one of each type will be retained)
 obs_2d = [292, 192, 281, 181, 284, 183, 287, 187, 193, 293, 280, 180, 294, 194, 282, 295, 195, 288, 
@@ -173,16 +174,18 @@ x_obs, y_obs = mp.ll_to_xy_lc(ob_df_red['YOB'].values, ob_df_red['XOB'].values -
 for i in range(len(ob_df_red)):
     if ob_df_red.loc[i, 'TYP'] in obs_2d:
         for v in var_min.keys():
-            ob_df_red.loc[i, v] = fake_linear_data(x_obs[i], y_obs[i], 0, ob_df_red.loc[i, 'DHR'], 
-                                                   var_min[v], var_max[v], xlen, ylen, p_rng, 
-                                                   0.25)
+            if v in ob_df_red.columns:
+                ob_df_red.loc[i, v] = fake_linear_data(x_obs[i], y_obs[i], 0, ob_df_red.loc[i, 'DHR'], 
+                                                       var_min[v], var_max[v], xlen, ylen, p_rng, 
+                                                       0.25)
     else:
         for v in var_min.keys():
-            ob_df_red.loc[i, v] = fake_linear_data(x_obs[i], y_obs[i], 
-                                                   np.log10(ob_df_red.loc[i, 'POB'] * 100), 
-                                                   ob_df_red.loc[i, 'DHR'], 
-                                                   var_min[v], var_max[v], xlen, ylen, p_rng, 
-                                                   0.25)
+            if v in ob_df_red.columns:
+                ob_df_red.loc[i, v] = fake_linear_data(x_obs[i], y_obs[i], 
+                                                       np.log10(ob_df_red.loc[i, 'POB'] * 100), 
+                                                       ob_df_red.loc[i, 'DHR'], 
+                                                       var_min[v], var_max[v], xlen, ylen, p_rng, 
+                                                       0.25)
  
 # Nature run UPP output
 x_upp, y_upp = np.meshgrid(np.arange(xlen), np.arange(ylen))

@@ -16,6 +16,7 @@ paths:
   real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/real_csv'
   syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
   syn_perf_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/perfect_conv'
+  syn_limit_uas_csv: ''
   syn_err_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
   syn_combine_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
   syn_select_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
@@ -99,6 +100,31 @@ interpolator:
   use_Tv: False
   add_ceiling: False
   debug: 2
+
+limit_uas:
+  use: False
+  in_csv_dir: 'syn_perf_csv'
+  drop_col:
+    - 
+  verbose: 2
+  limits:
+    236:
+      wind:
+        lim_kw:
+          lim: 20
+        remove_kw:
+          match_type:
+            - 136
+          nthres: 5
+    136:
+      icing_LIQMR:
+        lim_kw:
+          tob_lim: 2
+          ql_lim: 0.001
+        remove_kw:
+          match_type:
+            - 236
+          nthres: 5
 
 obs_errors: 
   use: False

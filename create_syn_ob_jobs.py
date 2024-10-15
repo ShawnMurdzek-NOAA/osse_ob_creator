@@ -81,6 +81,7 @@ for bufr_t in bufr_times:
         fake_csv_perf_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_perf_csv'], t_str, tag)
         real_red_csv_fname = '%s/%s.%s.real_red.prepbufr.csv' % (param['paths']['syn_perf_csv'], t_str, tag)
         in_csv_limit_uas_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['limit_uas']['in_csv_dir']], t_str, tag)
+        fake_csv_limit_uas_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_limit_uas_csv'], t_str, tag)
         fake_csv_err_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_err_csv'], t_str, tag)
         csv_comb_list_fname = '%s/combine_csv_list_%s_%s.txt' % (param['paths']['syn_combine_csv'], t_str, tag)
         fake_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_combine_csv'], t_str, tag)
@@ -283,7 +284,7 @@ for bufr_t in bufr_times:
                 fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
                 fptr.write('python plot_raw_superob_uas_vprofs.py %s \\\n' % t_str)
                 fptr.write('                                          %s \\\n' % tag)
-                fptr.write('                                          %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+                fptr.write('                                          %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_superob_fname        
 
         if param['convert_syn_csv']['use']:
