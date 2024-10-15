@@ -76,10 +76,15 @@ for typ in limits_param.keys():
             bufr_obj = lp.wspd_limit(bufr_obj, wind_type=typ,
                                      **limits_param[typ][lim_type]['lim_kw'])
 
-        # Icing detection
-        if lim_type == 'icing':
-            bufr_obj = lp.detect_icing(bufr_obj, thermo_type=typ,
-                                       **limits_param[typ][lim_type]['lim_kw'])
+        # Icing detection (using RH threshold)
+        if lim_type == 'icing_RH':
+            bufr_obj = lp.detect_icing_RH(bufr_obj, thermo_type=typ,
+                                          **limits_param[typ][lim_type]['lim_kw'])
+
+        # Icing detection (using ql threshold)
+        if lim_type == 'icing_LIQMR':
+            bufr_obj = lp.detect_icing_LIQMR(bufr_obj, thermo_type=typ,
+                                             **limits_param[typ][lim_type]['lim_kw'])
 
         # Remove BUFR obs that exceed the limit
         if verbose > 1: print('  removing obs   ', dt.datetime.now())

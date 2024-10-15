@@ -16,9 +16,9 @@ paths:
   real_csv: ''
   syn_bogus_csv: ''
   syn_perf_csv: ''
+  syn_limit_uas_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/main'
   syn_err_csv: ''
   syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_hspace_150km_ctrl/combine_csv'
-  syn_limit_uas_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/main'
   syn_select_csv: ''
   syn_superob_csv: '/work2/noaa/wrfruc/murdzek/src/ob_creator_test/superob_uas'
   syn_bufr: '/work2/noaa/wrfruc/murdzek/src/ob_creator_test/syn_bufr'
@@ -98,7 +98,31 @@ interpolator:
   coastline_correct: False
   use_Tv: False
   add_ceiling: False
+  add_liq_mix: False
   debug: 0
+
+limit_uas:
+  use: True
+  in_csv_dir: 'syn_perf_csv'
+  verbose: 2
+  limits:
+    236:
+      wind:
+        lim_kw:
+          lim: 20
+        remove_kw:
+          match_type:
+            - 136
+          nthres: 5
+    136:
+      icing_RH:
+        lim_kw:
+          tob_lim: 2
+          rh_lim: 90
+        remove_kw:
+          match_type:
+            - 236
+          nthres: 5
 
 obs_errors: 
   use: False
@@ -119,29 +143,6 @@ combine_csv:
   csv_dirs: 
     - '/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/perfect_conv'
     - '/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/perfect_uas'
-
-limit_uas:
-  use: True
-  in_csv_dir: 'syn_combine_csv'
-  verbose: 2
-  limits:
-    236:
-      wind:
-        lim_kw:
-          lim: 20
-        remove_kw:
-          match_type:
-            - 136
-          nthres: 5
-    136:
-      icing:
-        lim_kw:
-          tob_lim: 2
-          rh_lim: 90
-        remove_kw:
-          match_type:
-            - 236
-          nthres: 5
 
 select_obs:
   use: False
