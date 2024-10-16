@@ -197,6 +197,12 @@ for bufr_t in bufr_times:
             fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_limit_uas_csv'], 
                                                           t_str, tag, 
                                                           fake_csv_limit_uas_fname))
+            if param['limit_uas']['plot_timeseries']['use']:
+                fptr.write('mkdir %s/%s\n' % (param['paths']['plots'], t_str))
+                fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
+                fptr.write('python plot_full_limited_uas_timeseries.py %s \\\n' % t_str)
+                fptr.write('                                           %s \\\n' % tag)
+                fptr.write('                                           %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_limit_uas_fname        
 
         if param['obs_errors']['use']:

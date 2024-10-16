@@ -125,6 +125,14 @@ limit_uas:
           match_type:
             - 236
           nthres: 5
+  plot_timeseries:
+    use: True
+    plot_vars:
+      WSPD: 20
+      TOB: 2
+      RHOB: 90
+    n_sid: 5
+    obtype: 136
 
 obs_errors: 
   use: False
