@@ -12,10 +12,10 @@ create_test_data=false
 prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/hercules
 
 # Option to run linear_interp_test
-run_linear_interp_test=false
+run_linear_interp_test=true
 
 # Option to run select_obs test
-run_select_obs_test=false
+run_select_obs_test=true
 
 # Option to run UAS test
 run_uas_test=true

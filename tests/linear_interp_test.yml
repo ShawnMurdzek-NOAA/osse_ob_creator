@@ -30,7 +30,7 @@ paths:
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/orion'
 
 shared:
-  machine: 'orion'
+  machine: 'hercules'
   bufr_start: '202202011200'
   bufr_end: '202202011200'
   bufr_step: 60
@@ -49,7 +49,7 @@ jobs:
   maxtries: 3
   mem: '30GB'
   time: '08:00:00'
-  partition: 'orion'
+  partition: 'hercules'
 
 #-----------
 # Components
@@ -99,6 +99,7 @@ interpolator:
   coastline_correct: False
   use_Tv: False
   add_ceiling: False
+  add_liq_mix: False
   debug: 2
 
 limit_uas:
