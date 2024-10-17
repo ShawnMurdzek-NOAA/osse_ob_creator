@@ -105,7 +105,7 @@ limit_uas:
   use: True
   in_csv_dir: 'syn_perf_csv'
   drop_col:
-    - 
+    - 'liqmix'
   verbose: 2
   limits:
     236:
@@ -117,10 +117,10 @@ limit_uas:
             - 136
           nthres: 5
     136:
-      icing_RH:
+      icing_LIQMR:
         lim_kw:
           tob_lim: 2
-          rh_lim: 90
+          ql_lim: 0.0002
         remove_kw:
           match_type:
             - 236
@@ -130,7 +130,7 @@ limit_uas:
     plot_vars:
       WSPD: 20
       TOB: 2
-      RHOB: 90
+      liqmix: 0.0002
     n_sid: 5
     obtype: 136
 
