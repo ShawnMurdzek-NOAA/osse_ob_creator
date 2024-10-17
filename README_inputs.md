@@ -9,12 +9,13 @@ shawn.s.murdzek@noaa.gov
 
 ### paths
 
-Contains numerous paths that point to...
+Contains numerous paths that contain...
 
 - **real_bufr**: Real observation prepBUFR files. Note that create_syn_ob_jobs.py will not run if this path does not point to the location of the real prepBUFR files. This only applies to this path, other paths can be set to blank strings if not needed.
 - **real_csv**: Real observation CSV files. Decoded from the prepBUFR files in real_bufr.
 - **syn_bogus_csv**: "Empty" observation CSV files. Used to define UAS observation locations and times.
 - **syn_perf_csv**: "Perfect" (i.e., no added errors) synthetic observation CSV files. Synthetic observations are determined by interpolating Nature Run output to locations specified by the observation CSV files found in real_csv (if use = False in create_csv block) or syn_bogus_csv (if use = True in create_csv block).
+- **syn_limit_uas_csv**: Synthetic UAS observations with flights terminated after certain meteorological conditions are met (e.g., high winds, icing). 
 - **syn_err_csv**: Synthetic observation CSV files with added errors.
 - **syn_combine_csv**: Combined observation CSV files (conventional obs + UAS obs).
 - **syn_select_csv**: Observation CSV files with only certain observation types. Useful for data-denial experiments (OSEs).
@@ -101,7 +102,24 @@ Interpolates Nature Run output in space and time to observation locations specif
 - **coastline_correct**: Option to "correct" observations that occur near coastlines. This does not appear to help much, so it should usually be set to `False`.
 - **use_Tv**: Option to use virtual temperature when tvflg = 0. Not necessary for RAP prepBUFR files because all temperatures are sensible, not virtual.
 - **add_ceiling**: Option to add ceiling observations to surface-based platforms (ADPSFC, SFCSHP, MSONET).
+- **add_liq_mix**: Option to interpolate liquid water mixing ratio (cloud + rain mixing ratio) to the observations. This field is saved to a new CSV column labeled "liqmix".
 - **debug**: Option to add additional output for debugging (0 = none, 1 = some, 2 = a lot).
+
+### limit_uas
+
+Limits synthetic UAS flights based on local meteorology (e.g., high winds). Uses `main/limit_uas_flights.py`.
+
+- **in_csv_dir**: Which path from the `paths` section to pull observation CSVs from.
+- **drop_col**: List of columns to drop after limiting UAS flights. This is useful for removing columns in the BUFR CSV files that are only included for limiting UAS flights (e.g., liqmix).
+- **verbose**: Verbosity. Higher integers will print more output
+- **limits**: Parameters for limiting UAS flights. Includes 3 levels:
+    1. Observation type used to determine whether a limit is exceeded
+    2. Method for limiting UAS flight ("wind", "icing_RH", or "icing_LIQMR"; options can also be found in `main/limit_uas_flights.py`)
+    3. "lim_kw" and "remove_kw": Keyword arguments passed to either the method that determines whether a meteorological limit is exceeded or the method that actually removes the observations that exceed the meteorological limits, respectively. Keyword arguments can be found in `pyDA_utils/limit_prepbufr.py`.
+- **plot_timeseries**: Parameters for plotting timeseries of UAS observations before and after meteorological limits are applied.
+    - **plot_vars**: Variable to plot, along with a single value to plot as a dashed, horizontal line (useful for plotting the meteorological limit for that variable).
+    - **n_sid**: Number of unique SIDs to plot. The program will automatically choose the SIDs that had the largest reductions owing to the meteorological limits.
+    - **obtype**: Observation type to pull the SIDs for "n_sid" from.
 
 ### obs_errors 
 
