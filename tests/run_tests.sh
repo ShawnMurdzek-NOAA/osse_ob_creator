@@ -5,11 +5,11 @@
 # User-specified options
 ################################################################################
 
-machine='orion'
+machine='hercules'
 
 # Option to re-create test data
 create_test_data=false
-prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/orion
+prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/hercules
 
 # Option to run linear_interp_test
 run_linear_interp_test=true
@@ -17,7 +17,7 @@ run_linear_interp_test=true
 # Option to run select_obs test
 run_select_obs_test=true
 
-# Option to run select_obs test
+# Option to run UAS test
 run_uas_test=true
 
 
@@ -231,7 +231,7 @@ if ${run_uas_test}; then
     rm -rf ./uas_test
   fi
   mkdir uas_test 
-  subdirs='bogus_csv perf_csv logs superob_uas syn_bufr plots'
+  subdirs='bogus_csv perf_csv logs superob_uas syn_bufr plots limit_uas'
   for s in ${subdirs}; do
     mkdir uas_test/${s}
   done

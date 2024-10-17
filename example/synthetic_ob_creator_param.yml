@@ -16,6 +16,7 @@ paths:
   real_csv: ''
   syn_bogus_csv: '/path/to/osse_ob_creator_EXAMPLE/bogus_uas_csv'
   syn_perf_csv: '/path/to/osse_ob_creator_EXAMPLE/perf_uas_csv'
+  syn_limit_uas_csv: ''
   syn_err_csv: '/path/to/osse_ob_creator_EXAMPLE/err_uas_csv'
   syn_combine_csv: '/path/to/osse_ob_creator_EXAMPLE/combine_csv'
   syn_select_csv: ''
@@ -97,7 +98,41 @@ interpolator:
   coastline_correct: False
   use_Tv: False
   add_ceiling: False
+  add_liq_mix: False
   debug: 0
+
+limit_uas:
+  use: False
+  in_csv_dir: 'syn_perf_csv'
+  drop_col:
+    - 'liqmix'
+  verbose: 2
+  limits:
+    236:
+      wind:
+        lim_kw:
+          lim: 20
+        remove_kw:
+          match_type:
+            - 136
+          nthres: 5
+    136:
+      icing_LIQMR:
+        lim_kw:
+          tob_lim: 2
+          ql_lim: 0.0002
+        remove_kw:
+          match_type:
+            - 236
+          nthres: 5
+  plot_timeseries:
+    use: True
+    plot_vars:
+      WSPD: 20
+      TOB: 2
+      liqmix: 0.0002
+    n_sid: 5
+    obtype: 136
 
 obs_errors: 
   use: True

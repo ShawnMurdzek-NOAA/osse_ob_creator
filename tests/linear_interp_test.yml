@@ -16,6 +16,7 @@ paths:
   real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/real_csv'
   syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
   syn_perf_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/perfect_conv'
+  syn_limit_uas_csv: ''
   syn_err_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
   syn_combine_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
   syn_select_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
@@ -29,7 +30,7 @@ paths:
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/orion'
 
 shared:
-  machine: 'orion'
+  machine: 'hercules'
   bufr_start: '202202011200'
   bufr_end: '202202011200'
   bufr_step: 60
@@ -48,7 +49,7 @@ jobs:
   maxtries: 3
   mem: '30GB'
   time: '08:00:00'
-  partition: 'orion'
+  partition: 'hercules'
 
 #-----------
 # Components
@@ -98,7 +99,41 @@ interpolator:
   coastline_correct: False
   use_Tv: False
   add_ceiling: False
+  add_liq_mix: False
   debug: 2
+
+limit_uas:
+  use: False
+  in_csv_dir: 'syn_perf_csv'
+  drop_col:
+    - 
+  verbose: 2
+  limits:
+    236:
+      wind:
+        lim_kw:
+          lim: 20
+        remove_kw:
+          match_type:
+            - 136
+          nthres: 5
+    136:
+      icing_LIQMR:
+        lim_kw:
+          tob_lim: 2
+          ql_lim: 0.001
+        remove_kw:
+          match_type:
+            - 236
+          nthres: 5
+  plot_timeseries:
+    use: True
+    plot_vars:
+      WSPD: 20
+      TOB: 2
+      RHOB: 90
+    n_sid: 5
+    obtype: 136
 
 obs_errors: 
   use: False

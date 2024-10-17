@@ -96,6 +96,35 @@ print()
 print(err)
 
 
+#---------------------------------------------------------------------------------------------------
+# Check Limited UAS CSV BUFR File
+#---------------------------------------------------------------------------------------------------
+
+# Read in file
+original_csv = bufr.bufrCSV('./uas_test/limit_uas/202202011200.rap.input.csv')
+original_df = bufr.compute_wspd_wdir(original_csv.df)
+limit_uas_csv = bufr.bufrCSV('./uas_test/limit_uas/202202011200.rap.fake.prepbufr.csv')
+limit_uas_df = bufr.compute_wspd_wdir(limit_uas_csv.df)
+
+# Check that 'liqmix' column is dropped in the new DataFrame
+if 'liqmix' in limit_uas_df.columns:
+    print("ERROR: 'liqmix' not dropped from output of limit_uas_flights.py")
+    err = 10
+if 'liqmix' not in original_df.columns:
+    print("ERROR: 'liqmix' not in input for limit_uas_flights.py")
+    err = 10
+
+# Check that the WSPD threshold is only exceeded at most 4 times
+for sid in np.unique(limit_uas_df['SID'].values):
+    n_wspd = np.sum(limit_uas_df.loc[limit_uas_df['SID'] == sid, 'WSPD'] > 300)
+    if n_wspd > 4:
+        print('ERROR: WSPD threshold exceeded too many times in limit_uas_flights.py output')
+        err = 10
+
+print()
+print(err)
+
+
 """
 End check_uas_test.py
 """

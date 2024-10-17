@@ -1,11 +1,10 @@
 """
 Create Perfect Simulated Conventional Observations from WRF Nature Run Output
 
-Conventional obs are written into a new CSV file. Instrument errors and other obs (e.g.,  UAS) can 
+Conventional obs are written into a new CSV file. Instrument errors and other obs (e.g., UAS) can 
 then be added later. Conventional observations include the following: ADPSFC, SFCSHP, MSONET, 
-GPSIPW, ADPUPA, AIRCAR, AIRCFT. Radiosonde drift is NOT accounted for in this program. Use
-create_adpupa_obs.py to create realistic radiosonde obs with drift included. Obs in this script
-are created used pure interpolation (linear in x, y, and t and logaritmic in p).
+GPSIPW, ADPUPA, AIRCAR, AIRCFT. Obs in this script are created used pure interpolation (linear in x, 
+y, and t and logarithmic in p).
 
 To Do:
 1. Better handle unit conversions (e.g., the POB conversion from Pa to hPa is hard coded)
@@ -128,6 +127,9 @@ add_ceiling = False
 #ceil_field = 'HGT_P0_L215_GLC0'  # Legacy ceiling diagnostic
 ceil_field = 'CEIL_P0_L2_GLC0'  # Experimental ceiling diagnostic #2
 
+# Option to add total liquid water mixing ratio 3D field
+add_liq_mix = False
+
 # Option for debugging output (0 = none, 1 = some, 2 = a lot)
 debug = 2
 
@@ -169,6 +171,9 @@ if len(sys.argv) > 1:
     coastline_correct = param['interpolator']['coastline_correct']
     use_Tv = param['interpolator']['use_Tv']
     add_ceiling = param['interpolator']['add_ceiling']
+    add_liq_mix = param['interpolator']['add_liq_mix']
+    if add_liq_mix:
+        vars_3d['liqmix'] = 'LIQMR'
     debug = param['interpolator']['debug']
 
     # Use vertical interpolation in Z for UAS obs
@@ -339,6 +344,10 @@ for j, vinterp_d in enumerate(vinterp):
         if o in ob_idx.keys():
             out_df.loc[ob_idx[o], 'vgroup'] = j
 
+# Add liquid mixing ratio column to DataFrame
+if add_liq_mix:
+    out_df['liqmix'] = np.zeros(len(out_df))
+
 # Initialize variables (other than vertical coordinate) for 3D obs as 1e9 (note that this is 
 # different from NaN, which is used for missing values)
 for i, vinterp_d in enumerate(vinterp):
@@ -369,6 +378,11 @@ extra_col_float = extra_col_float + ['xlc', 'ylc', 'iwgt', 'jwgt']
 if add_ceiling:
     extra_col_int = extra_col_int + ['inear', 'jnear']
     out_df['ceil'] = np.zeros(nrow) * np.nan
+
+# Compute derived fields
+if add_liq_mix:
+    for key in wrf_ds.keys():
+        wrf_ds[key]['LIQMR'] = wrf_ds[key]['CLWMR_P0_L105_GLC0'] + wrf_ds[key]['RWMR_P0_L105_GLC0']
 
 
 #---------------------------------------------------------------------------------------------------

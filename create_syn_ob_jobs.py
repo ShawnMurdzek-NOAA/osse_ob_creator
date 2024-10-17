@@ -32,6 +32,15 @@ in_yaml = sys.argv[1]
 with open(in_yaml, 'r') as fptr:
     param = yaml.safe_load(fptr)
 
+# Create directories if they do not already exist
+all_dir = param['paths'].keys()
+skip_dir = ['real_bufr', 'model', 'osse_code', 'bufr_code']
+for d in all_dir:
+    path = param['paths'][d]
+    if ((d not in skip_dir) and (len(path) > 0) and (not os.path.exists(path))):
+        print(f'making {path}')
+        os.makedirs(path)
+
 # Copy YAML to log directory
 os.system('cp %s %s' % (in_yaml, param['paths']['log']))
 
@@ -80,6 +89,8 @@ for bufr_t in bufr_times:
         fake_csv_bogus_fname = param['paths']['syn_bogus_csv'] + '/%s.' + tag + '.prepbufr.csv'
         fake_csv_perf_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_perf_csv'], t_str, tag)
         real_red_csv_fname = '%s/%s.%s.real_red.prepbufr.csv' % (param['paths']['syn_perf_csv'], t_str, tag)
+        in_csv_limit_uas_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths'][param['limit_uas']['in_csv_dir']], t_str, tag)
+        fake_csv_limit_uas_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_limit_uas_csv'], t_str, tag)
         fake_csv_err_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_err_csv'], t_str, tag)
         csv_comb_list_fname = '%s/combine_csv_list_%s_%s.txt' % (param['paths']['syn_combine_csv'], t_str, tag)
         fake_csv_comb_fname = '%s/%s.%s.fake.prepbufr.csv' % (param['paths']['syn_combine_csv'], t_str, tag)
@@ -177,6 +188,32 @@ for bufr_t in bufr_times:
             fptr.write('                               %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_perf_fname        
 
+        if param['limit_uas']['use']:
+            fptr.write('# Limiting UAS flights\n')
+            fptr.write('echo ""\n')
+            fptr.write('echo "=============================================================="\n')
+            fptr.write('echo "Limiting UAS flights"\n')
+            fptr.write('echo ""\n')
+            fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
+            fptr.write('cp %s %s/%s.%s.input.csv\n' % (in_csv_limit_uas_fname,
+                                                       param['paths']['syn_limit_uas_csv'], 
+                                                       t_str, tag))
+            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
+            fptr.write('python limit_uas_flights.py %s \\\n' % t_str)
+            fptr.write('                            %s \\\n' % tag)
+            fptr.write('                            %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_limit_uas_csv'], 
+                                                          t_str, tag, 
+                                                          fake_csv_limit_uas_fname))
+            if param['limit_uas']['plot_timeseries']['use']:
+                fptr.write('mkdir %s/%s\n' % (param['paths']['plots'], t_str))
+                fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
+                fptr.write('python plot_full_limited_uas_timeseries.py %s \\\n' % t_str)
+                fptr.write('                                           %s \\\n' % tag)
+                fptr.write('                                           %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            convert_csv_fname = fake_csv_limit_uas_fname        
+
         if param['obs_errors']['use']:
             fptr.write('# Add observation errors\n')
             fptr.write('echo ""\n')
@@ -262,7 +299,7 @@ for bufr_t in bufr_times:
                 fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
                 fptr.write('python plot_raw_superob_uas_vprofs.py %s \\\n' % t_str)
                 fptr.write('                                          %s \\\n' % tag)
-                fptr.write('                                          %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+                fptr.write('                                          %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_superob_fname        
 
         if param['convert_syn_csv']['use']:

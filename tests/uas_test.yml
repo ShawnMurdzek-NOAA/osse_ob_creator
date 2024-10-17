@@ -16,6 +16,7 @@ paths:
   real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/real_csv'
   syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/bogus_csv'
   syn_perf_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/perf_csv'
+  syn_limit_uas_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test/limit_uas'
   syn_err_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test'
   syn_combine_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test'
   syn_select_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/uas_test'
@@ -29,7 +30,7 @@ paths:
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/orion'
 
 shared:
-  machine: 'orion'
+  machine: 'hercules'
   bufr_start: '202202011200'
   bufr_end: '202202011200'
   bufr_step: 60
@@ -46,7 +47,7 @@ jobs:
   maxtries: 3
   mem: '5GB'
   time: '00:15:00'
-  partition: 'orion'
+  partition: 'hercules'
 
 #-----------
 # Components
@@ -65,6 +66,7 @@ create_uas_grid:
   shp_fname: '/home/smurdzek/.local/share/cartopy/shapefiles/natural_earth/cultural/ne_50m_admin_0_countries'
   nshape: 16
   proj_str: '+proj=lcc +lat_0=39 +lon_0=-96 +lat_1=33 +lat_2=45'
+  max_sites: 2500
   make_plot: False
 
 create_csv: 
@@ -96,7 +98,41 @@ interpolator:
   coastline_correct: False
   use_Tv: False
   add_ceiling: False
+  add_liq_mix: True
   debug: 2
+
+limit_uas:
+  use: True
+  in_csv_dir: 'syn_perf_csv'
+  drop_col:
+    - 'liqmix'
+  verbose: 2
+  limits:
+    236:
+      wind:
+        lim_kw:
+          lim: 300
+        remove_kw:
+          match_type:
+            - 136
+          nthres: 5
+    136:
+      icing_LIQMR:
+        lim_kw:
+          tob_lim: 50
+          ql_lim: 0.5
+        remove_kw:
+          match_type:
+            - 236
+          nthres: 5
+  plot_timeseries:
+    use: True
+    plot_vars:
+      WSPD: 300
+      TOB: 50
+      liqmix: 0.5
+    n_sid: 2
+    obtype: 136
 
 obs_errors: 
   use: False
@@ -129,8 +165,9 @@ obs_errors:
 
 combine_csv:
   use: False
-  csv1_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
-  csv2_dir: '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_uas'
+  csv_dirs:
+    - '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_conv'
+    - '/work2/noaa/wrfruc/murdzek/nature_run_winter/synthetic_obs_csv/perfect_uas'
 
 select_obs:
   use: False
