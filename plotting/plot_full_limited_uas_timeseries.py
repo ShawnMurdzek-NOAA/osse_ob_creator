@@ -2,7 +2,7 @@
 Plot Full and Limited UAS Time Series
 
 Optional command-line arguments:
-    argv[1] = Time of prepbufr file (YYYYMMDDHH)
+    argv[1] = Time of prepbufr file (YYYYMMDDHHMM)
     argv[2] = Prepbufr file tag
     argv[3] = YAML file with program parameters
 
@@ -96,6 +96,12 @@ for sid in plot_sid:
             bufr_df['limit'].loc[bufr_df['limit']['SID'] == sid].plot(x='DHR', y=v, ax=ax, 
                                                                       kind='line', legend=False, 
                                                                       style=['--'], lw=2, c='r')
+
+        if v == 'liqmix':
+            ymin = -0.1 * plot_vars[v]
+            ymax = 1.05 * max([plot_vars[v], np.amax(bufr_df['full'].loc[bufr_df['full']['SID'] == sid, v])])
+            ax.set_ylim([ymin, ymax])
+
         ax.axhline(plot_vars[v], ls='--', c='k')
         ax.grid()
 
