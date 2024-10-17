@@ -32,6 +32,15 @@ in_yaml = sys.argv[1]
 with open(in_yaml, 'r') as fptr:
     param = yaml.safe_load(fptr)
 
+# Create directories if they do not already exist
+all_dir = param['paths'].keys()
+skip_dir = ['real_bufr', 'model', 'osse_code', 'bufr_code']
+for d in all_dir:
+    path = param['paths'][d]
+    if ((d not in skip_dir) and (len(path) > 0) and (not os.path.exists(path))):
+        print(f'making {path}')
+        os.makedirs(path)
+
 # Copy YAML to log directory
 os.system('cp %s %s' % (in_yaml, param['paths']['log']))
 
