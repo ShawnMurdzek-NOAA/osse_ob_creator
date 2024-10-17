@@ -2,6 +2,7 @@
 # Synthetic Observation Creator Code
 
 Shawn Murdzek  
+Cooperative Institute for Research in Environmental Sciences (CIRES) and CU Boulder
 NOAA/OAR/Global Systems Laboratory  
 shawn.s.murdzek@noaa.gov
 
@@ -9,7 +10,7 @@ shawn.s.murdzek@noaa.gov
 
 The programs included here create synthetic observations for an Observing System Simulation Experiment (OSSE) by interpolating Nature Run (NR) output to predefined observation locations and adding appropriate random errors (either purely Gaussian or autocorrelated in time or space). The program relies heavily on CSV files that contain the output from prepBUFR files. These CSV files define the observation locations and all synthetic obs are saved to these CSV files so that they can be easily converted into prepBUFR files that can be read by data assimilation packages.
 
-### Specific Programs
+### Contents
 
 1. `activate_python_env.sh`: Helper program that activates the Python environment necessary for this program.
 
@@ -17,13 +18,17 @@ The programs included here create synthetic observations for an Observing System
 
 3. `cron_run_synthetic_ob_creator.sh`: Bash script that runs `run_synthetic_ob_creator.py`. Can be run as a cron job.
 
-4. `run_synthetic_ob_creator.py`: Helper program that submits a bunch of bash jobs (up to a certain limit). Failed jobs are also retried.
+4. `environment.yml`: Python environment used by this program.
 
-5. `synthetic_ob_creator_param.yml`: Input settings for the synthetic observation creation program.
+5. `run_synthetic_ob_creator.py`: Helper program that submits a bunch of bash jobs (up to a certain limit). Failed jobs are also retried.
 
-6. `fix_data`: Fixed input data (e.g., UAS site location text files).
+6. `synthetic_ob_creator_param.yml`: Input settings for the synthetic observation creation program.
 
-7. `main`: Various programs needed to create synthetic observations. Inputs can either be specified within each of these programs or within `synthetic_ob_creator_param.yml`.
+7. `example/`: Example case.
+
+8. `fix_data/`: Fixed input data (e.g., UAS site location text files).
+
+9. `main/`: Various programs needed to create synthetic observations. Inputs can either be specified within each of these programs or within `synthetic_ob_creator_param.yml`.
 
     1. `add_obs_errors.py`: Reads a series of prepBUFR CSV files and adds random observation errors.
 
@@ -36,34 +41,27 @@ The programs included here create synthetic observations for an Observing System
     5. `create_synthetic_obs.py`: Intepolates NR output to synthetic observation locations.
 
     6. `create_uas_csv.py`: Creates an "empty" CSV for UAS observations. This CSV can then be passed to `create_synthetic_obs.py`.
+  
+    7. `limit_uas_flights.py`: Limits UAS flights owing to local meteorology.
     
-    7. `select_obtypes.py`: Controls which observation types (3-digit numbers) are within an observation CSV file.
+    8. `select_obtypes.py`: Controls which observation types (3-digit numbers) are within an observation CSV file.
 
-    8. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
+    9. `uas_sites.py`: Determines UAS observation locations across CONUS given a specified observation spacing.
 
-8. `plotting`: Various utilities for making comparison plots between synthetic and real observations.
+10. `plotting/`: Various utilities for making comparison plots between synthetic and real observations.
 
-9. `tests`: Contains various scripts to test whether the synthetic observations are being created correctly.
+11. `tests/`: Contains various scripts to test whether the synthetic observations are being created correctly.
 
-10. `utils`: Miscellaneous scripts that might be helpful (or that I haven't bothered deleting yet!)
+12. `utils/`: Miscellaneous scripts that might be helpful (or that I haven't bothered deleting yet!)
 
 ## Dependencies
 
-This program has been tested using a Python environment with the following packages:
+This program has been tested using the Python environment found in `environment.yml`. In addition to these packages, the following are also needed:
 
-- CartoPy v0.21.1
-- Matplotlib v3.7.1
-- MetPy v1.4.1
-- NumPy v1.25.2
-- Pandas v2.1.0
-- PyNIO v1.5.5
-- pyproj v3.5.0
-- Python v3.11.3
-- SciPy v1.10.1
-- Xarray v2023.4.2
 - [pyDA_utils](https://github.com/ShawnMurdzek-NOAA/pyDA_utils)
+- [prepbufr_decoder](https://github.com/ShawnMurdzek-NOAA/prepbufr_decoder)
 
-Most of the Python packages listed above can be installed using `conda` except for [pyDA_utils](https://github.com/ShawnMurdzek-NOAA/pyDA_utils). To avoid having to install each package independently, it is recommend that the user create an empty environment and install PyNIO followed by MetPy, which should install most of the other packages as dependencies. To install pyDA_utils, I recommend cloning the repo and adding the location of pyDA_utils to the `PYTHONPATH` environment variable. To be able to decode and encode prepBUFR files, the [prepbufr_decoder](https://github.com/ShawnMurdzek-NOAA/prepbufr_decoder) fortran program is also needed. 
+To install pyDA_utils, I recommend cloning the repo and adding the location of pyDA_utils to the `PYTHONPATH` environment variable. prepbufr_decoder is a Fortran program and must be compiled prior to running osse_ob_creator. This program is used to convert prepBUFR files to CSVs and vice versa. 
 
 ## Running the Program
 
