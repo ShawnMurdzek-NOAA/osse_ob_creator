@@ -101,6 +101,7 @@ for sid in plot_sid:
             ymin = -0.1 * plot_vars[v]
             ymax = 1.05 * max([plot_vars[v], np.amax(bufr_df['full'].loc[bufr_df['full']['SID'] == sid, v])])
             ax.set_ylim([ymin, ymax])
+            ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 
         ax.axhline(plot_vars[v], ls='--', c='k')
         ax.grid()
