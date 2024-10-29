@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import yaml
+import datetime as dt
 
 import pyDA_utils.bufr as bufr
 
@@ -39,6 +40,9 @@ n_sid = 10
 
 # Observation type to search/plot
 obtype = 136
+
+# Verbosity level
+verbose = 1
 
 # Output file name (include %s placeholder for SID)
 out_fname = './uas_full_limit_timeseries_%s.png'
@@ -66,18 +70,23 @@ if len(sys.argv) > 1:
 # Read in BUFR CSV files
 bufr_df = {}
 for fname, key in zip([bufr_file_full, bufr_file_limit], ['full', 'limit']):
+    if verbose > 0: print(f"reading {fname}")
     bufr_df[key] = bufr.bufrCSV(fname).df
 
     # Compute WSPD and RHOB if needed
     if 'WSPD' in plot_vars.keys():
+        if verbose > 0: print(f"computing WSPD")
         bufr_df[key] = bufr.compute_wspd_wdir(bufr_df[key])
     if 'RHOB' in plot_vars.keys():
+        if verbose > 0: print(f"computing RHOB")
         bufr_df[key] = bufr.compute_RH(bufr_df[key])
 
 # Determine SIDs to plot by finding which SIDs had the largest reductions owing to the flight limits
-all_sid = np.unique(bufr_df['limit'].loc[bufr_df['limit']['TYP'] == obtype, 'SID'])
-len_diff = np.array([np.sum(bufr_df['full']['SID'] == s) - np.sum(bufr_df['limit']['SID'] == s) for s in all_sid])
-plot_sid = all_sid[np.argsort(len_diff)[::-1][:n_sid]]
+sid_cts = {}
+for key in bufr_df.keys():
+    sid_cts[key] = {}
+    sid_cts[key]['SID'], sid_cts[key]['n'] = np.unique(bufr_df[key].loc[bufr_df[key]['TYP'] == obtype, 'SID'], return_counts=True)
+plot_sid = sid_cts['full']['SID'][np.argsort(sid_cts['full']['n'] - sid_cts['limit']['n'])[::-1][:n_sid]]
 
 # Create plots
 for sid in plot_sid:
@@ -86,6 +95,8 @@ for sid in plot_sid:
     # Create figure
     fig, axes = plt.subplots(nrows=len(plot_vars), ncols=1, figsize=(6, 1+2*len(plot_vars)),
                              sharex=True)
+    if len(plot_vars.keys()) == 1:
+        axes = [axes]
 
     # Loop over each variable
     for v, ax in zip(plot_vars.keys(), axes):
