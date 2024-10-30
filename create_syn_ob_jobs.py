@@ -24,6 +24,126 @@ import pyDA_utils.slurm_util as slurm
 
 
 #---------------------------------------------------------------------------------------------------
+# Helper Functions
+#---------------------------------------------------------------------------------------------------
+
+def write_sbatch_header(fptr, param, t_str, tag):
+    """
+    Write SBATCH headers to fptr
+
+    Parameters
+    ----------
+    fptr : file pointer
+        File to write SBATCH headers to
+    param : dictionary
+        Dictionary containing parameters from synthetic_ob_creator_param.yml
+    t_str : string
+        Time string
+    tag : string
+        prepBUFR tag (e.g., 'rap')
+
+    Returns
+    -------
+    fptr : file pointer
+        File with SBATCH headers written
+
+    """
+
+    fptr.write('#!/bin/sh\n\n')
+    fptr.write('#SBATCH -A %s\n' % param['jobs']['alloc'])
+    fptr.write('#SBATCH -t %s\n' % param['jobs']['time'])
+    fptr.write('#SBATCH --nodes=1 --ntasks=1\n')
+    fptr.write('#SBATCH --mem=%s\n' % param['jobs']['mem'])
+    fptr.write('#SBATCH -o %s/%s.%s.%s.log\n' % (param['paths']['log'], t_str, tag, param['shared']['log_str']))
+    fptr.write('#SBATCH --partition=%s\n\n' % param['jobs']['partition'])
+
+    return fptr
+
+
+def create_fname(param, t_str, tag, task=None):
+    """
+    Create a batch file name
+
+    Parameters
+    ----------
+    param : dictionary
+        Dictionary containing parameters from synthetic_ob_creator_param.yml
+    t_str : string
+        Time string
+    tag : string
+        prepBUFR tag (e.g., 'rap')
+    task : string, optional
+        Task name (included in batch script file name)
+
+    Returns
+    -------
+    fname : string
+        Batch file name
+
+    """
+
+    if param['jobs']['use_rocoto']:
+        fname = f"{param['paths']['log']}/syn_obs_{t_str}_{tag}_{param['shared']['log_str']}_{task}.sh"
+    else:
+        fname = f"{param['paths']['log']}/syn_obs_{t_str}_{tag}_{param['shared']['log_str']}.sh"
+
+    return fname
+
+
+def init_file(param, t_str, tag, task=None):
+    """
+    Open a new batch script file and write headers
+
+    Parameters
+    ----------
+    param : dictionary
+        Dictionary containing parameters from synthetic_ob_creator_param.yml
+    t_str : string
+        Time string
+    tag : string
+        prepBUFR tag (e.g., 'rap')
+    task : string, optional
+        Task name (included in batch script file name)
+
+    Returns
+    -------
+    fptr : file pointer
+        Batch file pointer
+    fname : string
+        Batch file name
+
+    """
+
+    fname = create_fname(param, t_str, tag, task=task)
+    fptr = open(fname, 'w')
+    fptr = write_sbatch_header(fptr, param, t_str, tag)
+    fptr.write('date\n\n')
+
+    return fptr, fname
+
+
+def close_file(fptr):
+    """
+    Write closing lines to a file, then close file
+
+    Parameters
+    ----------
+    fptr : file pointer
+        Batch script file pointer
+
+    Returns
+    -------
+    None
+
+    """
+
+    fptr.write('date')
+    fptr.close()
+
+    return None
+
+
+#---------------------------------------------------------------------------------------------------
 # Create Job Scripts
 #---------------------------------------------------------------------------------------------------
 
@@ -34,7 +154,7 @@ with open(in_yaml, 'r') as fptr:
 
 # Create directories if they do not already exist
 all_dir = param['paths'].keys()
-skip_dir = ['real_bufr', 'model', 'osse_code', 'bufr_code']
+skip_dir = ['real_bufr', 'model', 'osse_code', 'bufr_code', 'rocoto']
 for d in all_dir:
     path = param['paths'][d]
     if ((d not in skip_dir) and (len(path) > 0) and (not os.path.exists(path))):
@@ -50,8 +170,11 @@ bufr_end_time = dt.datetime.strptime(param['shared']['bufr_end'], '%Y%m%d%H%M')
 while bufr_times[-1] < bufr_end_time:
     bufr_times.append(bufr_times[-1] + dt.timedelta(minutes=param['shared']['bufr_step']))
 
+# Keep track of job names if not using rocoto
+if not param['jobs']['use_rocoto']:
+    j_names = []
+
 # Create job submission files
-j_names = []
 for bufr_t in bufr_times:
 
     # Determine first and last WRF file time
@@ -111,20 +234,12 @@ for bufr_t in bufr_times:
             continue 
 
         # Create job script
-        j_names.append('%s/syn_obs_%s_%s_%s.sh' % (param['paths']['log'], t_str, tag, param['shared']['log_str']))
-
-        fptr = open(j_names[-1], 'w') 
-        fptr.write('#!/bin/sh\n\n')
-        fptr.write('#SBATCH -A %s\n' % param['jobs']['alloc'])
-        fptr.write('#SBATCH -t %s\n' % param['jobs']['time'])
-        fptr.write('#SBATCH --nodes=1 --ntasks=1\n')
-        fptr.write('#SBATCH --mem=%s\n' % param['jobs']['mem'])
-        fptr.write('#SBATCH -o %s/%s.%s.%s.log\n' % (param['paths']['log'], t_str, tag, param['shared']['log_str']))
-        fptr.write('#SBATCH --partition=%s\n\n' % param['jobs']['partition'])
-            
-        fptr.write('date\n\n')
+        if not param['jobs']['use_rocoto']:
+            fptr, batch_fname = init_file(param, t_str, tag)
+            j_names.append(batch_fname)
 
         if param['convert_bufr']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='convert_bufr')
             fptr.write('# Convert real prepBUFR to CSV\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -140,8 +255,10 @@ for bufr_t in bufr_times:
             fptr.write('mv ./prepbufr.csv %s\n' % real_csv_fname)
             fptr.write('cd ..\n')
             fptr.write('rm -r %s/tmp_%s_%s\n\n' % (param['paths']['real_csv'], t_str, tag))    
+            if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['create_uas_grid']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='create_uas_grid')
             fptr.write('# Create UAS grid\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -151,8 +268,10 @@ for bufr_t in bufr_times:
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('python uas_sites.py %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['create_csv']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='create_csv')
             fptr.write('# Create UAS CSV\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -165,8 +284,10 @@ for bufr_t in bufr_times:
             fptr.write('                         %s \\\n' % fake_csv_bogus_fname)
             fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_bogus_fname
+            if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['interpolator']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='interpolator')
             fptr.write('# Perform interpolation from model grid to obs location\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -187,8 +308,10 @@ for bufr_t in bufr_times:
             fptr.write('                               %s \\\n' % tag)
             fptr.write('                               %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_perf_fname        
+            if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['limit_uas']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='limit_uas')
             fptr.write('# Limiting UAS flights\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -213,8 +336,10 @@ for bufr_t in bufr_times:
                 fptr.write('                                           %s \\\n' % tag)
                 fptr.write('                                           %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_limit_uas_fname        
+            if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['obs_errors']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='obs_errors')
             fptr.write('# Add observation errors\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -233,8 +358,10 @@ for bufr_t in bufr_times:
                                                           t_str, tag, 
                                                           fake_csv_err_fname))
             convert_csv_fname = fake_csv_err_fname        
+            if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['combine_csv']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='combine_csv')
 
             # First, create file with CSV file names to be combined
             comb_fptr = open(csv_comb_list_fname, 'w')
@@ -253,8 +380,10 @@ for bufr_t in bufr_times:
             fptr.write('python combine_bufr_csv.py %s \\\n' % csv_comb_list_fname)
             fptr.write('                           %s \n\n' % fake_csv_comb_fname)
             convert_csv_fname = fake_csv_comb_fname        
+            if param['jobs']['use_rocoto']: close_file(fptr)
         
         if param['select_obs']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='select_obs')
             fptr.write('# Only select certain ob types for CSV files\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -275,8 +404,10 @@ for bufr_t in bufr_times:
                 fptr.write('                         %s \\\n' % out_csv_real)
                 fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_select_fname        
+            if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['superobs']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='superobs')
             fptr.write('# Creating superobs\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -301,8 +432,10 @@ for bufr_t in bufr_times:
                 fptr.write('                                          %s \\\n' % tag)
                 fptr.write('                                          %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_superob_fname        
+            if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['convert_syn_csv']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='convert_syn_csv')
             fptr.write('# Convert synthetic ob CSV to prepBUFR\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -318,8 +451,10 @@ for bufr_t in bufr_times:
             fptr.write('mv ./prepbufr %s\n' % fake_bufr_fname)
             fptr.write('cd ..\n')
             fptr.write('rm -r %s/tmp_%s_%s\n\n' % (param['paths']['syn_bufr'], t_str, tag))
+            if param['jobs']['use_rocoto']: close_file(fptr)
         
         if param['convert_real_red_csv']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='convert_real_red_csv')
             fptr.write('# Convert real_red ob CSV to prepBUFR\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -338,8 +473,10 @@ for bufr_t in bufr_times:
             fptr.write('mv ./prepbufr %s\n' % real_red_bufr_fname)
             fptr.write('cd ..\n')
             fptr.write('rm -r %s/tmp_%s_%s\n\n' % (param['paths']['real_red_bufr'], t_str, tag))
+            if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['plots']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='plots')
             fptr.write('# Make plots\n')
             fptr.write('echo ""\n')
             fptr.write('echo "=============================================================="\n')
@@ -361,12 +498,72 @@ for bufr_t in bufr_times:
                 fptr.write('                              %s \\\n' % t_str)
                 fptr.write('                              %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
 
-        fptr.write('date')
-        fptr.close()
+        close_file(fptr)
   
-# Create CSV with job submission information
-all_jobs = slurm.job_list(jobs=j_names)
-all_jobs.save('%s/%s' % (param['paths']['log'], param['jobs']['csv_name']))
+if param['jobs']['use_rocoto']:
+    # Change bash script permissions and create rocoto workflow
+    os.system(f"chmod 740 {param['paths']['log']}/*.sh")
+    if not os.path.exists(param['paths']['rocoto']):
+        os.makedirs(param['paths']['rocoto'])
+    for tag in param['shared']['bufr_tag']:
+        wflow_fptr = open(f'{param["paths"]["rocoto"]}/syn_obs_{tag}.xml', 'w')
+
+        # Header information
+        wflow_fptr.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        wflow_fptr.write('<!DOCTYPE workflow [\n\n')
+        wflow_fptr.write('<!--\nJob information\n-->\n')
+        wflow_fptr.write('<!ENTITY SCHED           "slurm">\n')
+        wflow_fptr.write(f'<!ENTITY RSRV_DEFAULT    "<account>{param["jobs"]["alloc"]}</account><queue>batch</queue><partition>{param["jobs"]["partition"]}</partition>">\n')
+        wflow_fptr.write('<!ENTITY CORES           "1">\n')
+        wflow_fptr.write(f'<!ENTITY MEM             "{param["jobs"]["mem"]}">\n')
+        wflow_fptr.write(f'<!ENTITY WTIME           "{param["jobs"]["time"]}">\n\n')
+        wflow_fptr.write('<!--\nDirectories\n-->\n')
+        wflow_fptr.write(f'<!ENTITY WFLOW_DIR   "{param["paths"]["rocoto"]}">\n')
+        wflow_fptr.write(f'<!ENTITY LOG_DIR     "{param["paths"]["log"]}">\n')
+        wflow_fptr.write(f'<!ENTITY BUFR_TAG    "{tag}">\n')
+        wflow_fptr.write(f'<!ENTITY TAG         "{param["shared"]["log_str"]}">\n\n\n')
+        wflow_fptr.write(f']>\n<workflow realtime="F" scheduler="&SCHED;" cyclethrottle="{param["jobs"]["max"]}" cyclelifespan="30:00:00:00">\n\n')
+        wflow_fptr.write(f'  <cycledef group="create_obs"> {param["shared"]["bufr_start"]} {param["shared"]["bufr_end"]} 01:00:00 </cycledef>\n\n')
+        wflow_fptr.write('  <log>\n    <cyclestr>&WFLOW_DIR;/syn_obs_&BUFR_TAG;_wflow.log</cyclestr>\n  </log>\n\n')
+
+        # Loop over each component (hard-code all_comp list b/c order matters)
+        last_comp=None
+        all_comp = ['convert_bufr', 'create_uas_grid', 'create_csv', 'interpolator', 'limit_uas',
+                    'obs_errors', 'combine_csv', 'select_obs', 'superobs', 'convert_syn_csv', 
+                    'convert_real_red_csv', 'plots']
+        for c in all_comp:
+            if param[c]['use']:
+                wflow_fptr.write('<!--\n'+50*'*'+'\n'+50*'*'+'\n'+'-->\n')
+                wflow_fptr.write(f'  <task name="{c}" cycledefs="create_obs" maxtries="1">\n\n')
+                wflow_fptr.write('    &RSRV_DEFAULT;\n\n')
+                wflow_fptr.write(f'    <command><cyclestr>&LOG_DIR;/syn_obs_@Y@m@d@H@M_&BUFR_TAG;_&TAG;_{c}.sh</cyclestr></command>\n\n')
+                wflow_fptr.write('    <cores>&CORES;</cores>\n')
+                wflow_fptr.write('    <walltime>&WTIME;</walltime>\n')
+                wflow_fptr.write('    <memory>&MEM;</memory>\n')
+                wflow_fptr.write(f'    <jobname>&BUFR_TAG;_{c}</jobname>\n')
+                wflow_fptr.write(f'    <join><cyclestr>&LOG_DIR;/@Y@m@d@H@M.&BUFR_TAG;.&TAG;.{c}.log</cyclestr></join>\n\n')
+                if last_comp != None:
+                    wflow_fptr.write('    <dependency>\n')
+                    wflow_fptr.write(f'      <taskdep task="{last_comp}"/>\n')
+                    wflow_fptr.write('    </dependency>\n\n')
+                wflow_fptr.write('  </task>\n')
+                last_comp = c
+
+        wflow_fptr.write('\n</workflow>')
+        wflow_fptr.close()
+
+        # Create bash script to launch rocoto workflow
+        launch_fname = f'{param["paths"]["rocoto"]}/launch_syn_obs_{tag}_wflow.sh'
+        launch_fptr = open(launch_fname, 'w')
+        launch_fptr.write('\nmodule load contrib rocoto\n')
+        launch_fptr.write(f'rocotorun -w syn_obs_{tag}.xml -d syn_obs_{tag}.db')
+        launch_fptr.close()
+        os.system(f'chmod 740 {launch_fname}')
+
+else:
+    # Create CSV with job submission information if not using rocoto
+    all_jobs = slurm.job_list(jobs=j_names)
+    all_jobs.save('%s/%s' % (param['paths']['log'], param['jobs']['csv_name']))
  
 
 """

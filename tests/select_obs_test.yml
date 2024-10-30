@@ -28,6 +28,7 @@ paths:
   plots: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/select_obs_test/plots'
   osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/orion'
+  rocoto: ''
 
 shared:
   machine: 'hercules'
@@ -50,6 +51,7 @@ jobs:
   mem: '5GB'
   time: '00:10:00'
   partition: 'hercules'
+  use_rocoto: False
 
 #-----------
 # Components
