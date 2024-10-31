@@ -253,7 +253,7 @@ for bufr_t in bufr_times:
             fptr.write('echo "Convert real prepBUFR to CSV"\n')
             fptr.write('echo ""\n')
             fptr.write('cd %s\n' % param['paths']['real_csv'])
-            fptr.write('mkdir tmp_%s_%s\n' % (t_str, tag))
+            fptr.write('mkdir -p tmp_%s_%s\n' % (t_str, tag))
             fptr.write('cd tmp_%s_%s\n' % (t_str, tag))
             fptr.write('cp -r  %s/bin/* .\n' % param['paths']['bufr_code']) 
             fptr.write('source %s/env/bufr_%s.env\n' % (param['paths']['bufr_code'], param['shared']['machine']))
@@ -337,7 +337,7 @@ for bufr_t in bufr_times:
                                                           t_str, tag, 
                                                           fake_csv_limit_uas_fname))
             if param['limit_uas']['plot_timeseries']['use']:
-                fptr.write('mkdir %s/%s\n' % (param['paths']['plots'], t_str))
+                fptr.write('mkdir -p %s/%s\n' % (param['paths']['plots'], t_str))
                 fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
                 fptr.write('python plot_full_limited_uas_timeseries.py %s \\\n' % t_str)
                 fptr.write('                                           %s \\\n' % tag)
@@ -433,7 +433,7 @@ for bufr_t in bufr_times:
                                                           t_str, tag, 
                                                           fake_csv_superob_fname))
             if param['superobs']['plot_vprof']['use']:
-                fptr.write('mkdir %s/%s\n' % (param['paths']['plots'], t_str))
+                fptr.write('mkdir -p %s/%s\n' % (param['paths']['plots'], t_str))
                 fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
                 fptr.write('python plot_raw_superob_uas_vprofs.py %s \\\n' % t_str)
                 fptr.write('                                          %s \\\n' % tag)
@@ -449,7 +449,7 @@ for bufr_t in bufr_times:
             fptr.write('echo "Convert synthetic ob CSV to prepBUFR"\n')
             fptr.write('echo ""\n')
             fptr.write('cd %s\n' % param['paths']['syn_bufr'])
-            fptr.write('mkdir tmp_%s_%s\n' % (t_str, tag))
+            fptr.write('mkdir -p tmp_%s_%s\n' % (t_str, tag))
             fptr.write('cd tmp_%s_%s\n' % (t_str, tag))
             fptr.write('cp -r %s/bin/* .\n' % param['paths']['bufr_code']) 
             fptr.write('source %s/env/bufr_%s.env\n' % (param['paths']['bufr_code'], param['shared']['machine']))
@@ -468,7 +468,7 @@ for bufr_t in bufr_times:
             fptr.write('echo "Convert real_red ob CSV to prepBUFR"\n')
             fptr.write('echo ""\n')
             fptr.write('cd %s\n' % param['paths']['real_red_bufr'])
-            fptr.write('mkdir tmp_%s_%s\n' % (t_str, tag))
+            fptr.write('mkdir -p tmp_%s_%s\n' % (t_str, tag))
             fptr.write('cd tmp_%s_%s\n' % (t_str, tag))
             fptr.write('cp -r %s/bin/* .\n' % param['paths']['bufr_code']) 
             fptr.write('source %s/env/bufr_%s.env\n' % (param['paths']['bufr_code'], param['shared']['machine']))
@@ -490,7 +490,7 @@ for bufr_t in bufr_times:
             fptr.write('echo "Make plots"\n')
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
-            fptr.write('mkdir %s/%s\n' % (param['paths']['plots'], t_str))
+            fptr.write('mkdir -p %s/%s\n' % (param['paths']['plots'], t_str))
             fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             if param['create_csv']['use']:
