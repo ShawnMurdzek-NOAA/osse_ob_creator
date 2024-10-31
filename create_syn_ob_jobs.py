@@ -27,7 +27,7 @@ import pyDA_utils.slurm_util as slurm
 # Helper Functions
 #---------------------------------------------------------------------------------------------------
 
-def write_sbatch_header(fptr, param, t_str, tag):
+def write_sbatch_header(fptr, param, t_str, tag, task=None):
     """
     Write SBATCH headers to fptr
 
@@ -41,6 +41,8 @@ def write_sbatch_header(fptr, param, t_str, tag):
         Time string
     tag : string
         prepBUFR tag (e.g., 'rap')
+    task : string, optional
+        Task name to add to output log file name
 
     Returns
     -------
@@ -54,7 +56,11 @@ def write_sbatch_header(fptr, param, t_str, tag):
     fptr.write('#SBATCH -t %s\n' % param['jobs']['time'])
     fptr.write('#SBATCH --nodes=1 --ntasks=1\n')
     fptr.write('#SBATCH --mem=%s\n' % param['jobs']['mem'])
-    fptr.write('#SBATCH -o %s/%s.%s.%s.log\n' % (param['paths']['log'], t_str, tag, param['shared']['log_str']))
+    if param['jobs']['use_rocoto']:
+        log = f"{param['paths']['log']}/{t_str}.{tag}.{param['shared']['log_str']}.{task}.log"
+    else:
+        log = f"{param['paths']['log']}/{t_str}.{tag}.{param['shared']['log_str']}.log"
+    fptr.write(f"#SBATCH -o {log}\n")
     fptr.write('#SBATCH --partition=%s\n\n' % param['jobs']['partition'])
 
     return fptr
@@ -116,7 +122,8 @@ def init_file(param, t_str, tag, task=None):
 
     fname = create_fname(param, t_str, tag, task=task)
     fptr = open(fname, 'w')
-    fptr = write_sbatch_header(fptr, param, t_str, tag)
+    fptr = write_sbatch_header(fptr, param, t_str, tag, task=task)
+    fptr.write('set -e -x\n\n')
     fptr.write('date\n\n')
 
     return fptr, fname
