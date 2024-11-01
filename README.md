@@ -71,9 +71,11 @@ To install pyDA_utils, I recommend cloning the repo and adding the location of p
 
 3. Run `python create_synthetic_obs.py` to create the job submission scripts
 
-4. Add `cron_run_synthetic_ob_creator.sh` to your crontab using the following line:
+4. Run the jobs in one of two ways:
+   
+    1. If a single job is created for each observation file, run the program by adding `cron_run_synthetic_ob_creator.sh` to your crontab. E.g., `*/30 * * * * source /etc/profile && cd /path/to/osse_ob_creator && bash ./cron_run_synthetic_ob_creator.sh`
 
-`*/30 * * * * source /etc/profile && cd /path/to/osse_ob_creator && bash ./cron_run_synthetic_ob_creator.sh`
+    2. If a single job is created for each task (i.e., multiple jobs per observation file), run using Rocoto. `create_synthetic_obs.py` will create a launch script in the `<rocoto>` directory that can be added to your crontab to run the Rocoto workflow.
 
 ## Testing
 

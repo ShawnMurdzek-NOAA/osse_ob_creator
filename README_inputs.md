@@ -27,6 +27,7 @@ Contains numerous paths that contain...
 - **plots**: Figures.  
 - **osse_code**: osse_ob_creator program.
 - **bufr_code**: prepbufr_decoder program.
+- **rocoto**: Rocoto workflow.
 
 ### shared
 
@@ -52,6 +53,7 @@ Contains parameters needed for the job submission files.
 - **mem**: Memory required for each job (the interpolator component requires ~30 GB).
 - **time**: Maximum allowed walltime for each job.
 - **partition**: HPC partition used for the jobs.
+- **use_rocoto**: Option to create a separate bash job for each component and run each component as part of a Rocoto workflow.
 
 ## Component Blocks
 

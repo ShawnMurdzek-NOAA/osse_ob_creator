@@ -15,39 +15,41 @@ paths:
   real_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
   real_csv: ''
   syn_bogus_csv: ''
-  syn_perf_csv: ''
-  syn_limit_uas_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/main'
-  syn_err_csv: ''
-  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_hspace_150km_ctrl/combine_csv'
+  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_ql/combine/combine_csv2'
+  syn_limit_uas_csv: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/limit_uas_csv'
+  syn_err_csv: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/err_uas_csv'
+  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/combine_csv'
   syn_select_csv: ''
-  syn_superob_csv: '/work2/noaa/wrfruc/murdzek/src/ob_creator_test/superob_uas'
-  syn_bufr: '/work2/noaa/wrfruc/murdzek/src/ob_creator_test/syn_bufr'
+  syn_superob_csv: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/superob_uas'
+  syn_bufr: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/syn_bufr'
   real_red_bufr: ''
   model: '/work2/noaa/wrfruc/murdzek/nature_run_spring/UPP'
-  log: '/work2/noaa/wrfruc/murdzek/src/ob_creator_test/log'
-  plots: '/work2/noaa/wrfruc/murdzek/src/ob_creator_test/plots'
-  osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
-  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder'
+  log: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/log'
+  plots: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/plots'
+  osse_code: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/osse_ob_creator'
+  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/orion'
+  rocoto: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/workflow'
 
 shared:
   machine: 'orion'
   bufr_start: '202204291200'
-  bufr_end: '202204291500'
+  bufr_end: '202205061200'
   bufr_step: 60
   bufr_tag:
     - 'rap'
   uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/uas_site_locs_150km.txt'
-  log_str: 'superob_uas'
+  log_str: 'uas_35km_wspd20'
 
 jobs:
-  max: 25
+  max: 100
   user: 'smurdzek'
   alloc: 'wrfruc'
   csv_name: 'syn_ob_creator_jobs.csv'
   maxtries: 3
-  mem: '5GB'
-  time: '00:15:00'
+  mem: '40G'
+  time: '08:00:00'
   partition: 'orion'
+  use_rocoto: True
 
 #-----------
 # Components
@@ -115,44 +117,34 @@ limit_uas:
         remove_kw:
           match_type:
             - 136
-          nthres: 5
-    136:
-      icing_LIQMR:
-        lim_kw:
-          tob_lim: 2
-          ql_lim: 0.0002
-        remove_kw:
-          match_type:
-            - 236
-          nthres: 5
+          nthres: 1
   plot_timeseries:
     use: True
     plot_vars:
       WSPD: 20
-      TOB: 2
-      liqmix: 0.0002
-    n_sid: 5
+    n_sid: 10
     obtype: 136
 
 obs_errors: 
-  use: False
+  use: True
   errtable: '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter_assim_only/include_uas/errtable.7day'
   autocor_POB_obs:
     - 126 
   autocor_DHR_obs: 
-    - 126
+    - 136
+    - 236
   autocor_ZOB_partition_DHR_obs: 
     - 126
   auto_reg_parm: 0.5
   verbose: False
   dewpt_check: False
-  plot_diff_hist: False
+  plot_diff_hist: True
 
 combine_csv:
-  use: False
-  csv_dirs: 
-    - '/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/perfect_conv'
-    - '/work2/noaa/wrfruc/murdzek/nature_run_spring/synthetic_obs_csv/perfect_uas'
+  use: True
+  csv_dirs:
+    - '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/corr_errors_2iter/err_csv'
+    - '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/err_uas_csv'
 
 select_obs:
   use: False
@@ -377,7 +369,7 @@ convert_real_red_csv:
   use: False
 
 plots:
-  use: False
+  use: True
   diff_2d:
     bufr_dir: 'syn_perf_csv'
     subsets:
