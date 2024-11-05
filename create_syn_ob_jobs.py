@@ -493,17 +493,18 @@ for bufr_t in bufr_times:
             fptr.write('mkdir -p %s/%s\n' % (param['paths']['plots'], t_str))
             fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            if param['create_csv']['use']:
-                fptr.write('python plot_uas_NR_diffs.py %s \\\n' % tag)
-                fptr.write('                            %s \\\n' % t_str)
-                fptr.write('                            %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
-            else:
+            if param['plots']['diff_2d']['use']:
                 fptr.write('python plot_ob_diffs_2d.py %s \\\n' % tag)
                 fptr.write('                           %s \\\n' % t_str)
-                fptr.write('                           %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+                fptr.write('                           %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            if param['plots']['diff_3d']['use']:
                 fptr.write('python plot_ob_diffs_vprof.py %s \\\n' % tag)
                 fptr.write('                              %s \\\n' % t_str)
                 fptr.write('                              %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            if param['plots']['diff_uas']['use']:
+                fptr.write('python plot_uas_NR_diffs.py %s \\\n' % tag)
+                fptr.write('                            %s \\\n' % t_str)
+                fptr.write('                            %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
 
         close_file(fptr)
   

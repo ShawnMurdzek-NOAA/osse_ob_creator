@@ -303,6 +303,7 @@ convert_real_red_csv:
 plots:
   use: True
   diff_2d:
+    use: False
     bufr_dir: 'syn_perf_csv'
     subsets:
       - 'SFCSHP'
@@ -329,10 +330,12 @@ plots:
     only_compare_strong_winds: False
     real_wspd_thres: 4. 
   diff_3d:
+    use: False
     bufr_dir: 'syn_perf_csv'
     exclude_sid:
       - '00000775'
   diff_uas:
+    use: True
     bufr_dir: 'syn_perf_csv'
     nclose: 10
 
