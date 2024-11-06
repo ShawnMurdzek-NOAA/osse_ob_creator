@@ -27,13 +27,13 @@ import pyDA_utils.bufr as bufr
 #---------------------------------------------------------------------------------------------------
 
 # BUFR file with full UAS profile
-bufr_file_full = '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/main/202205011300.rap.input.csv'
+bufr_file_full = '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/limit_uas_csv/202204292300.rap.input.csv'
 
 # BUFR file with limited UAS profile
-bufr_file_limit = '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/main/202205011300.rap.output.csv'
+bufr_file_limit = '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/limit_uas_csv/202204292300.rap.fake.prepbufr.csv'
 
 # Variables to plot along with the threshold for limiting UAS obs
-plot_vars = {'WSPD':20, 'TOB':2, 'RHOB':90}
+plot_vars = {'WSPD':20}
 
 # Number of SIDs to plot
 n_sid = 10
@@ -81,11 +81,21 @@ for fname, key in zip([bufr_file_full, bufr_file_limit], ['full', 'limit']):
         if verbose > 0: print(f"computing RHOB")
         bufr_df[key] = bufr.compute_RH(bufr_df[key])
 
-# Determine SIDs to plot by finding which SIDs had the largest reductions owing to the flight limits
+# Determine how many obs each SID has
 sid_cts = {}
 for key in bufr_df.keys():
     sid_cts[key] = {}
     sid_cts[key]['SID'], sid_cts[key]['n'] = np.unique(bufr_df[key].loc[bufr_df[key]['TYP'] == obtype, 'SID'], return_counts=True)
+
+# Remove SIDs with no obs after accounting for limits
+keep_idx = []
+for i, sid in enumerate(sid_cts['full']['SID']):
+    if sid in sid_cts['limit']['SID']:
+        keep_idx.append(i)
+sid_cts['full']['SID'] = sid_cts['full']['SID'][keep_idx]
+sid_cts['full']['n'] = sid_cts['full']['n'][keep_idx]
+
+# Determine SIDs to plot by finding which SIDs had the largest reductions owing to the flight limits
 plot_sid = sid_cts['full']['SID'][np.argsort(sid_cts['full']['n'] - sid_cts['limit']['n'])[::-1][:n_sid]]
 
 # Create plots
