@@ -34,6 +34,7 @@ if len(sys.argv) > 1:
         param = yaml.safe_load(fptr)
     in_csv_fname = f"{param['paths']['syn_limit_uas_csv']}/{bufr_t}.{tag}.input.csv"
     out_csv_fname = f"{param['paths']['syn_limit_uas_csv']}/{bufr_t}.{tag}.output.csv"
+    csv_ref_fname = f"{param['paths'][param['limit_uas']['csv_ref_dir']]}/{bufr_t}.{tag}.fake.prepbufr.csv"
     drop_col = param['limit_uas']['drop_col']
     if drop_col[0] == None:
         drop_col = []
@@ -53,6 +54,7 @@ if verbose > 1:
 
 # Read in input prepBUFR file
 bufr_obj = bufr.bufrCSV(in_csv_fname)
+bufr_obj_ref = bufr.bufrCSV(csv_ref_fname)
 keep_col = bufr_obj.df.columns.values
 
 # Check how many obs we are starting with
@@ -67,7 +69,6 @@ if verbose > 0:
     print()
 
 # Remove BUFR obs that exceed various limits
-cond = np.zeros(len(bufr_obj.df))
 for typ in limits_param.keys():
     for lim_type in limits_param[typ]:
 
@@ -76,22 +77,25 @@ for typ in limits_param.keys():
 
         # Wind speed limit
         if lim_type == 'wind':
-            bufr_obj = lp.wspd_limit(bufr_obj, wind_type=typ,
-                                     **limits_param[typ][lim_type]['lim_kw'])
+            bufr_obj_ref = lp.wspd_limit(bufr_obj_ref, wind_type=typ,
+                                         **limits_param[typ][lim_type]['lim_kw'])
 
         # Icing detection (using RH threshold)
         if lim_type == 'icing_RH':
-            bufr_obj = lp.detect_icing_RH(bufr_obj, thermo_type=typ,
-                                          **limits_param[typ][lim_type]['lim_kw'])
+            bufr_obj_ref = lp.detect_icing_RH(bufr_obj_ref, thermo_type=typ,
+                                              **limits_param[typ][lim_type]['lim_kw'])
 
         # Icing detection (using ql threshold)
         if lim_type == 'icing_LIQMR':
-            bufr_obj = lp.detect_icing_LIQMR(bufr_obj, thermo_type=typ,
-                                             **limits_param[typ][lim_type]['lim_kw'])
+            bufr_obj_ref = lp.detect_icing_LIQMR(bufr_obj_ref, thermo_type=typ,
+                                                 **limits_param[typ][lim_type]['lim_kw'])
 
         # Remove BUFR obs that exceed the limit
         if verbose > 1: print('  removing obs   ', dt.datetime.now())
-        bufr_obj.df = lp.remove_obs_after_lim(bufr_obj.df, typ, **limits_param[typ][lim_type]['remove_kw'])
+        bufr_obj.df = lp.remove_obs_after_lim(bufr_obj.df, bufr_obj_ref.df, typ, 
+                                              **limits_param[typ][lim_type]['remove_kw'])
+        bufr_obj_ref.df = lp.remove_obs_after_lim(bufr_obj_ref.df, bufr_obj_ref.df, typ, 
+                                                  **limits_param[typ][lim_type]['remove_kw'])
 
 # Print how many obs were removed
 if verbose > 0: 

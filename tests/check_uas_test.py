@@ -92,9 +92,6 @@ if size_superob >= size_bogus:
     print('ERROR: Number of superobs is >= number of raw obs')
     err = 10
 
-print()
-print(err)
-
 
 #---------------------------------------------------------------------------------------------------
 # Check Limited UAS CSV BUFR File
@@ -105,6 +102,8 @@ original_csv = bufr.bufrCSV('./uas_test/limit_uas/202202011200.rap.input.csv')
 original_df = bufr.compute_wspd_wdir(original_csv.df)
 limit_uas_csv = bufr.bufrCSV('./uas_test/limit_uas/202202011200.rap.fake.prepbufr.csv')
 limit_uas_df = bufr.compute_wspd_wdir(limit_uas_csv.df)
+ref_csv = bufr.bufrCSV('./uas_test/perf_csv/202202011200.rap.fake.prepbufr.csv')
+ref_df = bufr.compute_wspd_wdir(ref_csv.df)
 
 # Check that 'liqmix' column is dropped in the new DataFrame
 if 'liqmix' in limit_uas_df.columns:
@@ -114,9 +113,19 @@ if 'liqmix' not in original_df.columns:
     print("ERROR: 'liqmix' not in input for limit_uas_flights.py")
     err = 10
 
-# Check that the WSPD threshold is only exceeded at most 4 times
+# Check that original_df and ref_df are the same size and arae larger than limit_uas_df
+if len(original_df) != len(ref_df):
+    print("ERROR: 'original_df' and 'ref_df' are different sizes!")
+    err = 10
+if len(limit_uas_df) >= len(original_df):
+    print("ERROR: 'limit_uas_df' is the same size or larger than 'original_df'")
+    err = 10
+
+# Check that the WSPD threshold is only exceeded at most 4 times in ref_df
 for sid in np.unique(limit_uas_df['SID'].values):
-    n_wspd = np.sum(limit_uas_df.loc[limit_uas_df['SID'] == sid, 'WSPD'] > 300)
+    ref_1_sid = ref_df.loc[ref_df['SID'] == sid]
+    limit_1_sid = limit_uas_df.loc[limit_uas_df['SID'] == sid]
+    n_wspd = np.sum(ref_1_sid.loc[:len(limit_1_sid), 'WSPD'] > 300)
     if n_wspd > 4:
         print('ERROR: WSPD threshold exceeded too many times in limit_uas_flights.py output')
         err = 10
