@@ -28,6 +28,7 @@ paths:
   plots: '/path/to/osse_ob_creator_EXAMPLE/plots'
   osse_code: '/path/to/osse_ob_creator_EXAMPLE/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/hercules'
+  rocoto: ''
 
 shared:
   machine: 'orion'
@@ -48,6 +49,7 @@ jobs:
   mem: '40GB'
   time: '08:00:00'
   partition: 'orion'
+  use_rocoto: False
 
 #-----------
 # Components
@@ -380,6 +382,7 @@ convert_real_red_csv:
 plots:
   use: True
   diff_2d:
+    use: False
     bufr_dir: 'syn_perf_csv'
     subsets:
       - 'SFCSHP'
@@ -406,10 +409,12 @@ plots:
     only_compare_strong_winds: False
     real_wspd_thres: 4. 
   diff_3d:
+    use: False
     bufr_dir: 'syn_perf_csv'
     exclude_sid:
       - '00000775'
   diff_uas:
+    use: True
     bufr_dir: 'syn_perf_csv'
     nclose: 3
 
