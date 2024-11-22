@@ -107,22 +107,6 @@ Interpolates Nature Run output in space and time to observation locations specif
 - **add_liq_mix**: Option to interpolate liquid water mixing ratio (cloud + rain mixing ratio) to the observations. This field is saved to a new CSV column labeled "liqmix".
 - **debug**: Option to add additional output for debugging (0 = none, 1 = some, 2 = a lot).
 
-### limit_uas
-
-Limits synthetic UAS flights based on local meteorology (e.g., high winds). Uses `main/limit_uas_flights.py`.
-
-- **in_csv_dir**: Which path from the `paths` section to pull observation CSVs from.
-- **drop_col**: List of columns to drop after limiting UAS flights. This is useful for removing columns in the BUFR CSV files that are only included for limiting UAS flights (e.g., liqmix).
-- **verbose**: Verbosity. Higher integers will print more output
-- **limits**: Parameters for limiting UAS flights. Includes 3 levels:
-    1. Observation type used to determine whether a limit is exceeded
-    2. Method for limiting UAS flight ("wind", "icing_RH", or "icing_LIQMR"; options can also be found in `main/limit_uas_flights.py`)
-    3. "lim_kw" and "remove_kw": Keyword arguments passed to either the method that determines whether a meteorological limit is exceeded or the method that actually removes the observations that exceed the meteorological limits, respectively. Keyword arguments can be found in `pyDA_utils/limit_prepbufr.py`.
-- **plot_timeseries**: Parameters for plotting timeseries of UAS observations before and after meteorological limits are applied.
-    - **plot_vars**: Variable to plot, along with a single value to plot as a dashed, horizontal line (useful for plotting the meteorological limit for that variable).
-    - **n_sid**: Number of unique SIDs to plot. The program will automatically choose the SIDs that had the largest reductions owing to the meteorological limits.
-    - **obtype**: Observation type to pull the SIDs for "n_sid" from.
-
 ### obs_errors 
 
 Add observation errors to observations within an observation CSV file. Uses `main/add_obs_errors.py`.
@@ -135,6 +119,23 @@ Add observation errors to observations within an observation CSV file. Uses `mai
 - **verbose**: Option to turn on verbose output (useful for debugging).
 - **dewpt_check**: Option to check whether the reported dewpoint (TDO) is consistent with the reported temperature (TOB) and specific humidity (QOB).
 - **plot_diff_hist**: Option to make plots of the observations before and after adding teh random errors.
+
+### limit_uas
+
+Limits synthetic UAS flights based on local meteorology (e.g., high winds). Uses `main/limit_uas_flights.py`.
+
+- **in_csv_dir**: Which path from the `paths` section to pull observation CSVs from. Observations are removed from these CSV files.
+- **csv_ref_dir**: Which path from the `paths` section to pull observation CSVs from. These CSV files are used to determine which observations to remove from the CSV files in `in_csv_dir`.
+- **drop_col**: List of columns to drop after limiting UAS flights. This is useful for removing columns in the BUFR CSV files that are only included for limiting UAS flights (e.g., liqmix).
+- **verbose**: Verbosity. Higher integers will print more output
+- **limits**: Parameters for limiting UAS flights. Includes 3 levels:
+    1. Observation type used to determine whether a limit is exceeded
+    2. Method for limiting UAS flight ("wind", "icing_RH", or "icing_LIQMR"; options can also be found in `main/limit_uas_flights.py`)
+    3. "lim_kw" and "remove_kw": Keyword arguments passed to either the method that determines whether a meteorological limit is exceeded or the method that actually removes the observations that exceed the meteorological limits, respectively. Keyword arguments can be found in `pyDA_utils/limit_prepbufr.py`.
+- **plot_timeseries**: Parameters for plotting timeseries of UAS observations before and after meteorological limits are applied.
+    - **plot_vars**: Variable to plot, along with a single value to plot as a dashed, horizontal line (useful for plotting the meteorological limit for that variable).
+    - **n_sid**: Number of unique SIDs to plot. The program will automatically choose the SIDs that had the largest reductions owing to the meteorological limits.
+    - **obtype**: Observation type to pull the SIDs for "n_sid" from.
 
 ### combine_csv
 

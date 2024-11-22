@@ -103,9 +103,25 @@ interpolator:
   add_liq_mix: True
   debug: 0
 
+obs_errors: 
+  use: True
+  errtable: '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter_assim_only/include_uas/errtable.7day'
+  autocor_POB_obs:
+    - 126 
+  autocor_DHR_obs: 
+    - 136
+    - 236
+  autocor_ZOB_partition_DHR_obs: 
+    - 126
+  auto_reg_parm: 0.5
+  verbose: False
+  dewpt_check: False
+  plot_diff_hist: True
+
 limit_uas:
   use: True
   in_csv_dir: 'syn_perf_csv'
+  csv_ref_dir: 'syn_perf_csv'
   drop_col:
     - 'liqmix'
   verbose: 2
@@ -124,21 +140,6 @@ limit_uas:
       WSPD: 20
     n_sid: 10
     obtype: 136
-
-obs_errors: 
-  use: True
-  errtable: '/work2/noaa/wrfruc/murdzek/real_obs/errtables/2nd_iter_assim_only/include_uas/errtable.7day'
-  autocor_POB_obs:
-    - 126 
-  autocor_DHR_obs: 
-    - 136
-    - 236
-  autocor_ZOB_partition_DHR_obs: 
-    - 126
-  auto_reg_parm: 0.5
-  verbose: False
-  dewpt_check: False
-  plot_diff_hist: True
 
 combine_csv:
   use: True

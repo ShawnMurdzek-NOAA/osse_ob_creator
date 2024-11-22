@@ -317,6 +317,28 @@ for bufr_t in bufr_times:
             convert_csv_fname = fake_csv_perf_fname        
             if param['jobs']['use_rocoto']: close_file(fptr)
 
+        if param['obs_errors']['use']:
+            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='obs_errors')
+            fptr.write('# Add observation errors\n')
+            fptr.write('echo ""\n')
+            fptr.write('echo "=============================================================="\n')
+            fptr.write('echo "Add observation errors"\n')
+            fptr.write('echo ""\n')
+            fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
+            fptr.write('cp %s %s/%s.%s.input.csv\n' % (fake_csv_perf_fname,
+                                                       param['paths']['syn_err_csv'], 
+                                                       t_str, tag))
+            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
+            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
+            fptr.write('python add_obs_errors.py %s \\\n' % t_str)
+            fptr.write('                         %s \\\n' % tag)
+            fptr.write('                         %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_err_csv'], 
+                                                          t_str, tag, 
+                                                          fake_csv_err_fname))
+            convert_csv_fname = fake_csv_err_fname        
+            if param['jobs']['use_rocoto']: close_file(fptr)
+
         if param['limit_uas']['use']:
             if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='limit_uas')
             fptr.write('# Limiting UAS flights\n')
@@ -343,28 +365,6 @@ for bufr_t in bufr_times:
                 fptr.write('                                           %s \\\n' % tag)
                 fptr.write('                                           %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_limit_uas_fname        
-            if param['jobs']['use_rocoto']: close_file(fptr)
-
-        if param['obs_errors']['use']:
-            if param['jobs']['use_rocoto']: fptr, batch_fname = init_file(param, t_str, tag, task='obs_errors')
-            fptr.write('# Add observation errors\n')
-            fptr.write('echo ""\n')
-            fptr.write('echo "=============================================================="\n')
-            fptr.write('echo "Add observation errors"\n')
-            fptr.write('echo ""\n')
-            fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
-            fptr.write('cp %s %s/%s.%s.input.csv\n' % (fake_csv_perf_fname,
-                                                       param['paths']['syn_err_csv'], 
-                                                       t_str, tag))
-            fptr.write('cd %s/main\n' % param['paths']['osse_code'])
-            fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python add_obs_errors.py %s \\\n' % t_str)
-            fptr.write('                         %s \\\n' % tag)
-            fptr.write('                         %s/%s \n' % (param['paths']['osse_code'], in_yaml))
-            fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_err_csv'], 
-                                                          t_str, tag, 
-                                                          fake_csv_err_fname))
-            convert_csv_fname = fake_csv_err_fname        
             if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['combine_csv']['use']:
