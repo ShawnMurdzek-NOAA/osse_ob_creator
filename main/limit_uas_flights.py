@@ -55,7 +55,12 @@ if verbose > 1:
 # Read in input prepBUFR file
 bufr_obj = bufr.bufrCSV(in_csv_fname)
 bufr_obj_ref = bufr.bufrCSV(csv_ref_fname)
-keep_col = bufr_obj.df.columns.values
+
+# Check that bufr_obj and bufr_obj_ref have the same obs
+check_col = ['SID', 'TYP', 'DHR', 'XOB', 'YOB']
+for c in check_col:
+    if ~np.all(bufr_obj.df[c].values == bufr_obj_ref.df[c].values):
+        raise ValueError('bufr_obj and bufr_obj_ref contain different observations')
 
 # Check how many obs we are starting with
 if verbose > 0:
@@ -92,10 +97,12 @@ for typ in limits_param.keys():
 
         # Remove BUFR obs that exceed the limit
         if verbose > 1: print('  removing obs   ', dt.datetime.now())
-        bufr_obj.df = lp.remove_obs_after_lim(bufr_obj.df, bufr_obj_ref.df, typ, 
-                                              **limits_param[typ][lim_type]['remove_kw'])
-        bufr_obj_ref.df = lp.remove_obs_after_lim(bufr_obj_ref.df, bufr_obj_ref.df, typ, 
-                                                  **limits_param[typ][lim_type]['remove_kw'])
+        idx_drop = lp.remove_obs_after_lim(bufr_obj_ref.df, typ, 
+                                           **limits_param[typ][lim_type]['remove_kw'])
+        bufr_obj_ref.df.drop(idx_drop, inplace=True)
+        bufr_obj_ref.df.reset_index(inplace=True, drop=True)
+        bufr_obj.df.drop(idx_drop, inplace=True)
+        bufr_obj.df.reset_index(inplace=True, drop=True)
 
 # Print how many obs were removed
 if verbose > 0: 
@@ -108,9 +115,6 @@ if verbose > 0:
 
 # Remove intermediate fields and save results
 if verbose > 1: print('removing intermediate columns', dt.datetime.now())
-for c in bufr_obj.df:
-    if c not in keep_col:
-        drop_col.append(c)
 bufr_obj.df.drop(drop_col, axis=1, inplace=True)
 bufr.df_to_csv(bufr_obj.df, out_csv_fname)
 

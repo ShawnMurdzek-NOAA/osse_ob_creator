@@ -325,9 +325,9 @@ for bufr_t in bufr_times:
             fptr.write('echo "Add observation errors"\n')
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
-            fptr.write('cp %s %s/%s.%s.input.csv\n' % (fake_csv_perf_fname,
-                                                       param['paths']['syn_err_csv'], 
-                                                       t_str, tag))
+            fptr.write('ln -sf %s %s/%s.%s.input.csv\n' % (fake_csv_perf_fname,
+                                                           param['paths']['syn_err_csv'], 
+                                                           t_str, tag))
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('python add_obs_errors.py %s \\\n' % t_str)
@@ -347,9 +347,9 @@ for bufr_t in bufr_times:
             fptr.write('echo "Limiting UAS flights"\n')
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
-            fptr.write('cp %s %s/%s.%s.input.csv\n' % (in_csv_limit_uas_fname,
-                                                       param['paths']['syn_limit_uas_csv'], 
-                                                       t_str, tag))
+            fptr.write('ln -sf %s %s/%s.%s.input.csv\n' % (in_csv_limit_uas_fname,
+                                                           param['paths']['syn_limit_uas_csv'], 
+                                                           t_str, tag))
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('python limit_uas_flights.py %s \\\n' % t_str)
@@ -421,9 +421,9 @@ for bufr_t in bufr_times:
             fptr.write('echo "Create superobs"\n')
             fptr.write('echo ""\n')
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
-            fptr.write('cp %s %s/%s.%s.input.csv\n' % (in_csv_superob_fname,
-                                                       param['paths']['syn_superob_csv'], 
-                                                       t_str, tag))
+            fptr.write('ln -sf %s %s/%s.%s.input.csv\n' % (in_csv_superob_fname,
+                                                           param['paths']['syn_superob_csv'], 
+                                                           t_str, tag))
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             fptr.write('python create_superobs.py %s \\\n' % t_str)
