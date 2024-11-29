@@ -97,7 +97,7 @@ for typ in limits_param.keys():
 
         # Remove BUFR obs that exceed the limit
         if verbose > 1: print('  removing obs   ', dt.datetime.now())
-        drop_idx = lp.remove_obs_after_lim(bufr_obj_ref.df, typ, 
+        idx_drop = lp.remove_obs_after_lim(bufr_obj_ref.df, typ, 
                                            **limits_param[typ][lim_type]['remove_kw'])
         bufr_obj_ref.df.drop(idx_drop, inplace=True)
         bufr_obj_ref.df.reset_index(inplace=True, drop=True)
