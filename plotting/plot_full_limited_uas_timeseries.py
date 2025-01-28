@@ -109,6 +109,15 @@ for sid in plot_sid:
 
     # Loop over each variable
     for v, ax in zip(plot_vars.keys(), axes):
+        
+        # Special case. Use logarithmic y-axis and set liqmix value for TYP != obtyp to be NaN
+        # (this second step is necessary to prevent liqmix values from being plotted twice)
+        if v == 'liqmix':
+            ax.set_yscale('log')
+            bufr_df['ref'].loc[bufr_df['ref']['TYP'] != obtype, 'liqmix'] = np.nan
+            bufr_df['limit'].loc[bufr_df['limit']['TYP'] != obtype, 'liqmix'] = np.nan
+
+        # Plot results
         bufr_df['ref'].loc[bufr_df['ref']['SID'] == sid].plot(x='DHR', y=v, ax=ax, kind='line',
                                                               legend=False, ylabel=v,
                                                               style=['-'], lw=1.5, c='b')
@@ -116,12 +125,8 @@ for sid in plot_sid:
             bufr_df['limit'].loc[bufr_df['limit']['SID'] == sid].plot(x='DHR', y=v, ax=ax, 
                                                                       kind='line', legend=False, 
                                                                       style=['--'], lw=2, c='r')
-
-        if v == 'liqmix':
-            ymin = -0.1 * plot_vars[v]
-            ymax = 1.05 * max([plot_vars[v], np.amax(bufr_df['ref'].loc[bufr_df['ref']['SID'] == sid, v])])
-            ax.set_ylim([ymin, ymax])
-            ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+        else:
+            print(f"NOTE: {v} is not in limited dataset ('liqmix' will never be in the limited dataset)")
 
         ax.axhline(plot_vars[v], ls='--', c='k')
         ax.grid()
