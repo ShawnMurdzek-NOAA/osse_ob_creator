@@ -2,8 +2,8 @@
 # Synthetic Observation Creator Code
 
 Shawn Murdzek  
-Cooperative Institute for Research in Environmental Sciences (CIRES) and CU Boulder
-NOAA/OAR/Global Systems Laboratory  
+Cooperative Institute for Research in Environmental Sciences (CIRES) and CU Boulder  
+Embedded in NOAA/OAR/Global Systems Laboratory  
 shawn.s.murdzek@noaa.gov
 
 ## Description
