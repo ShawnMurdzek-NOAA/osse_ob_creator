@@ -23,11 +23,11 @@ paths:
   syn_superob_csv: '/path/to/osse_ob_creator_EXAMPLE/superob_uas'
   syn_bufr: '/path/to/osse_ob_creator_EXAMPLE/syn_bufr'
   real_red_bufr: ''
-  model: '/work2/noaa/wrfruc/murdzek/nature_run_spring/UPP'
+  model: '/work/noaa/wrfruc/murdzek/nature_run_spring/UPP'
   log: '/path/to/osse_ob_creator_EXAMPLE/log'
   plots: '/path/to/osse_ob_creator_EXAMPLE/plots'
   osse_code: '/path/to/osse_ob_creator_EXAMPLE/osse_ob_creator'
-  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/hercules'
+  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/orion'
   rocoto: ''
 
 shared:
@@ -41,7 +41,7 @@ shared:
   log_str: 'example'
 
 jobs:
-  max: 50
+  max: 100
   user: 'smurdzek'
   alloc: 'wrfruc'
   csv_name: 'syn_ob_creator_jobs.csv'
@@ -78,7 +78,7 @@ create_csv:
   sample_freq: 1.
   max_height: 2000.
   init_sid: 1
-  sample_bufr_fname: '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/perfect_conv/real_csv/202204291800.rap.prepbufr.csv'
+  sample_bufr_fname: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/perfect_conv/real_csv/202204291800.rap.prepbufr.csv'
   uas_offset: 0.
 
 interpolator: 
@@ -154,7 +154,7 @@ obs_errors:
 combine_csv:
   use: True
   csv_dirs: 
-    - '/work2/noaa/wrfruc/murdzek/nature_run_spring/obs/corr_errors_2iter/err_csv'
+    - '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/corr_errors_2iter/err_csv'
     - '/path/to/osse_ob_creator_EXAMPLE/err_uas_csv'
 
 select_obs:
