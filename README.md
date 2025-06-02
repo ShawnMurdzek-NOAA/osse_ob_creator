@@ -56,16 +56,24 @@ The programs included here create synthetic observations for an Observing System
 
 ## Dependencies
 
-This program has been tested using the Python environment found in `environment.yml`. In addition to these packages, the following are also needed:
+This program requires a Python environment with the packages listed in `environment.yml`. One way to create such an environment is with miniforge. The basic instructions are for doing this are listed below, with `{ENV_PREFIX}` being a placeholder for the environment install location.
+
+1. Install [miniforge](https://conda-forge.org/miniforge/)
+2. Activate the base conda environment
+3. `cd osse_ob_creator`
+4. `conda env create -f environment.yml --prefix {ENV_PREFIX}`
+5. `conda activate {ENV_PREFIX}`
+
+In addition to these packages, the following are also needed:
 
 - [pyDA_utils](https://github.com/ShawnMurdzek-NOAA/pyDA_utils)
 - [prepbufr_decoder](https://github.com/ShawnMurdzek-NOAA/prepbufr_decoder)
 
-To install pyDA_utils, I recommend cloning the repo and adding the location of pyDA_utils to the `PYTHONPATH` environment variable. prepbufr_decoder is a Fortran program and must be compiled prior to running osse_ob_creator. This program is used to convert prepBUFR files to CSVs and vice versa. 
+To install pyDA_utils, I recommend cloning the repo and adding the path (at the level above pyDA_utils) to the `PYTHONPATH` environment variable. prepbufr_decoder is a Fortran program and must be compiled prior to running osse_ob_creator. This program is used to convert prepBUFR files to CSVs and vice versa. 
 
 ## Running the Program
 
-1. Update `activate_python_env.sh` with the appropriate Python environment.
+1. Update `activate_python_env.sh` with the appropriate Python environment. This includes activating the appropriate Python environment and adding the pah containing pyDA_utils to your `PYTHONPATH`.
 
 2. Edit `synthetic_ob_creator_param.yml` with the desired parameters.
 

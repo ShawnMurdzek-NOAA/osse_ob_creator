@@ -249,6 +249,7 @@ if use_raob_drift:
     bufr_csv.df.reset_index(drop=True, inplace=True)
 
 # Open wrfnat files
+# Factor of 1.001 is needed b/c np.arange is used to construct wrf_hr
 start_grib = dt.datetime.now()
 hr_start = math.floor(bufr_csv.df['DHR'].min()*4) / 4
 hr_end = bufr_csv.df['DHR'].max() + (1.001 * wrf_step_dec)
@@ -753,8 +754,13 @@ debug_df.reset_index(drop=True, inplace=True)
 # Convert to proper units
 out_df['QOB'] = out_df['QOB'] * 1e6
 out_df['TOB'] = out_df['TOB'] - 273.15
-out_df['PWO'] = (out_df['PWO'] / 997.) * 1000.
 out_df['PMO'] = out_df['PMO'] * 1e-2
+
+# For PWAT, UPP is in kg/m^2, but we need mm
+# Assume density of water is 997 kg/m^3 (true for water temperature of ~25C)
+# https://www.usgs.gov/special-topics/water-science-school/science/water-density
+out_df['PWO'] = (out_df['PWO'] / 997.) * 1000.
+
 out_df['ELV'] = np.int64(np.around(out_df['ELV']))
 idx_3d = np.where((out_df['subset'] == 'AIRCAR') | (out_df['subset'] == 'AIRCFT') | 
                   (out_df['subset'] == 'ADPUPA'))[0]

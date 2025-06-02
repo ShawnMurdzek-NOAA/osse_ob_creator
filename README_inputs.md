@@ -100,7 +100,7 @@ Interpolates Nature Run output in space and time to observation locations specif
 - **copy_winds**: Option to copy UOB and VOB to UFC and VFC. These fields are used in `read_prepbufr.f90` to create VAD observations.
 - **interp_z_aircft**: Option to interpolate height obs (ZOB) for AIRCAR and AIRCFT platforms. Because altitudes are not actually measured by aircraft (instead, they are derived using the observed pressure and the US standard atmosphere), this should be set to `False`, unless UAS observations are used.
 - **height_opt**: Reference for height observations. Options: `msl` = above mean sea level, `agl` = above ground level. Heights from prepBUFR files are in MSL, but heights from "empty" UAS observation CSV files are in AGL.
-- **use_raob_drift**: Option to use (XDR, YDR) rather tha (XOB, YOB) for ADPUPA observations.
+- **use_raob_drift**: Option to use (XDR, YDR) rather than (XOB, YOB) for ADPUPA observations.
 - **coastline_correct**: Option to "correct" observations that occur near coastlines. This does not appear to help much, so it should usually be set to `False`.
 - **use_Tv**: Option to use virtual temperature when tvflg = 0. Not necessary for RAP prepBUFR files because all temperatures are sensible, not virtual.
 - **add_ceiling**: Option to add ceiling observations to surface-based platforms (ADPSFC, SFCSHP, MSONET).
@@ -118,7 +118,7 @@ Add observation errors to observations within an observation CSV file. Uses `mai
 - **auto_reg_parm**: Autoregression parameter for an AR1 process. $Error = N(0, stdev) + auto\\_reg\\_parm * \frac{previous\\ error}{d}$, where $stdev$ is specified in `errtable` and $d$ is the distance between two consecutive observations.
 - **verbose**: Option to turn on verbose output (useful for debugging).
 - **dewpt_check**: Option to check whether the reported dewpoint (TDO) is consistent with the reported temperature (TOB) and specific humidity (QOB).
-- **plot_diff_hist**: Option to make plots of the observations before and after adding teh random errors.
+- **plot_diff_hist**: Option to make plots of the observations before and after adding the random errors.
 
 ### limit_uas
 
@@ -149,7 +149,9 @@ Only keep certain observation types in an observation CSV file. Useful when perf
 
 - **in_csv_dir**: Which path from the `paths` section to pull observation CSVs from.
 - **include_real_red**: Option to also select certain observations from real_red observation CSVs. Synthetic (fake) observation CSVs are always included.
-- **ob_types**: PrepBUFR observation types (3-digit numbers) to keep.
+- **obtypes**: PrepBUFR observation types (3-digit numbers) to keep.
+- **missing_var**: PrepBUFR observation types and variable combinations to set to missing (i.e., NaN). missing_var is formulated as a dictionary where the key is the variable and the value is a list of observation types. As an example, setting missing_var to {POB: [181, 182]} will set POB to NaN for observation types 181 and 182.
+- **qm_to_5**: Same as missing_var, except instead of setting the variable to missing, the quality mark flag is set to 5 (qm = 5 means "do not assimilate").
 
 ### superobs
 
