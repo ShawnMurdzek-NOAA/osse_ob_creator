@@ -12,22 +12,22 @@
 #===================================================================================================
 
 paths:
-  real_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data'
-  real_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/real_csv'
-  syn_bogus_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_perf_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/perfect_conv'
+  real_bufr: '{DATADIR}'
+  real_csv: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test/real_csv'
+  syn_bogus_csv: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test'
+  syn_perf_csv: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test/perfect_conv'
   syn_limit_uas_csv: ''
-  syn_err_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_combine_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_select_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test'
-  syn_superob_csv: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/superob_uas'
-  syn_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/syn_bufr'
-  real_red_bufr: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/real_red_obs_bufr'
-  model: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data'
-  log: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/logs'
-  plots: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/linear_interp_test/plots'
-  osse_code: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator'
-  bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/orion'
+  syn_err_csv: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test'
+  syn_combine_csv: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test'
+  syn_select_csv: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test'
+  syn_superob_csv: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test/superob_uas'
+  syn_bufr: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test/syn_bufr'
+  real_red_bufr: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test/real_red_obs_bufr'
+  model: '{DATADIR}'
+  log: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test/logs'
+  plots: '{HOMEDIR}/osse_ob_creator/tests/linear_interp_test/plots'
+  osse_code: '{HOMEDIR}/osse_ob_creator'
+  bufr_code: '{BUFRDIR}'
   rocoto: ''
 
 shared:
@@ -39,7 +39,7 @@ shared:
     - 'rap'
     - 'rap_e'
     - 'rap_p' 
-  uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/uas_site_locs_150km.txt'
+  uas_grid_file: '{HOMEDIR}/osse_ob_creator/uas_site_locs_150km.txt'
   log_str: 'test'
 
 jobs:
@@ -223,7 +223,7 @@ superobs:
     knownj: 264
   grouping: 'grid'
   grouping_kw:
-    grid_fname: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/fix_data/RRFS_grid_mean_twice_gspacing.nc'
+    grid_fname: '{HOMEDIR}/osse_ob_creator/fix_data/RRFS_grid_mean_twice_gspacing.nc'
     subtract_360_lon_grid: True
   reduction_kw:
     136:

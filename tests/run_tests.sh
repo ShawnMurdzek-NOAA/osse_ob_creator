@@ -6,10 +6,11 @@
 ################################################################################
 
 machine='hercules'
+prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/${machine}
+datadir=/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data
 
 # Option to re-create test data
 create_test_data=false
-prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/hercules
 
 # Option to run linear_interp_test
 run_linear_interp_test=true
@@ -19,6 +20,15 @@ run_select_obs_test=true
 
 # Option to run UAS test
 run_uas_test=true
+
+
+################################################################################
+# General Setup
+################################################################################
+
+cd ../../
+home=`pwd`
+cd osse_ob_creator/tests
 
 
 ################################################################################
@@ -79,20 +89,24 @@ if ${run_linear_interp_test}; then
     rm -rf ./linear_interp_test
   fi
   mkdir linear_interp_test 
-  subdirs='real_csv perfect_conv syn_bufr real_red_obs_bufr logs plots'
-  for s in ${subdirs}; do
-    mkdir linear_interp_test/${s}
-  done
- 
-  source ../activate_python_env.sh
+
+  echo 
+  echo 'creating input YAML file'
+  cp linear_interp_test.yml ./linear_interp_test
+  sed -i "s={HOMEDIR}=${home}=" ./linear_interp_test/linear_interp_test.yml
+  sed -i "s={BUFRDIR}=${prepbufr_decoder_path}=" ./linear_interp_test/linear_interp_test.yml
+  sed -i "s={DATADIR}=${datadir}=" ./linear_interp_test/linear_interp_test.yml
+
+  cd ..
+  source activate_python_env.sh
   echo
   echo 'calling create_syn_ob_jobs.py'
-  cp linear_interp_test.yml ../
-  python ../create_syn_ob_jobs.py linear_interp_test.yml
+  python create_syn_ob_jobs.py ./tests/linear_interp_test/linear_interp_test.yml
 
   echo
   echo 'calling run_synthetic_ob_creator.py'
-  job_line=$(python ../run_synthetic_ob_creator.py linear_interp_test.yml | grep "submitted job")
+  job_line=$(python run_synthetic_ob_creator.py ./tests/linear_interp_test/linear_interp_test.yml | grep "submitted job")
+  cd ./tests/
   if [[ `echo ${job_line} | wc -c` -lt 2 ]]; then
     echo 'no job submitted for linear interpolation test'
     linear_interp_test_pass=false
@@ -106,7 +120,6 @@ if ${run_linear_interp_test}; then
       sleep 60
       scomplete=`sacct --job ${job_id} | grep "COMPLETED" | wc -c`
     done
-    rm ../linear_interp_test.yml
     echo "Job done. Start verification"
     echo
 
@@ -155,20 +168,24 @@ if ${run_select_obs_test}; then
     rm -rf ./select_obs_test
   fi
   mkdir select_obs_test 
-  subdirs='select_csv logs'
-  for s in ${subdirs}; do
-    mkdir select_obs_test/${s}
-  done
  
-  source ../activate_python_env.sh
+  echo 
+  echo 'creating input YAML file'
+  cp select_obs_test.yml ./select_obs_test
+  sed -i "s={HOMEDIR}=${home}=" ./select_obs_test/select_obs_test.yml
+  sed -i "s={BUFRDIR}=${prepbufr_decoder_path}=" ./select_obs_test/select_obs_test.yml
+  sed -i "s={DATADIR}=${datadir}=" ./select_obs_test/select_obs_test.yml
+
+  cd ../
+  source activate_python_env.sh
   echo
   echo 'calling create_syn_ob_jobs.py'
-  cp select_obs_test.yml ../
-  python ../create_syn_ob_jobs.py select_obs_test.yml
+  python create_syn_ob_jobs.py ./tests/select_obs_test/select_obs_test.yml
 
   echo
   echo 'calling run_synthetic_ob_creator.py'
-  job_line=$(python ../run_synthetic_ob_creator.py select_obs_test.yml | grep "submitted job")
+  job_line=$(python run_synthetic_ob_creator.py ./tests/select_obs_test/select_obs_test.yml | grep "submitted job")
+  cd ./tests/
   if [[ `echo ${job_line} | wc -c` -lt 2 ]]; then
     echo "no job submitted for select_obs test"
     select_obs_test_pass=false
@@ -182,7 +199,6 @@ if ${run_select_obs_test}; then
       sleep 15
       scomplete=`sacct --job ${job_id} | grep "COMPLETED" | wc -c`
     done
-    rm ../select_obs_test.yml
     echo "Job done. Start verification"
     echo
     
@@ -231,20 +247,24 @@ if ${run_uas_test}; then
     rm -rf ./uas_test
   fi
   mkdir uas_test 
-  subdirs='bogus_csv perf_csv logs superob_uas syn_bufr plots limit_uas'
-  for s in ${subdirs}; do
-    mkdir uas_test/${s}
-  done
  
-  source ../activate_python_env.sh
+  echo 
+  echo 'creating input YAML file'
+  cp uas_test.yml ./uas_test
+  sed -i "s={HOMEDIR}=${home}=" ./uas_test/uas_test.yml
+  sed -i "s={BUFRDIR}=${prepbufr_decoder_path}=" ./uas_test/uas_test.yml
+  sed -i "s={DATADIR}=${datadir}=" ./uas_test/uas_test.yml
+
+  cd ../
+  source activate_python_env.sh
   echo
   echo 'calling create_syn_ob_jobs.py'
-  cp uas_test.yml ../
-  python ../create_syn_ob_jobs.py uas_test.yml
+  python create_syn_ob_jobs.py ./tests/uas_test/uas_test.yml
 
   echo
   echo 'calling run_synthetic_ob_creator.py'
-  job_line=$(python ../run_synthetic_ob_creator.py uas_test.yml | grep "submitted job")
+  job_line=$(python run_synthetic_ob_creator.py ./tests/uas_test/uas_test.yml | grep "submitted job")
+  cd ./tests/
   if [[ `echo ${job_line} | wc -c` -lt 2 ]]; then
     echo "no job submitted for uas test"
     uas_test_pass=false
@@ -258,7 +278,6 @@ if ${run_uas_test}; then
       sleep 60
       scomplete=`sacct --job ${job_id} | grep "COMPLETED" | wc -c`
     done
-    rm ../uas_test.yml
     echo "Job done. Start verification"
     echo
     
@@ -306,7 +325,7 @@ fi
 if ${run_select_obs_test}; then
   echo "Pass Select Obs Test? ${select_obs_test_pass}"
 fi
-if ${run_UAS_test}; then
+if ${run_uas_test}; then
   echo "Pass UAS Test? ${uas_test_pass}"
 fi
 echo

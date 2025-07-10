@@ -186,7 +186,7 @@ for bufr_t in bufr_times:
 
     # Determine first and last WRF file time
     wrf_start = None
-    hr = 3
+    hr = 24
     while wrf_start == None:
         tmp = bufr_t - dt.timedelta(hours=hr)
         if (os.path.isfile('%s/%s' % (param['paths']['model'], tmp.strftime('%Y%m%d/wrfnat_%Y%m%d%H%M_er.grib2'))) or
@@ -195,7 +195,7 @@ for bufr_t in bufr_times:
         hr = hr - 0.25
 
     wrf_end = None
-    hr = 1
+    hr = 24
     while wrf_end == None:
         tmp = bufr_t + dt.timedelta(hours=hr)
         if (tmp == wrf_start):
@@ -274,7 +274,7 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python uas_sites.py %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('python -u uas_sites.py %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             if param['jobs']['use_rocoto']: close_file(fptr)
 
         if param['create_csv']['use']:
@@ -287,9 +287,9 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python create_uas_csv.py %s \\\n' % t_str)
-            fptr.write('                         %s \\\n' % fake_csv_bogus_fname)
-            fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('python -u create_uas_csv.py %s \\\n' % t_str)
+            fptr.write('                            %s \\\n' % fake_csv_bogus_fname)
+            fptr.write('                            %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_bogus_fname
             if param['jobs']['use_rocoto']: close_file(fptr)
 
@@ -303,17 +303,17 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python create_synthetic_obs.py %s \\\n' % param['paths']['model'])
+            fptr.write('python -u create_synthetic_obs.py %s \\\n' % param['paths']['model'])
             if param['create_csv']['use']:
-                fptr.write('                               %s \\\n' % param['paths']['syn_bogus_csv'])
+                fptr.write('                                  %s \\\n' % param['paths']['syn_bogus_csv'])
             else:
-                fptr.write('                               %s \\\n' % param['paths']['real_csv'])
-            fptr.write('                               %s \\\n' % param['paths']['syn_perf_csv'])
-            fptr.write('                               %s \\\n' % bufr_t.strftime('%Y%m%d%H'))
-            fptr.write('                               %s \\\n' % wrf_start.strftime('%Y%m%d%H%M'))
-            fptr.write('                               %s \\\n' % wrf_end.strftime('%Y%m%d%H%M'))
-            fptr.write('                               %s \\\n' % tag)
-            fptr.write('                               %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+                fptr.write('                                  %s \\\n' % param['paths']['real_csv'])
+            fptr.write('                                  %s \\\n' % param['paths']['syn_perf_csv'])
+            fptr.write('                                  %s \\\n' % bufr_t.strftime('%Y%m%d%H'))
+            fptr.write('                                  %s \\\n' % wrf_start.strftime('%Y%m%d%H%M'))
+            fptr.write('                                  %s \\\n' % wrf_end.strftime('%Y%m%d%H%M'))
+            fptr.write('                                  %s \\\n' % tag)
+            fptr.write('                                  %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_perf_fname        
             if param['jobs']['use_rocoto']: close_file(fptr)
 
@@ -330,9 +330,9 @@ for bufr_t in bufr_times:
                                                            t_str, tag))
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python add_obs_errors.py %s \\\n' % t_str)
-            fptr.write('                         %s \\\n' % tag)
-            fptr.write('                         %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('python -u add_obs_errors.py %s \\\n' % t_str)
+            fptr.write('                            %s \\\n' % tag)
+            fptr.write('                            %s/%s \n' % (param['paths']['osse_code'], in_yaml))
             fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_err_csv'], 
                                                           t_str, tag, 
                                                           fake_csv_err_fname))
@@ -352,18 +352,18 @@ for bufr_t in bufr_times:
                                                            t_str, tag))
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python limit_uas_flights.py %s \\\n' % t_str)
-            fptr.write('                            %s \\\n' % tag)
-            fptr.write('                            %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('python -u limit_uas_flights.py %s \\\n' % t_str)
+            fptr.write('                               %s \\\n' % tag)
+            fptr.write('                               %s/%s \n' % (param['paths']['osse_code'], in_yaml))
             fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_limit_uas_csv'], 
                                                           t_str, tag, 
                                                           fake_csv_limit_uas_fname))
             if param['limit_uas']['plot_timeseries']['use']:
                 fptr.write('mkdir -p %s/%s\n' % (param['paths']['plots'], t_str))
                 fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
-                fptr.write('python plot_full_limited_uas_timeseries.py %s \\\n' % t_str)
-                fptr.write('                                           %s \\\n' % tag)
-                fptr.write('                                           %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+                fptr.write('python -u plot_full_limited_uas_timeseries.py %s \\\n' % t_str)
+                fptr.write('                                              %s \\\n' % tag)
+                fptr.write('                                              %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_limit_uas_fname        
             if param['jobs']['use_rocoto']: close_file(fptr)
 
@@ -384,8 +384,8 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python combine_bufr_csv.py %s \\\n' % csv_comb_list_fname)
-            fptr.write('                           %s \n\n' % fake_csv_comb_fname)
+            fptr.write('python -u combine_bufr_csv.py %s \\\n' % csv_comb_list_fname)
+            fptr.write('                              %s \n\n' % fake_csv_comb_fname)
             convert_csv_fname = fake_csv_comb_fname        
             if param['jobs']['use_rocoto']: close_file(fptr)
         
@@ -399,17 +399,17 @@ for bufr_t in bufr_times:
             fptr.write('source %s/activate_python_env.sh\n' % param['paths']['osse_code'])
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python select_obtypes.py %s \\\n' % in_csv_select_fname)
-            fptr.write('                         %s \\\n' % fake_csv_select_fname)
-            fptr.write('                         %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('python -u select_obtypes.py %s \\\n' % in_csv_select_fname)
+            fptr.write('                            %s \\\n' % fake_csv_select_fname)
+            fptr.write('                            %s/%s \n' % (param['paths']['osse_code'], in_yaml))
             if param['select_obs']['include_real_red']:
                 in_csv_real = '/'.join(in_csv_select_fname.split('/')[:-1] + 
                                        [in_csv_select_fname.split('/')[-1].replace('fake', 'real_red')])
                 out_csv_real = '/'.join(fake_csv_select_fname.split('/')[:-1] + 
                                         [fake_csv_select_fname.split('/')[-1].replace('fake', 'real_red')])
-                fptr.write('python select_obtypes.py %s \\\n' % in_csv_real)
-                fptr.write('                         %s \\\n' % out_csv_real)
-                fptr.write('                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+                fptr.write('python -u select_obtypes.py %s \\\n' % in_csv_real)
+                fptr.write('                            %s \\\n' % out_csv_real)
+                fptr.write('                            %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_select_fname        
             if param['jobs']['use_rocoto']: close_file(fptr)
 
@@ -426,18 +426,18 @@ for bufr_t in bufr_times:
                                                            t_str, tag))
             fptr.write('cd %s/main\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
-            fptr.write('python create_superobs.py %s \\\n' % t_str)
-            fptr.write('                          %s \\\n' % tag)
-            fptr.write('                          %s/%s \n' % (param['paths']['osse_code'], in_yaml))
+            fptr.write('python -u create_superobs.py %s \\\n' % t_str)
+            fptr.write('                             %s \\\n' % tag)
+            fptr.write('                             %s/%s \n' % (param['paths']['osse_code'], in_yaml))
             fptr.write('mv %s/%s.%s.output.csv %s\n\n' % (param['paths']['syn_superob_csv'], 
                                                           t_str, tag, 
                                                           fake_csv_superob_fname))
             if param['superobs']['plot_vprof']['use']:
                 fptr.write('mkdir -p %s/%s\n' % (param['paths']['plots'], t_str))
                 fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
-                fptr.write('python plot_raw_superob_uas_vprofs.py %s \\\n' % t_str)
-                fptr.write('                                          %s \\\n' % tag)
-                fptr.write('                                          %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+                fptr.write('python -u plot_raw_superob_uas_vprofs.py %s \\\n' % t_str)
+                fptr.write('                                         %s \\\n' % tag)
+                fptr.write('                                         %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             convert_csv_fname = fake_csv_superob_fname        
             if param['jobs']['use_rocoto']: close_file(fptr)
 
@@ -494,17 +494,17 @@ for bufr_t in bufr_times:
             fptr.write('cd %s/plotting\n' % param['paths']['osse_code'])
             fptr.write('echo "Using osse_ob_creator version `git describe`"\n')
             if param['plots']['diff_2d']['use']:
-                fptr.write('python plot_ob_diffs_2d.py %s \\\n' % tag)
-                fptr.write('                           %s \\\n' % t_str)
-                fptr.write('                           %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
-            if param['plots']['diff_3d']['use']:
-                fptr.write('python plot_ob_diffs_vprof.py %s \\\n' % tag)
+                fptr.write('python -u plot_ob_diffs_2d.py %s \\\n' % tag)
                 fptr.write('                              %s \\\n' % t_str)
                 fptr.write('                              %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+            if param['plots']['diff_3d']['use']:
+                fptr.write('python -u plot_ob_diffs_vprof.py %s \\\n' % tag)
+                fptr.write('                                 %s \\\n' % t_str)
+                fptr.write('                                 %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
             if param['plots']['diff_uas']['use']:
-                fptr.write('python plot_uas_NR_diffs.py %s \\\n' % tag)
-                fptr.write('                            %s \\\n' % t_str)
-                fptr.write('                            %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
+                fptr.write('python -u plot_uas_NR_diffs.py %s \\\n' % tag)
+                fptr.write('                               %s \\\n' % t_str)
+                fptr.write('                               %s/%s \n\n' % (param['paths']['osse_code'], in_yaml))
 
         close_file(fptr)
   
