@@ -60,6 +60,9 @@ sample_bufr_fname = '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/20220201000
 # Output BUFR CSV file (include %s placeholder for timestamp)
 out_fname = '%s.bogus.prepbufr.csv'
 
+# If True, performs a "down" profile as opposed to an "up" profile
+uas_reverse = False
+
 # Option to use inputs from YAML file
 if len(sys.argv) > 1:
     bufr_t = sys.argv[1]
@@ -75,7 +78,7 @@ if len(sys.argv) > 1:
     max_height = param['create_csv']['max_height']
     init_sid = param['create_csv']['init_sid']
     sample_bufr_fname = param['create_csv']['sample_bufr_fname']
-
+    uas_reverse = param['create_csv']['uas_reverse']
 
 #---------------------------------------------------------------------------------------------------
 # Create UAS BUFR CSV
@@ -124,7 +127,10 @@ for valid, start in zip(valid_times, flight_times):
     out_dict['T29'] = np.array([t29]*ntobs)
     out_dict['POB'] = np.array([0.]*ntobs)
     out_dict['PQM'] = np.array([quality_m]*ntobs)
-    out_dict['ZOB'] = np.array(list(uas_z[:nfobs])*2*nlocs)
+    if uas_reverse:
+       out_dict['ZOB'] = np.array(np.flip(list(uas_z[:nfobs])*2*nlocs))
+    else:
+       out_dict['ZOB'] = np.array(list(uas_z[:nfobs])*2*nlocs)
     out_dict['ZQM'] = np.array([quality_m]*ntobs)
     for v in ['QOB', 'TOB', 'TDO']:
         out_dict[v] = np.array(([0.]*nfobs + [np.nan]*nfobs)*nlocs)
