@@ -39,7 +39,7 @@ flight_times = [dt.datetime(2022, 4, 29, 12) + dt.timedelta(hours=i) for i in ra
 # UAS ob valid times (this is the timestamp on the BUFR CSV)
 valid_times = [dt.datetime(2022, 4, 29, 12) + dt.timedelta(hours=i) for i in range(0, 13, 6)]
 
-# Elapsed time after the valid time to stop collect UAS obs (s)
+# Elapsed time after the flight start time to stop collect UAS obs (s)
 max_time = 1500.
 
 # UAS ascent rate (m/s)
@@ -106,8 +106,10 @@ for valid, start in zip(valid_times, flight_times):
 
     # nfobs: Number of obs for a single flight from a single UAS
     # Need factor of 2 for total obs (ntobs) to account for both thermodynamic and kinematic obs
-    nfobs = min(int(((valid - start).total_seconds() + max_time) / sample_freq), len(uas_z)) 
+    nfobs = min(int(max_time / sample_freq), len(uas_z)) 
     ntobs = 2*nfobs*nlocs
+
+    offset = (start - valid).total_seconds()
 
     out_dict = {}
     for col in all_columns:  
@@ -120,8 +122,8 @@ for valid, start in zip(valid_times, flight_times):
     out_dict['SID'] = np.array([["UA%06d" % i]*2*nfobs for i in range(init_sid, nlocs+init_sid)], dtype=str).ravel()
     out_dict['XOB'] = np.array([[i]*2*nfobs for i in uas_locs['lon (deg E)'].values]).ravel() + 360.
     out_dict['YOB'] = np.array([[i]*2*nfobs for i in uas_locs['lat (deg N)'].values]).ravel()
-    out_dict['DHR'] = np.array(list(np.arange((valid - start).total_seconds(), 
-                                              max_time, sample_freq))[:nfobs]*2*nlocs) / 3600.
+    out_dict['DHR'] = np.array(list(np.arange(offset, max_time + offset + 0.1*sample_freq, 
+                                              sample_freq))[:nfobs]*2*nlocs) / 3600.
     out_dict['TYP'] = np.array(([typ_thermo]*nfobs + [typ_wind]*nfobs)*nlocs)
     out_dict['ELV'] = np.zeros(ntobs)
     out_dict['T29'] = np.array([t29]*ntobs)
