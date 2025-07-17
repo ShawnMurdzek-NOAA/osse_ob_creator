@@ -82,7 +82,7 @@ Creates a text file containing the horizontal locations of UAS sites. Uses `main
 
 Creates an "empty" observation CSV file that includes UAS observation locations (x, y, z, and t). Uses `main/create_uas_csv.py`.
 
-- **max_time**: Elapsed time after CSV observation timestamp to stop collecting UAS obs (s).
+- **max_time**: Total elapsed time allowed for a UAS flight (s).
 - **ascent_rate**: UAS ascent speed (m/s).
 - **sample_freq**: UAS sampling frequency (s).
 - **max_height**: Maximum UAS flight altitude (m)
