@@ -89,6 +89,7 @@ Creates an "empty" observation CSV file that includes UAS observation locations 
 - **init_sid**: Number assigned to the first station ID. Useful when using multiple input text files and you don't want the station IDs to repeat.
 - **sample_bufr_fname**: File (including the path) of an observation CSV. Needed to determine which fields to include in the "empty" observation CSV.
 - **uas_offset**: Difference between the actual UAS flight time and the observation CSV timestamp (s).
+- **uas_reverse**: If True, changes the ascent profile to a descent, UAS will start at max_height and go to the surface.
 
 ### interpolator
 

@@ -80,6 +80,7 @@ create_csv:
   init_sid: 1
   sample_bufr_fname: '{DATADIR}/202202011200.rap.fake.prepbufr.csv'
   uas_offset: 0.
+  uas_reverse: False
 
 interpolator: 
   use: True
