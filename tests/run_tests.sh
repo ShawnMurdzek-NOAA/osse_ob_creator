@@ -5,7 +5,8 @@
 # User-specified options
 ################################################################################
 
-machine='hercules'
+machine='orion'
+partition=${machine}
 prepbufr_decoder_path=/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/${machine}
 datadir=/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/tests/data
 
@@ -93,6 +94,8 @@ if ${run_linear_interp_test}; then
   echo 
   echo 'creating input YAML file'
   cp linear_interp_test.yml ./linear_interp_test
+  sed -i "s={MACHINE}=${machine}=" ./linear_interp_test/linear_interp_test.yml
+  sed -i "s={PARTITION}=${partition}=" ./linear_interp_test/linear_interp_test.yml
   sed -i "s={HOMEDIR}=${home}=" ./linear_interp_test/linear_interp_test.yml
   sed -i "s={BUFRDIR}=${prepbufr_decoder_path}=" ./linear_interp_test/linear_interp_test.yml
   sed -i "s={DATADIR}=${datadir}=" ./linear_interp_test/linear_interp_test.yml
@@ -172,6 +175,8 @@ if ${run_select_obs_test}; then
   echo 
   echo 'creating input YAML file'
   cp select_obs_test.yml ./select_obs_test
+  sed -i "s={MACHINE}=${machine}=" ./select_obs_test/select_obs_test.yml
+  sed -i "s={PARTITION}=${partition}=" ./select_obs_test/select_obs_test.yml
   sed -i "s={HOMEDIR}=${home}=" ./select_obs_test/select_obs_test.yml
   sed -i "s={BUFRDIR}=${prepbufr_decoder_path}=" ./select_obs_test/select_obs_test.yml
   sed -i "s={DATADIR}=${datadir}=" ./select_obs_test/select_obs_test.yml
@@ -251,6 +256,8 @@ if ${run_uas_test}; then
   echo 
   echo 'creating input YAML file'
   cp uas_test.yml ./uas_test
+  sed -i "s={MACHINE}=${machine}=" ./uas_test/uas_test.yml
+  sed -i "s={PARTITION}=${partition}=" ./uas_test/uas_test.yml
   sed -i "s={HOMEDIR}=${home}=" ./uas_test/uas_test.yml
   sed -i "s={BUFRDIR}=${prepbufr_decoder_path}=" ./uas_test/uas_test.yml
   sed -i "s={DATADIR}=${datadir}=" ./uas_test/uas_test.yml
