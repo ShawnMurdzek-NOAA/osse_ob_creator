@@ -14,31 +14,31 @@
 paths:
   real_bufr: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_prepbufr'
   real_csv: ''
-  syn_bogus_csv: ''
-  syn_perf_csv: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_ql/combine/combine_csv'
-  syn_limit_uas_csv: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/limit_uas_csv'
-  syn_err_csv: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/err_uas_csv'
-  syn_combine_csv: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/combine_csv'
+  syn_bogus_csv: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/bogus_sfc_csv'
+  syn_perf_csv: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/perf_sfc_csv'
+  syn_limit_uas_csv: ''
+  syn_err_csv: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/err_sfc_csv'
+  syn_combine_csv: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/combine_csv'
   syn_select_csv: ''
-  syn_superob_csv: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/superob_uas'
-  syn_bufr: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/syn_bufr'
+  syn_superob_csv: ''
+  syn_bufr: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/syn_bufr'
   real_red_bufr: ''
   model: '/work/noaa/wrfruc/murdzek/nature_run_spring/UPP'
-  log: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/log'
-  plots: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/plots'
-  osse_code: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/osse_ob_creator'
+  log: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/log'
+  plots: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/plots'
+  osse_code: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/osse_ob_creator'
   bufr_code: '/work2/noaa/wrfruc/murdzek/src/prepbufr_decoder/machine_bin/orion'
-  rocoto: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/workflow'
+  rocoto: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/workflow'
 
 shared:
   machine: 'orion'
   bufr_start: '202204291200'
-  bufr_end: '202205061200'
+  bufr_end: '202204300000'
   bufr_step: 60
   bufr_tag:
     - 'rap'
-  uas_grid_file: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/fix_data/uas_site_locs_150km.txt'
-  log_str: 'uas_35km_wspd20'
+  bogus_ob_grid: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/fix_data/uas_site_locs_150km.txt'
+  log_str: 'sfc_150km'
 
 jobs:
   max: 100
@@ -49,7 +49,7 @@ jobs:
   mem: '40G'
   time: '08:00:00'
   partition: 'orion'
-  use_rocoto: True
+  use_rocoto: False
 
 #-----------
 # Components
@@ -72,18 +72,20 @@ create_uas_grid:
   make_plot: False
 
 create_csv: 
-  use: False
+  use: True
+  ob: 'sfc'
   max_time: 1500.
   ascent_rate: 3.
   sample_freq: 60.
   max_height: 2000.
   init_sid: 1
-  sample_bufr_fname: '/work/noaa/wrfruc/murdzek/nature_run_winter/obs/perfect_conv/real_csv/202202010000.rap.prepbufr.csv'
+  sample_bufr_fname: '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/perfect_conv/real_csv/202205010000.rap.prepbufr.csv'
   uas_offset: 0.
   uas_reverse: False
+  DHR_vals: [0]
 
 interpolator: 
-  use: False
+  use: True
   obs_2d:
     - 'ADPSFC'
     - 'SFCSHP'
@@ -93,7 +95,7 @@ interpolator:
     - 'ADPUPA'
     - 'AIRCAR'
     - 'AIRCFT'
-  uas_obs: True
+  uas_obs: False
   copy_winds: False
   interp_z_aircft: False
   height_opt: null
@@ -101,8 +103,8 @@ interpolator:
   coastline_correct: False
   use_Tv: False
   add_ceiling: False
-  add_liq_mix: True
-  debug: 0
+  add_liq_mix: False
+  debug: 1
 
 obs_errors: 
   use: True
@@ -120,7 +122,7 @@ obs_errors:
   plot_diff_hist: True
 
 limit_uas:
-  use: True
+  use: False
   in_csv_dir: 'syn_perf_csv'
   csv_ref_dir: 'syn_perf_csv'
   drop_col:
@@ -146,7 +148,7 @@ combine_csv:
   use: True
   csv_dirs:
     - '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/corr_errors_2iter/err_csv'
-    - '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/uas_obs_35km_wspd20/err_uas_csv'
+    - '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/sfc_obs_150km/err_sfc_csv'
 
 select_obs:
   use: False
@@ -283,7 +285,7 @@ select_obs:
       - 295
 
 superobs: 
-  use: True
+  use: False
   in_csv_dir: 'syn_combine_csv'
   map_proj: 'll_to_xy_lc'
   map_proj_kw:
@@ -373,7 +375,7 @@ convert_real_red_csv:
 plots:
   use: True
   diff_2d:
-    use: False
+    use: True
     bufr_dir: 'syn_perf_csv'
     subsets:
       - 'SFCSHP'
@@ -405,7 +407,7 @@ plots:
     exclude_sid:
       - '00000775'
   diff_uas:
-    use: True
+    use: False
     bufr_dir: 'syn_perf_csv'
     nclose: 10
 

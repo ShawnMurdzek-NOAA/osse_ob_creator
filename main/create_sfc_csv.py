@@ -54,7 +54,7 @@ if len(sys.argv) > 1:
     with open(sys.argv[3], 'r') as fptr:
         param = yaml.safe_load(fptr)
     valid_times = [dt.datetime.strptime(bufr_t, '%Y%m%d%H%M')]
-    loc_fname = param['shared']['uas_grid_file']
+    loc_fname = param['shared']['bogus_ob_grid']
     DHR_vals = param['create_csv']['DHR_vals']
     init_sid = param['create_csv']['init_sid']
     sample_bufr_fname = param['create_csv']['sample_bufr_fname']

@@ -38,7 +38,7 @@ Contains parameters needed for multiple components.
 - **bufr_end**: Timestamp for last prepBUFR file (YYYYMMDDHHMM).
 - **bufr_step**: Minutes between successive prepBUFR files.
 - **bufr_tag**: List of prepBUFR tags to use (e.g., `rap`, `rap_e`, `rap_p`).
-- **uas_grid_file**: File (including the path) containing UAS observation horizontal locations.
+- **bogus_ob_grid**: File (including the path) containing the observation horizontal locations for the bogus CSV files.
 - **log_str**: String to include in the log file names (useful to prevent log files from being overwritten if the program is run multiple times).
 
 ### jobs
@@ -80,16 +80,26 @@ Creates a text file containing the horizontal locations of UAS sites. Uses `main
 
 ### create_csv
 
-Creates an "empty" observation CSV file that includes UAS observation locations (x, y, z, and t). Uses `main/create_uas_csv.py`.
+Creates a bogus (i.e., empty) observation CSV file that includes observation locations (x, y, z, and t). Uses `main/create_*_csv.py`.
+
+#### Options used for all observation types:
+
+- **ob**: Type of observation bogus file to create. Current options: 'uas' or 'sfc'.
+- **init_sid**: Number assigned to the first station ID. Useful when using multiple input text files and you don't want the station IDs to repeat.
+- **sample_bufr_fname**: File (including the path) of an observation CSV. Needed to determine which fields to include in the bogus observation CSV.
+
+#### Options used for UAS observations only:
 
 - **max_time**: Total elapsed time allowed for a UAS flight (s).
 - **ascent_rate**: UAS ascent speed (m/s).
 - **sample_freq**: UAS sampling frequency (s).
 - **max_height**: Maximum UAS flight altitude (m)
-- **init_sid**: Number assigned to the first station ID. Useful when using multiple input text files and you don't want the station IDs to repeat.
-- **sample_bufr_fname**: File (including the path) of an observation CSV. Needed to determine which fields to include in the "empty" observation CSV.
 - **uas_offset**: Difference between the actual UAS flight time and the observation CSV timestamp (s).
 - **uas_reverse**: If True, changes the ascent profile to a descent, UAS will start at max_height and go to the surface.
+
+#### Options used for surface observations only:
+
+- **DHR_vals**: List of DHR values to use when creating observations (hrs from cycletime).
 
 ### interpolator
 
