@@ -37,7 +37,7 @@ shared:
   bufr_step: 60
   bufr_tag:
     - 'rap'
-  bogus_ob_grid: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/fix_data/uas_site_locs_150km.txt'
+  bogus_ob_grid: '/work2/noaa/wrfruc/murdzek/src/osse_ob_creator/fix_data/sfc_site_locs_150km.txt'
   log_str: 'sfc_150km'
 
 jobs:
