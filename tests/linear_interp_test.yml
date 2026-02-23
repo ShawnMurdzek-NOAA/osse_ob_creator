@@ -39,7 +39,7 @@ shared:
     - 'rap'
     - 'rap_e'
     - 'rap_p' 
-  uas_grid_file: '{HOMEDIR}/osse_ob_creator/uas_site_locs_150km.txt'
+  bogus_ob_grid: '{HOMEDIR}/osse_ob_creator/uas_site_locs_150km.txt'
   log_str: 'test'
 
 jobs:
@@ -74,6 +74,7 @@ create_uas_grid:
 
 create_csv: 
   use: False
+  ob: 'uas'
   max_time: 1500.
   ascent_rate: 3.
   sample_freq: 60.
@@ -82,6 +83,7 @@ create_csv:
   sample_bufr_fname: '/work2/noaa/wrfruc/murdzek/real_obs/obs_rap_csv/202202010000.rap.prepbufr.csv'
   uas_offset: 0.
   uas_reverse: False
+  DHR_vals: [0]
 
 interpolator: 
   use: True
