@@ -22,6 +22,9 @@ run_select_obs_test=true
 # Option to run UAS test
 run_uas_test=true
 
+# Option to run sfc ob test
+run_sfc_obs_test=true
+
 
 ################################################################################
 # General Setup
@@ -318,6 +321,87 @@ fi
 
 
 ################################################################################
+# Run Sfc Ob Test
+################################################################################
+
+if ${run_sfc_obs_test}; then
+  
+  echo
+  echo '==============================='
+  echo "Running Sfc Obs Test"
+  echo
+
+  if [ -d ./sfc_obs_test ]; then
+    echo 'removing old sfc_obs_test directory'
+    rm -rf ./sfc_obs_test
+  fi
+  mkdir sfc_obs_test 
+ 
+  echo 
+  echo 'creating input YAML file'
+  cp sfc_obs_test.yml ./sfc_obs_test
+  sed -i "s={MACHINE}=${machine}=" ./sfc_obs_test/sfc_obs_test.yml
+  sed -i "s={PARTITION}=${partition}=" ./sfc_obs_test/sfc_obs_test.yml
+  sed -i "s={HOMEDIR}=${home}=" ./sfc_obs_test/sfc_obs_test.yml
+  sed -i "s={BUFRDIR}=${prepbufr_decoder_path}=" ./sfc_obs_test/sfc_obs_test.yml
+  sed -i "s={DATADIR}=${datadir}=" ./sfc_obs_test/sfc_obs_test.yml
+
+  cd ../
+  source activate_python_env.sh
+  echo
+  echo 'calling create_syn_ob_jobs.py'
+  python create_syn_ob_jobs.py ./tests/sfc_obs_test/sfc_obs_test.yml
+
+  echo
+  echo 'calling run_synthetic_ob_creator.py'
+  job_line=$(python run_synthetic_ob_creator.py ./tests/sfc_obs_test/sfc_obs_test.yml | grep "submitted job")
+  cd ./tests/
+  if [[ `echo ${job_line} | wc -c` -lt 2 ]]; then
+    echo "no job submitted for sfc_obs test"
+    sfc_obs_test_pass=false
+  else
+    job_id=${job_line:16:8}  
+    echo "Slurm jobID = ${job_id}"
+
+    scomplete=`sacct --job ${job_id} | grep "COMPLETED" | wc -c`
+    while [ ${scomplete} -lt 2 ]; do
+      echo "waiting 1 min for job to finish..."
+      sleep 60
+      scomplete=`sacct --job ${job_id} | grep "COMPLETED" | wc -c`
+    done
+    echo "Job done. Start verification"
+    echo
+    
+    # First check to ensure that all output files exist
+    err_sfc_obs=0
+    for s in ${subdirs}; do
+      if [[ `ls -l sfc_obs_test/${s} | wc -l` -lt 2 ]]; then
+        echo "missing output file(s) in sfc_obs_test/${s}"
+        err_sfc_obs=1
+        sfc_obs_test_pass=false
+      fi
+    done
+    if [[ ${err_sfc_obs} -eq 0 ]]; then
+      echo "all output subdirectories are populated"
+    fi
+
+    # Perform verification using Python script
+    if [[ ${err_sfc_obs} -eq 0 ]]; then
+      python check_sfc_obs_test.py > ./sfc_obs_test/test.log
+      err_sfc_obs=`tail -1 ./sfc_obs_test/test.log`
+      if [[ ${err_sfc_obs} -eq 0 ]]; then
+        echo "sfc obs test passed"
+        sfc_obs_test_pass=true
+      else
+        echo "sfc obs test failed, error code = ${err_sfc_obs}"
+        sfc_obs_test_pass=false
+      fi
+    fi
+  fi
+fi
+
+
+################################################################################
 # Print Final Test Results
 ################################################################################
 
@@ -334,6 +418,9 @@ if ${run_select_obs_test}; then
 fi
 if ${run_uas_test}; then
   echo "Pass UAS Test? ${uas_test_pass}"
+fi
+if ${run_sfc_obs_test}; then
+  echo "Pass sfc ob Test? ${sfc_obs_test_pass}"
 fi
 echo
 
