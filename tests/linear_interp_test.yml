@@ -84,6 +84,7 @@ create_csv:
   uas_offset: 0.
   uas_reverse: False
   DHR_vals: [0]
+  inc_pmo: True
 
 interpolator: 
   use: True

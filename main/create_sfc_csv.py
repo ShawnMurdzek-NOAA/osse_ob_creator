@@ -44,6 +44,9 @@ init_sid = 1
 # Sample BUFR CSV file (needed to determine which fields to include)
 sample_bufr_fname = '/work/noaa/wrfruc/murdzek/nature_run_spring/obs/perfect_conv/real_csv/202205010000.rap.prepbufr.csv'
 
+# Include PMO (if False, PMO is set to 0)
+inc_pmo = True
+
 # Output BUFR CSV file (include %s placeholder for timestamp)
 out_fname = '%s.bogus.prepbufr.csv'
 
@@ -57,6 +60,7 @@ if len(sys.argv) > 1:
     loc_fname = param['shared']['bogus_ob_grid']
     DHR_vals = param['create_csv']['DHR_vals']
     init_sid = param['create_csv']['init_sid']
+    inc_pmo = param['create_csv']['inc_pmo']
     sample_bufr_fname = param['create_csv']['sample_bufr_fname']
 
 
@@ -78,6 +82,13 @@ nlocs = len(ob_locs)
 # Sample BUFR file
 sample_bufr = bufr.bufrCSV(sample_bufr_fname)
 all_columns = list(sample_bufr.df.columns)
+
+# Thermodynamic variables
+thermo_vars = ['QOB', 'TOB', 'ZOB', 'TDO']
+thermo_qm = ['QQM', 'TQM', 'ZQM']
+if inc_pmo:
+    thermo_vars.append('PMO')
+    thermo_qm.append('PMQ')
 
 # Loop over each valid time
 for valid in valid_times:
@@ -103,9 +114,9 @@ for valid in valid_times:
     out_dict['T29'] = np.array([t29]*ntobs)
     out_dict['POB'] = np.zeros(ntobs)
     out_dict['PQM'] = np.array([quality_m]*ntobs)
-    for v in ['QOB', 'TOB', 'ZOB', 'TDO', 'PMO']:
+    for v in thermo_vars:
         out_dict[v] = np.array(([0.]*nDHR + [np.nan]*nDHR)*nlocs)
-    for qm in ['TQM', 'QQM', 'ZQM', 'PMQ']:
+    for qm in thermo_qm:
         out_dict[qm] = np.array(([quality_m]*nDHR + [np.nan]*nDHR)*nlocs)
     for v in['UOB', 'VOB']:
         out_dict[v] = np.array(([np.nan]*nDHR + [0.]*nDHR)*nlocs)

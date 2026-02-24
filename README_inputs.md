@@ -100,6 +100,7 @@ Creates a bogus (i.e., empty) observation CSV file that includes observation loc
 #### Options used for surface observations only:
 
 - **DHR_vals**: List of DHR values to use when creating observations (hrs from cycletime).
+- **inc_pmo**: Option to include PMO (mean sea-level pressure) in surface observations. True = include these observations. False = set these observations to missing.
 
 ### interpolator
 
