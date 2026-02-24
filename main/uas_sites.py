@@ -78,7 +78,7 @@ npts_sn = 35
 #npts_sn = 391
 
 # Nature run output (for landmask)
-upp_file = '/work2/noaa/wrfruc/murdzek/nature_run_spring/UPP/20220429/wrfnat_202204291200_er.grib2'
+upp_file = '/work/noaa/wrfruc/murdzek/nature_run_spring/UPP/20220429/wrfnat_202204291200_er.grib2'
 
 # Apply binary closing after applying landmask?
 # Goal here is to include UAS sites over small inland bodies of water (i.e., not the Great Lakes).
@@ -225,6 +225,7 @@ if make_plot:
                                            name='lakes')
     ax.add_feature(lakes)
     ax.set_extent([lon_lim[0], lon_lim[1], lat_lim[0], lat_lim[1]])
+    ax.set_title(f"land_closing = {land_closing}, max_hole_size = {max_hole_size}", size=14)
 
     plt.savefig(plot_save_fname)
     plt.show()

@@ -37,7 +37,7 @@ shared:
   bufr_step: 60
   bufr_tag:
     - 'rap'
-  uas_grid_file: '{DATADIR}/uas_site_locs_TEST.txt'
+  bogus_ob_grid: '{DATADIR}/uas_site_locs_TEST.txt'
   log_str: 'test'
 
 jobs:
@@ -73,6 +73,7 @@ create_uas_grid:
 
 create_csv: 
   use: True
+  ob: 'uas'
   max_time: 1500.
   ascent_rate: 3.
   sample_freq: 1.
@@ -81,6 +82,8 @@ create_csv:
   sample_bufr_fname: '{DATADIR}/202202011200.rap.fake.prepbufr.csv'
   uas_offset: 0.
   uas_reverse: False
+  DHR_vals: [0]
+  inc_pmo: True
 
 interpolator: 
   use: True

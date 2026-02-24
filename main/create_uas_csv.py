@@ -71,7 +71,7 @@ if len(sys.argv) > 1:
         param = yaml.safe_load(fptr)
     valid_times = [dt.datetime.strptime(bufr_t, '%Y%m%d%H%M')]
     flight_times = [valid_times[0] + dt.timedelta(seconds=param['create_csv']['uas_offset'])]
-    uas_loc_fname = param['shared']['uas_grid_file']
+    uas_loc_fname = param['shared']['bogus_ob_grid']
     max_time = param['create_csv']['max_time']
     ascent_rate = param['create_csv']['ascent_rate']
     sample_freq = param['create_csv']['sample_freq']
