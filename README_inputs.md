@@ -2,7 +2,8 @@
 # Description of Parameters Found in synthetic_ob_creator_param.yml
 
 Shawn Murdzek  
-NOAA/OAR/Global Systems Laboratory  
+CIRES and CU Boulder
+Embedded in NOAA/OAR/Global Systems Laboratory  
 shawn.s.murdzek@noaa.gov  
 
 ## General Blocks
@@ -100,7 +101,7 @@ Creates a bogus (i.e., empty) observation CSV file that includes observation loc
 #### Options used for surface observations only:
 
 - **DHR_vals**: List of DHR values to use when creating observations (hrs from cycletime).
-- **inc_pmo**: Option to include PMO (mean sea-level pressure) in surface observations. True = include these observations. False = set these observations to missing.
+- **inc_pmo**: Option to include PMO (mean sea-level pressure) in surface observations. True = include these observations. False = set these observations to missing. For HRRR-like and RRFSv1-like forecast systems, this should have no impact because PMO is not assimilated (i.e., "pmsl" is not included in the GSI namelist).
 
 ### interpolator
 
